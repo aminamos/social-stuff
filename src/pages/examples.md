@@ -24,15 +24,15 @@ Germany builds roughly **3.5 housing units per 1,000 people** annually, compared
 <p>Germany's system works because it distinguishes between <strong>existing tenants</strong> (protected from displacement) and <strong>new construction</strong> (exempt from price caps on first lease). This preserves the incentive to build while keeping existing renters housed.</p>
 </div>
 
-## Minnesota: The 7% rule
+## Minnesota: The Minneapolis Rent Stabilization Study
 
-Research from the University of Minnesota's Center for Urban and Regional Affairs, led by Professor **Ed Goetz**, has found that rent stabilization with annual increases capped at **7% or below** does not have a statistically significant negative effect on housing supply. The mechanism:
+In 2021, the University of Minnesota's Center for Urban and Regional Affairs (CURA) published the **Minneapolis Rent Stabilization Study**, led by Professor **Edward G. Goetz** with co-authors Anthony Damiano, Peter Hendee Brown, Patrick Alcorn, and Jeff Matson. The study modeled the impact of different rent caps on actual Minneapolis rent data from 2001–2019 and built a pro forma to assess building-level returns. Key findings:
 
-- At 7%, landlords can still recoup operating cost increases and earn a reasonable return.
-- Developers factor the cap into their pro formas; it doesn't kill deals.
-- Above 7%, the evidence of supply effects starts to emerge — but most modern stabilization regimes are well under that threshold.
+- **"Little empirical evidence shows that rent control policies negatively impact new construction."** Construction rates depend far more on local economic cycles and credit markets than on rent regulation — and most programs exempt new builds anyway.
+- The study tested caps at 75% of CPI, CPI, CPI + 3%, and CPI + 7%. A cap at **CPI + 3%** would have allowed returns comparable to the **90th percentile** of the market. A cap at **CPI + 7%** would have allowed returns **far in excess** of what was achieved at the very top of the Minneapolis market.
+- Caps at CPI and 75% of CPI allowed returns at the market middle — meaning even the tighter caps didn't crater landlord returns, they just trimmed the most aggressive increases.
 
-The Twin Cities (Minneapolis and St. Paul) both enacted rent stabilization in 2021. Minneapolis caps increases at 3%, St. Paul at 3% with some exemptions. Both cities continue to see active construction.
+The Twin Cities (Minneapolis and St. Paul) both enacted rent stabilization in 2021. Minneapolis caps increases at 3%, St. Paul at 3% with some exemptions. Both cities continue to see active construction — and both caps are well below the CPI + 7% threshold the study found was already generous.
 
 ## California: Statewide rent cap (2019)
 

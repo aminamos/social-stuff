@@ -30,7 +30,7 @@ Recent history:
 
 ## What Mamdani's rent freeze would do
 
-Zaran Mamdani's proposal is straightforward: set the RGB's annual increase to **0%** across the board. For tenants in stabilized units, their rent would not rise year-over-year. The policy would not deregulate any units, change the building stock, or alter the existing stabilization framework — it's a change to the *rate*, not the *structure*.
+Zohran Mamdani's proposal is straightforward: set the RGB's annual increase to **0%** across the board. For tenants in stabilized units, their rent would not rise year-over-year. The policy would not deregulate any units, change the building stock, or alter the existing stabilization framework — it's a change to the *rate*, not the *structure*.
 
 ## Key facts
 

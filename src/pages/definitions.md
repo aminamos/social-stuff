@@ -21,7 +21,7 @@ Most people use "rent control" as a catch-all, but in housing policy it refers t
 
 <li>
   <span class="def-term">Rent Freeze</span>
-  A temporary or permanent halt to all rent increases. During the COVID-19 pandemic, many jurisdictions enacted emergency rent freezes. Zaran Mamdani's proposal would set the annual increase at 0% for stabilized units — meaning tenants in those units would see no rent hikes.
+  A temporary or permanent halt to all rent increases. During the COVID-19 pandemic, many jurisdictions enacted emergency rent freezes. Zohran Mamdani's proposal would set the annual increase at 0% for stabilized units — meaning tenants in those units would see no rent hikes.
 </li>
 
 <li>

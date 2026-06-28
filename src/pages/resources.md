@@ -11,7 +11,7 @@ description: Further reading, academic research, and policy sources on rent stab
 - **Diamond, McQuade & Qian (2019)** — "The Effects of Rent Control Expansion on Tenants, Landlords, and Inequality: Evidence from San Francisco." *American Economic Review*. The most-cited recent study; found that SF's 1994 expansion benefited existing tenants but reduced supply. Important limitation: studies a first-generation hard-cap system.
   [doi.org/10.1257/aer.20181289](https://doi.org/10.1257/aer.20181289)
 
-- **Goetz, E. (University of Minnesota)** — Research on the effects of moderate rent stabilization caps (under 7%) on housing supply. CURA Reporter. [cura.umn.edu](https://www.cura.umn.edu/)
+- **Goetz, Edward G., Anthony Damiano, Peter Hendee Brown, Patrick Alcorn & Jeff Matson (2021)** — "Minneapolis Rent Stabilization Study." Center for Urban and Regional Affairs (CURA), University of Minnesota. Found little empirical evidence that rent stabilization negatively impacts new construction. Modeled caps at 75% CPI, CPI, CPI+3%, and CPI+7%; even CPI+3% allowed returns at the 90th percentile. [cura.umn.edu](https://www.cura.umn.edu/research/minneapolis-rent-stabilization-study)
 
 - **Autor, Palmer & Pathak (2014)** — "Housing Market Spillovers: Evidence from the End of Rent Control in Cambridge, Massachusetts." *Journal of Political Economy*. Found that decontrol in Cambridge raised property values but also increased crime.
 
