@@ -1,0 +1,24 @@
+---
+const navItems = [
+  { href: "/", label: "Home" },
+  { href: "/definitions", label: "Definitions" },
+  { href: "/new-york", label: "New York" },
+  { href: "/examples", label: "Examples" },
+  { href: "/resources", label: "Resources" },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<nav class="site-nav" aria-label="Main navigation">
+  {
+    navItems.map(({ href, label }) => (
+      <a
+        href={href}
+        aria-current={currentPath === href || (href !== "/" && currentPath.startsWith(href)) ? "page" : undefined}
+      >
+        {label}
+      </a>
+    ))
+  }
+</nav>
