@@ -416,8 +416,8 @@ export function renderUI(): string {
           <div class="stat-label">Multi-Family Parcels</div>
         </div>
         <div class="stat-card">
-          <div class="stat-val">$800K+</div>
-          <div class="stat-label">Wage Theft Recovered</div>
+          <div class="stat-val" style="color: #38bdf8;">2,140+</div>
+          <div class="stat-label">Unmasked Shell LLCs</div>
         </div>
       </div>
     </div>
@@ -429,9 +429,11 @@ export function renderUI(): string {
       <button class="tab-btn active" onclick="switchTab('search')">🔍 Property Search & De-anonymizer</button>
       <button class="tab-btn" onclick="switchTab('syndicates')">🏆 Top Corporate Syndicates</button>
       <button class="tab-btn" onclick="switchTab('slumlords')">⚠️ Tier 3 Habitability Violators</button>
-      <button class="tab-btn" onclick="switchTab('wagetheft')">⚖️ Wage Theft Tracker</button>
       <button class="tab-btn" onclick="switchTab('cities')">🏙️ Municipalities (66 Cities)</button>
       <button class="tab-btn" onclick="switchTab('api')">⚡ REST API</button>
+      <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev" target="_blank" class="tab-btn" style="margin-left: auto; color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); text-decoration: none;">
+        ⚖️ Wage Theft Registry ↗
+      </a>
     </div>
 
     <!-- TAB 1: Search & De-anonymizer -->
@@ -500,33 +502,7 @@ export function renderUI(): string {
       </div>
     </div>
 
-    <!-- TAB 4: Wage Theft Tracker -->
-    <div id="tab-wagetheft" style="display: none;">
-      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Wage Theft & Labor Exploitation Database</h2>
-      <p style="color: var(--text-dim); margin-bottom: 16px;">
-        Federal (US DOL WHD), state (MN DLI), and municipal citations and settlements against residential landlords, property management firms, and cleaning contractors.
-      </p>
-      <div class="data-table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Employer / Legal Name</th>
-              <th>Trade Name / City</th>
-              <th>Agency / Violation</th>
-              <th style="text-align: right;">Stolen Wages Recovered</th>
-              <th style="text-align: right;">Fines & Penalties</th>
-              <th style="text-align: right;">Workers</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="wageTheftTable">
-            <tr><td colspan="7" class="loading"><div class="spinner"></div>Loading wage theft enforcement records...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 5: Cities Coverage -->
+    <!-- TAB 4: Cities Coverage -->
     <div id="tab-cities" style="display: none;">
       <h2 style="font-size: 1.5rem; margin-bottom: 8px;">All 66 Municipalities Across Hennepin & Ramsey Counties</h2>
       <p style="color: var(--text-dim); margin-bottom: 16px;">
@@ -596,7 +572,6 @@ export function renderUI(): string {
 
       if (tabId === 'syndicates') loadSyndicates();
       if (tabId === 'slumlords') loadSlumlords();
-      if (tabId === 'wagetheft') loadWageTheft();
       if (tabId === 'cities') loadCities();
     }
 
@@ -679,11 +654,17 @@ export function renderUI(): string {
           let wageTheftHTML = '';
           if (item.wage_theft_match) {
             const parts = item.wage_theft_match.split('::');
+            const searchTarget = encodeURIComponent(item.applicant_name || item.owner_name || '');
             wageTheftHTML = \`
               <div class="wage-theft-banner">
-                <div class="wage-theft-title">⚠️ WAGE THEFT ENFORCEMENT ON RECORD</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span class="wage-theft-title">⚠️ LABOR VIOLATION CITATION ON RECORD</span>
+                  <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev" target="_blank" style="color: #fca5a5; font-size: 0.72rem; font-weight: 700; text-decoration: underline;">
+                    View Labor Registry ↗
+                  </a>
+                </div>
                 <div class="wage-theft-desc">
-                  Case \${parts[0]}: \${parts[1]} violation. $\${parseFloat(parts[2] || 0).toLocaleString()} recovered for \${parts[3]} workers.
+                  Case \${parts[0]} (\${parts[1]}): $\${parseFloat(parts[2] || 0).toLocaleString()} recovered for \${parts[3]} affected caretakers/workers.
                 </div>
               </div>
             \`;
@@ -805,30 +786,6 @@ export function renderUI(): string {
         \`).join('');
       } catch (e) {
         grid.innerHTML = \`<div style="color: red; padding: 20px;">Error: \${e.message}</div>\`;
-      }
-    }
-
-    async function loadWageTheft() {
-      const tbody = document.getElementById('wageTheftTable');
-      tbody.innerHTML = '<tr><td colspan="7" class="loading"><div class="spinner"></div>Loading wage theft enforcement records...</td></tr>';
-      try {
-        const resp = await fetch('/wage-theft/top');
-        const data = await resp.json();
-        const offenders = data.top_wage_theft_offenders || [];
-
-        tbody.innerHTML = offenders.map(o => \`
-          <tr>
-            <td><strong>\${o.respondent_legal_name}</strong></td>
-            <td>\${o.trade_name || 'N/A'}<br><span style="font-size:0.75rem; color:var(--text-dim);">\${o.city}</span></td>
-            <td><span class="city-badge">Enforcement Action</span></td>
-            <td style="text-align: right; font-weight: 700; color: #34d399;">$\${parseFloat(o.total_back_wages || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-            <td style="text-align: right; font-weight: 700; color: #f87171;">$\${parseFloat(o.total_penalties || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-            <td style="text-align: right; font-weight: 600;">\${o.total_workers_affected}</td>
-            <td>\${o.is_repeat_violator ? '<span class="deanonymized-badge badge-tier3">REPEAT OFFENDER</span>' : '<span class="deanonymized-badge badge-transparent">SETTLED</span>'}</td>
-          </tr>
-        \`).join('');
-      } catch (e) {
-        tbody.innerHTML = \`<tr><td colspan="7" style="color: red;">Error: \${e.message}</td></tr>\`;
       }
     }
 
