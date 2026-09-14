@@ -23,3 +23,6 @@ jobs:
       - name: Unit tests
         run: deno test src/ui.test.ts
         working-directory: 02-corporate-shell-deanonymizer/cloudflare-wage-theft
+      - name: Docs route tests
+        run: deno test --no-check --sloppy-imports src/docs-route.test.ts
+        working-directory: 02-corporate-shell-deanonymizer/cloudflare-wage-theft

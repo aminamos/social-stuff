@@ -45,7 +45,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 250000.00,
     description: "Stearns County District Court consent decree obtained by Minnesota Attorney General Keith Ellison: $250,000 restitution for overtime wage theft, illegal payroll deductions, and substandard employee housing habitability violations.",
     provenance_type: "VERIFIED_PUBLIC_ACTION",
-    source_docket_url: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2024.pdf"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/mn-ag-2025-labor-report-p5.pdf"
   },
   {
     case_id: "MNAG-PMC-2023",
@@ -68,7 +68,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 160000.00,
     description: "Joint enforcement action by MN Attorney General and MN DLI: Multi-family apartment renovation contractor settled charges of worker intimidation, wage theft obstruction, and failure to pay lawful construction/renovation wages.",
     provenance_type: "VERIFIED_PUBLIC_ACTION",
-    source_docket_url: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2024.pdf"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/mn-ag-2024-labor-report-p6.pdf"
   },
   {
     case_id: "MNAG-WT-2023-014",
@@ -114,7 +114,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 276814.14,
     description: "MN Attorney General Wage Theft investigation settlement recovering $256,814.14 for 142 Twin Cities workers for improper time-clock rounding deductions.",
     provenance_type: "VERIFIED_PUBLIC_ACTION",
-    source_docket_url: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2025.pdf"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/mn-ag-2024-labor-report-p6.pdf"
   },
   {
     case_id: "HENNEPIN-CV-22-16162",

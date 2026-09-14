@@ -36,6 +36,26 @@ export default {
       });
     }
 
+    // Worker-hosted primary source documents (R2): one quick excerpt PDF per
+    // case, so readers never have to scroll a full-length agency report.
+    if (url.pathname.startsWith("/docs/")) {
+      const key = url.pathname.slice(1);
+      if (!/^docs\/[A-Za-z0-9][A-Za-z0-9._-]*\.pdf$/.test(key)) {
+        return new Response("Not found", { status: 404 });
+      }
+      const obj = await env.R2_BUCKET.get(key);
+      if (!obj) {
+        return new Response("Not found", { status: 404 });
+      }
+      return new Response(obj.body, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `inline; filename="${key.split("/").pop()}"`,
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      });
+    }
+
     // Search and filter enforcement cases
     if (url.pathname === "/cases") {
       const accept = request.headers.get("Accept") || "";

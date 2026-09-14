@@ -88,6 +88,18 @@ Deno.test("seed data: every agency is covered by labels + fallback portals", () 
   }
 });
 
+Deno.test("seed data: AG cases link worker-hosted excerpts, never full reports", () => {
+  const docsOrigin = "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/";
+  for (const r of WAGE_THEFT_SEED_DATA) {
+    if (r.source_agency !== "MN_AG_OFFICE") continue;
+    assert(
+      r.source_docket_url.startsWith(docsOrigin) && r.source_docket_url.endsWith(".pdf"),
+      "AG record must link a hosted excerpt: " + r.case_id,
+    );
+    assert(!/LaborReport_\d{4}\.pdf([?#]|$)/.test(r.source_docket_url), "no full report: " + r.case_id);
+  }
+});
+
 Deno.test("seed data: PDF claims match reality for every record", () => {
   for (const r of WAGE_THEFT_SEED_DATA) {
     const src = primarySourceFor(r);
