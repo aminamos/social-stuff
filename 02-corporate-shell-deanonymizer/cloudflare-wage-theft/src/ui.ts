@@ -614,6 +614,29 @@ export function renderWageTheftUI(): string {
   </header>
 
   <main class="container" style="margin-top: 24px;">
+    <!-- Cloudflare Cron & Live Sync Status Banner -->
+    <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 12px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.3rem;">⚡</span>
+        <div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: #34d399;">
+            Automated Government Open Data Live Sync
+          </div>
+          <div style="font-size: 0.75rem; color: #94a3b8;">
+            Cloudflare Cron Trigger: <code style="color: #a5f3fc; font-family: monospace;">0 5 * * *</code> (Daily 05:00 UTC) • Ingests US DOL Open Data (<code style="color: #cbd5e1;">api.dol.gov</code>) & MN DLI Orders • Archived to R2
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button id="liveSyncBtn" onclick="triggerLiveSync()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-weight: 700; font-size: 0.8rem; padding: 6px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+          <span>🔄</span> Trigger Live Sync
+        </button>
+        <a href="/sync/status" target="_blank" style="color: #94a3b8; font-size: 0.75rem; text-decoration: underline;">
+          Telemetry Logs ↗
+        </a>
+      </div>
+    </div>
+
     <!-- Navigation Tabs -->
     <div class="tabs-bar">
       <button class="tab-btn active" onclick="switchTab('cases')">⚖️ Enforcement Cases</button>
@@ -1351,8 +1374,67 @@ export function renderWageTheftUI(): string {
       }
     }
 
+    async function triggerLiveSync() {
+      const btn = document.getElementById('liveSyncBtn');
+      if (!btn) return;
+      const origHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> Ingesting Gov Feeds...';
+
+      try {
+        const resp = await fetch('/sync/live', { method: 'POST' });
+        const data = await resp.json();
+        if (resp.ok) {
+          btn.innerHTML = '✓ Synced ' + (data.total_upserted || 0) + ' Dockets (' + data.duration_ms + 'ms)';
+          btn.style.borderColor = '#10b981';
+          btn.style.color = '#34d399';
+          executeSearch();
+          loadStats();
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = origHTML;
+            btn.style.borderColor = '';
+            btn.style.color = '';
+          }, 4500);
+        } else {
+          btn.innerHTML = '❌ Sync Error: ' + (data.error || 'Server error');
+          setTimeout(() => { btn.disabled = false; btn.innerHTML = origHTML; }, 4000);
+        }
+      } catch (e) {
+        btn.innerHTML = '❌ Network Error';
+        setTimeout(() => { btn.disabled = false; btn.innerHTML = origHTML; }, 4000);
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const resp = await fetch('/stats');
+        const data = await resp.json();
+        const s = data.stats || {};
+        if (s.total_recovered != null) {
+          const recEl = document.getElementById('statRecovered');
+          if (recEl) recEl.innerText = '$' + parseFloat(s.total_recovered || 0).toLocaleString(undefined, {maximumFractionDigits: 0});
+        }
+        if (s.total_penalties != null) {
+          const penEl = document.getElementById('statPenalties');
+          if (penEl) penEl.innerText = '$' + parseFloat(s.total_penalties || 0).toLocaleString(undefined, {maximumFractionDigits: 0});
+        }
+        if (s.total_workers_affected != null) {
+          const wrkEl = document.getElementById('statWorkers');
+          if (wrkEl) wrkEl.innerText = (s.total_workers_affected || 0).toLocaleString();
+        }
+        if (s.total_cases != null) {
+          const casEl = document.getElementById('statCases');
+          if (casEl) casEl.innerText = (s.total_cases || 0).toLocaleString();
+        }
+      } catch (e) {
+        console.warn('Failed to load stats:', e);
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       executeSearch();
+      loadStats();
     });
 
     document.getElementById('searchInput').addEventListener('keypress', function(e) {

@@ -1,15 +1,17 @@
 import { renderWageTheftUI } from "./ui";
 import { WAGE_THEFT_SEED_DATA, WageTheftSeedRecord } from "./data";
+import { runLiveEnforcementSync } from "./live_sync";
 
 export interface Env {
   DB: D1Database;
   R2_BUCKET: R2Bucket;
   AUTH_SECRET?: string;
+  DOL_API_KEY?: string;
 }
 
 export default {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
-    ctx.waitUntil(backupSnapshotToR2(env));
+    ctx.waitUntil(runLiveEnforcementSync(env));
   },
 
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -387,8 +389,46 @@ export default {
       }
     }
 
+    // Automated Live Government Ingestion Sync (US DOL Open Data + MN DLI Orders)
+    if (url.pathname === "/sync/live") {
+      try {
+        const syncResult = await runLiveEnforcementSync(env);
+        return new Response(JSON.stringify(syncResult, null, 2), {
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-store",
+          },
+        });
+      } catch (err: any) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Sync history & telemetry logs
+    if (url.pathname === "/sync/status") {
+      try {
+        const logs = await env.DB.prepare(`
+          SELECT * FROM sync_logs ORDER BY created_at DESC LIMIT 10
+        `).all();
+        return new Response(JSON.stringify({ sync_history: logs.results }, null, 2), {
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "public, max-age=60",
+          },
+        });
+      } catch (err: any) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
     return new Response(
-      "Twin Cities Wage Theft & Labor Standards Registry Worker. Routes: /, /cases, /offenders/top, /stats, /export.csv, /report, /seed",
+      "Twin Cities Wage Theft & Labor Standards Registry Worker. Routes: /, /cases, /offenders/top, /stats, /export.csv, /export.md, /sync/live, /sync/status, /report, /seed",
       { status: 200 }
     );
   },
