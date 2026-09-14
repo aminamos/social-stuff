@@ -14,6 +14,7 @@ Every organization listed here has been audited for **active maintenance pipelin
 * 🏢 **[Landlord De-anonymizer](https://mpls-rental-sync-worker.a-8c6.workers.dev)** — ownership graphs for Twin Cities rental properties, reconstructing corporate landlord networks from tax rolls, SOS filings, violations, and mortgage deeds.
 * ⚖️ **[Wage Theft & Labor Standards Registry](https://twin-cities-wage-theft-worker.a-8c6.workers.dev)** — searchable registry of wage theft and labor standards violations across the Twin Cities.
 * 🧩 **[Slumlord & Wage Theft Crossover Matrix](https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev)** — cross-index of corporate syndicates cited for both slumlord code violations and wage theft, with a crossover API and in-browser AI assistant.
+* 🌎 **[Decarb My State](https://decarb-my-state.a-8c6.workers.dev)** — state-by-state decarbonization progress for all 50 states + DC: emissions through 2022 (EPA), power generation through 2024 (EIA). Source: [aminamos/decarbonize-my-state](https://github.com/aminamos/decarbonize-my-state).
 
 ---
 
