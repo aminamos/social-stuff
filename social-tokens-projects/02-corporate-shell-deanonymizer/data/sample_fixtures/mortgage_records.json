@@ -1,0 +1,36 @@
+[
+  {
+    "recording_number": "DOC-2023-0914820",
+    "lender_name": "Arbor Commercial Mortgage LLC",
+    "borrower_name": "1420 ELEVENTH AVE LLC & AFFILIATES",
+    "borrower_entity_id": "1420_eleventh_ave_llc",
+    "principal_amount": 14800000.0,
+    "recording_date": "2023-03-15",
+    "cross_collateralized_parcels": [
+      "26-029-24-12-0045",
+      "34-029-24-21-0089",
+      "26-029-24-13-0012",
+      "35-029-24-34-0102"
+    ],
+    "guarantor_names": [
+      "Marcus Vance",
+      "Eleanor Vance"
+    ],
+    "master_credit_facility_name": "Twin Cities Multifamily Credit Facility 2023-1"
+  },
+  {
+    "recording_number": "DOC-2022-0449102",
+    "lender_name": "Bell Bank",
+    "borrower_name": "DINKYTOWN STUDENT LOFTS LLC",
+    "borrower_entity_id": "dinkytown_student_lofts_llc",
+    "principal_amount": 950000.0,
+    "recording_date": "2022-06-01",
+    "cross_collateralized_parcels": [
+      "24-029-24-41-0033"
+    ],
+    "guarantor_names": [
+      "Sarah Jenkins"
+    ],
+    "master_credit_facility_name": null
+  }
+]

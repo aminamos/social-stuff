@@ -1,0 +1,68 @@
+[
+  {
+    "violation_id": "V-2024-00192",
+    "parcel_id": "26-029-24-12-0045",
+    "property_address": "1420 11th Ave S",
+    "citation_date": "2024-01-14",
+    "category": "Heating System Failure",
+    "description": "Central boiler inoperative in sub-zero weather; ambient temperature in 8 units measured at 48F. Critical life-safety violation.",
+    "severity": "CRITICAL_LIFE_SAFETY",
+    "status": "OPEN",
+    "fine_amount": 2500.0
+  },
+  {
+    "violation_id": "V-2024-00215",
+    "parcel_id": "26-029-24-12-0045",
+    "property_address": "1420 11th Ave S",
+    "citation_date": "2024-02-02",
+    "category": "Plumbing / Sewage",
+    "description": "Raw sewage backing up into basement laundry facility. Unsanitary condition.",
+    "severity": "HIGH",
+    "status": "OPEN",
+    "fine_amount": 1000.0
+  },
+  {
+    "violation_id": "V-2023-09811",
+    "parcel_id": "34-029-24-21-0089",
+    "property_address": "2815 Grand Ave S",
+    "citation_date": "2023-11-20",
+    "category": "Toxic Mold / Water Intrusion",
+    "description": "Extensive black mold colonization behind drywall in 3rd floor units following chronic roof leaks.",
+    "severity": "HIGH",
+    "status": "OPEN",
+    "fine_amount": 1500.0
+  },
+  {
+    "violation_id": "V-2023-10044",
+    "parcel_id": "26-029-24-13-0012",
+    "property_address": "712 E 15th St",
+    "citation_date": "2023-12-05",
+    "category": "Fire Safety / Egress",
+    "description": "Rear emergency fire escape staircase corroded through and structurally compromised. Immediate hazard.",
+    "severity": "CRITICAL_LIFE_SAFETY",
+    "status": "OPEN",
+    "fine_amount": 3000.0
+  },
+  {
+    "violation_id": "V-2024-00412",
+    "parcel_id": "35-029-24-34-0102",
+    "property_address": "3104 Cedar Ave S",
+    "citation_date": "2024-03-01",
+    "category": "Structural Integrity",
+    "description": "Partial ceiling plaster collapse in unit 204 following unaddressed radiator steam leak.",
+    "severity": "HIGH",
+    "status": "OPEN",
+    "fine_amount": 1200.0
+  },
+  {
+    "violation_id": "V-2024-00088",
+    "parcel_id": "24-029-24-41-0033",
+    "property_address": "415 6th Ave SE",
+    "citation_date": "2024-01-08",
+    "category": "Window Screen",
+    "description": "Torn insect screen on ground floor unit.",
+    "severity": "LOW",
+    "status": "CLOSED",
+    "fine_amount": 100.0
+  }
+]
