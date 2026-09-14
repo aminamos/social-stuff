@@ -28,8 +28,10 @@ class RelationType(str, Enum):
     MANAGED_BY = "MANAGED_BY"
     FINANCED_BY = "FINANCED_BY"
     CITED_FOR = "CITED_FOR"
+    CITED_FOR_WAGE_THEFT = "CITED_FOR_WAGE_THEFT"
     CROSS_COLLATERALIZED_WITH = "CROSS_COLLATERALIZED_WITH"
     SAME_UBO_AS = "SAME_UBO_AS"
+
 
 
 class Address(BaseModel):
@@ -117,6 +119,28 @@ class OwnershipEdge(BaseModel):
     evidence: List[str] = Field(default_factory=list)
 
 
+class WageTheftRecord(BaseModel):
+    case_id: str
+    source_agency: str  # e.g., "US_DOL_WHD", "MN_DLI", "MINNEAPOLIS_CIVIL_RIGHTS", "STPAUL_HREEO", "COURT_JUDGMENT"
+    respondent_legal_name: str
+    trade_name: Optional[str] = None
+    address: Optional[str] = None
+    city: str = "Minneapolis"
+    state: str = "MN"
+    zip_code: Optional[str] = None
+    naics_code: Optional[str] = None
+    industry_description: Optional[str] = None
+    violation_type: str = "FLSA_OVERTIME"
+    back_wages_recovered: float = 0.0
+    civil_penalties_assessed: float = 0.0
+    workers_affected: int = 0
+    repeat_violator: bool = False
+    status: str = "VIOLATION_CONFIRMED"
+    findings_date: Optional[str] = None
+    settlement_amount: float = 0.0
+    description: Optional[str] = None
+
+
 class BeneficialOwnerCluster(BaseModel):
     cluster_id: str
     cluster_alias: str
@@ -133,7 +157,12 @@ class BeneficialOwnerCluster(BaseModel):
     critical_violations_count: int = 0
     total_mortgage_debt: float = 0.0
     primary_lenders: List[str] = Field(default_factory=list)
+    total_wage_theft_back_wages: float = 0.0
+    total_wage_theft_penalties: float = 0.0
+    wage_theft_cases_count: int = 0
+    wage_theft_records: List[WageTheftRecord] = Field(default_factory=list)
     shared_markers: Dict[str, Any] = Field(default_factory=dict)
+
 
 
 class TokenUsageReport(BaseModel):

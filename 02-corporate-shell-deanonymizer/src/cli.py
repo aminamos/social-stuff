@@ -517,6 +517,83 @@ def cmd_sync_metro(args):
     )
 
 
+def cmd_wage_theft(args):
+    from .engine.local_store import LocalRentalStore
+    store = LocalRentalStore()
+    if store.wage_theft_count() == 0:
+        store.seed_default_wage_theft_records()
+
+    query = args.query.strip()
+    records = store.search_wage_theft(query, limit=args.limit)
+
+    if not records:
+        console.print(f"[yellow]No wage theft or labor enforcement records found matching:[/] '{query}'")
+        return
+
+    table = Table(
+        title=f"Wage Theft & Labor Enforcement Records for '{query}'",
+        show_header=True,
+        header_style="bold red"
+    )
+    table.add_column("Case ID / Agency", style="cyan")
+    table.add_column("Respondent / Employer", style="bold white")
+    table.add_column("City", style="dim")
+    table.add_column("Violation Type", style="yellow")
+    table.add_column("Back Wages Recovered", justify="right", style="bold green")
+    table.add_column("Civil Penalties", justify="right", style="bold red")
+    table.add_column("Workers", justify="right", style="magenta")
+    table.add_column("Status", style="bold cyan")
+
+    for r in records:
+        table.add_row(
+            f"{r['case_id']}\n[dim]{r['source_agency']}[/]",
+            f"{r['respondent_legal_name']}" + (f"\n[dim]DBA: {r['trade_name']}[/]" if r.get("trade_name") else ""),
+            r.get("city", "Minneapolis"),
+            r.get("violation_type", "FLSA_OVERTIME"),
+            f"${float(r.get('back_wages_recovered') or 0):,.2f}",
+            f"${float(r.get('civil_penalties_assessed') or 0):,.2f}",
+            str(r.get("workers_affected", 0)),
+            r.get("status", "CONFIRMED")
+        )
+
+    console.print(table)
+
+
+def cmd_wage_theft_top(args):
+    from .engine.local_store import LocalRentalStore
+    store = LocalRentalStore()
+    if store.wage_theft_count() == 0:
+        store.seed_default_wage_theft_records()
+
+    top = store.get_top_wage_theft_offenders(limit=args.limit)
+
+    table = Table(
+        title="Top Wage Theft & Labor Violations (Twin Cities Residential & Property Services)",
+        show_header=True,
+        header_style="bold red"
+    )
+    table.add_column("Employer / Corporate Entity", style="bold white")
+    table.add_column("Trade Name / DBA", style="cyan")
+    table.add_column("City", style="dim")
+    table.add_column("Total Recovered (Wages + Fines)", justify="right", style="bold green")
+    table.add_column("Workers Exploited", justify="right", style="bold yellow")
+    table.add_column("Repeat Violator?", justify="center", style="bold red")
+
+    for t in top:
+        repeat_badge = "[bold red]YES[/]" if t.get("is_repeat_violator") else "[dim]No[/]"
+        table.add_row(
+            t["respondent_legal_name"],
+            t.get("trade_name") or "N/A",
+            t.get("city", "Twin Cities"),
+            f"${t['total_recovered']:,.2f}",
+            f"{t['total_workers_affected']:,}",
+            repeat_badge
+        )
+
+    console.print(table)
+
+
+
 
 def main():
     parser = argparse.ArgumentParser(description="Corporate Shell Entity & Slumlord De-anonymizer CLI")
@@ -597,8 +674,20 @@ def main():
     p_sm = subparsers.add_parser("sync-metro", help="Sync rental licenses and multi-family parcels for St. Paul, Brooklyn Park, and county GIS")
     p_sm.set_defaults(func=cmd_sync_metro)
 
+    # wage-theft
+    p_wt = subparsers.add_parser("wage-theft", help="Search wage theft enforcement actions, settlements, and civil citations")
+    p_wt.add_argument("--query", "-q", required=True, help="Employer name, property management company, or trade name")
+    p_wt.add_argument("--limit", "-l", type=int, default=25, help="Max results to display")
+    p_wt.set_defaults(func=cmd_wage_theft)
+
+    # wage-theft-top
+    p_wtt = subparsers.add_parser("wage-theft-top", help="Rank top wage theft offenders in Twin Cities residential & property services")
+    p_wtt.add_argument("--limit", "-l", type=int, default=20, help="Number of offenders to display")
+    p_wtt.set_defaults(func=cmd_wage_theft_top)
+
     args = parser.parse_args()
     args.func(args)
+
 
 
 

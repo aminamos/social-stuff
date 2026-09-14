@@ -91,6 +91,56 @@ export default {
       });
     }
 
+    // Search wage theft and labor enforcement records
+    if (url.pathname === "/wage-theft") {
+      const q = (url.searchParams.get("q") || "").trim();
+      if (!q) {
+        return new Response(JSON.stringify({ error: "Missing query param ?q=" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      const pattern = `%${q}%`;
+      const wageRes = await env.DB.prepare(`
+        SELECT * FROM wage_theft_records
+        WHERE respondent_legal_name LIKE ?1
+           OR trade_name LIKE ?1
+           OR case_id LIKE ?1
+           OR description LIKE ?1
+           OR address LIKE ?1
+        ORDER BY (back_wages_recovered + settlement_amount) DESC
+        LIMIT 50
+      `).bind(pattern).all();
+
+      return new Response(JSON.stringify({ query: q, results: wageRes.results }, null, 2), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Top wage theft offenders
+    if (url.pathname === "/wage-theft/top") {
+      const topRes = await env.DB.prepare(`
+        SELECT 
+          respondent_legal_name,
+          trade_name,
+          city,
+          COUNT(*) as case_count,
+          SUM(back_wages_recovered) as total_back_wages,
+          SUM(civil_penalties_assessed) as total_penalties,
+          SUM(COALESCE(NULLIF(settlement_amount, 0), back_wages_recovered + civil_penalties_assessed)) as total_recovered,
+          SUM(workers_affected) as total_workers_affected,
+          MAX(repeat_violator) as is_repeat_violator
+        FROM wage_theft_records
+        GROUP BY respondent_legal_name
+        ORDER BY total_recovered DESC
+        LIMIT 20
+      `).all();
+
+      return new Response(JSON.stringify({ top_wage_theft_offenders: topRes.results }, null, 2), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     if (url.pathname === "/stats") {
       const countRes = await env.DB.prepare("SELECT COUNT(*) as total FROM rental_licenses").first();
       const topSyndicates = await env.DB.prepare(`
@@ -109,9 +159,10 @@ export default {
     }
 
     return new Response(
-      "Twin Cities Metro Housing Registry Worker. Endpoints: /sync, /sync/stpaul, /cities, /search?q=..., /stats",
+      "Twin Cities Metro Housing & Labor Standards Registry Worker. Endpoints: /sync, /sync/stpaul, /cities, /search?q=..., /wage-theft?q=..., /wage-theft/top, /stats",
       { status: 200 }
     );
+
   },
 };
 

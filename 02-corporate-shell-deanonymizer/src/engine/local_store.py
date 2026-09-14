@@ -101,9 +101,40 @@ class LocalRentalStore:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_parcel_county ON county_parcels(county);")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_parcel_address ON county_parcels(address);")
 
+            # Wage theft and labor enforcement records table
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS wage_theft_records (
+                    case_id TEXT PRIMARY KEY,
+                    source_agency TEXT NOT NULL,
+                    respondent_legal_name TEXT NOT NULL,
+                    trade_name TEXT,
+                    address TEXT,
+                    city TEXT DEFAULT 'Minneapolis',
+                    state TEXT DEFAULT 'MN',
+                    zip_code TEXT,
+                    naics_code TEXT,
+                    industry_description TEXT,
+                    violation_type TEXT,
+                    back_wages_recovered REAL DEFAULT 0.0,
+                    civil_penalties_assessed REAL DEFAULT 0.0,
+                    workers_affected INTEGER DEFAULT 0,
+                    repeat_violator INTEGER DEFAULT 0,
+                    status TEXT DEFAULT 'VIOLATION_CONFIRMED',
+                    findings_date TEXT,
+                    settlement_amount REAL DEFAULT 0.0,
+                    description TEXT,
+                    synced_at TIMESTAMP
+                )
+            """)
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_wage_theft_legal_name ON wage_theft_records(respondent_legal_name);")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_wage_theft_trade_name ON wage_theft_records(trade_name);")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_wage_theft_city ON wage_theft_records(city);")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_wage_theft_agency ON wage_theft_records(source_agency);")
+
             conn.commit()
         finally:
             conn.close()
+
 
     def count(self) -> int:
         conn = self._get_connection()
@@ -557,3 +588,112 @@ class LocalRentalStore:
             return [dict(row) for row in cur.fetchall()]
         finally:
             conn.close()
+
+    # --------------------------------------------------------------------------
+    # 6. WAGE THEFT & LABOR ENFORCEMENT ACTIONS
+    # --------------------------------------------------------------------------
+    def wage_theft_count(self) -> int:
+        conn = self._get_connection()
+        try:
+            cur = conn.execute("SELECT COUNT(*) FROM wage_theft_records;")
+            return cur.fetchone()[0]
+        finally:
+            conn.close()
+
+    def insert_wage_theft_records(self, records: List[Dict[str, Any]]) -> int:
+        """Upserts wage theft and labor enforcement records."""
+        if not records:
+            return 0
+        now = datetime.now(timezone.utc).isoformat()
+        rows = []
+        for r in records:
+            cid = str(r.get("case_id") or "").strip()
+            if not cid:
+                continue
+            rows.append((
+                cid,
+                str(r.get("source_agency") or "US_DOL_WHD"),
+                str(r.get("respondent_legal_name") or "").strip(),
+                str(r.get("trade_name") or "").strip(),
+                str(r.get("address") or "").strip(),
+                str(r.get("city") or "Minneapolis").strip(),
+                str(r.get("state") or "MN").strip(),
+                str(r.get("zip_code") or "").strip(),
+                str(r.get("naics_code") or "").strip(),
+                str(r.get("industry_description") or "").strip(),
+                str(r.get("violation_type") or "FLSA_OVERTIME"),
+                float(r.get("back_wages_recovered") or 0.0),
+                float(r.get("civil_penalties_assessed") or 0.0),
+                int(r.get("workers_affected") or 0),
+                1 if r.get("repeat_violator") else 0,
+                str(r.get("status") or "VIOLATION_CONFIRMED"),
+                str(r.get("findings_date") or ""),
+                float(r.get("settlement_amount") or 0.0),
+                str(r.get("description") or ""),
+                now
+            ))
+
+        conn = self._get_connection()
+        try:
+            conn.executemany("""
+                INSERT OR REPLACE INTO wage_theft_records (
+                    case_id, source_agency, respondent_legal_name, trade_name,
+                    address, city, state, zip_code, naics_code, industry_description,
+                    violation_type, back_wages_recovered, civil_penalties_assessed,
+                    workers_affected, repeat_violator, status, findings_date,
+                    settlement_amount, description, synced_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, rows)
+            conn.commit()
+        finally:
+            conn.close()
+        return len(rows)
+
+    def search_wage_theft(self, query: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """Searches wage theft records by employer, trade name, case ID, or description."""
+        pattern = f"%{query.strip()}%"
+        conn = self._get_connection()
+        try:
+            cur = conn.execute("""
+                SELECT * FROM wage_theft_records
+                WHERE respondent_legal_name LIKE ?
+                   OR trade_name LIKE ?
+                   OR case_id LIKE ?
+                   OR description LIKE ?
+                   OR address LIKE ?
+                ORDER BY (back_wages_recovered + settlement_amount) DESC
+                LIMIT ?;
+            """, (pattern, pattern, pattern, pattern, pattern, limit))
+            return [dict(row) for row in cur.fetchall()]
+        finally:
+            conn.close()
+
+    def get_top_wage_theft_offenders(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Ranks employers by total wage theft penalties, back wages, and affected workers."""
+        conn = self._get_connection()
+        try:
+            cur = conn.execute("""
+                SELECT 
+                    respondent_legal_name,
+                    trade_name,
+                    city,
+                    COUNT(*) as case_count,
+                    SUM(back_wages_recovered) as total_back_wages,
+                    SUM(civil_penalties_assessed) as total_penalties,
+                    SUM(COALESCE(NULLIF(settlement_amount, 0), back_wages_recovered + civil_penalties_assessed)) as total_recovered,
+                    SUM(workers_affected) as total_workers_affected,
+                    MAX(repeat_violator) as is_repeat_violator
+                FROM wage_theft_records
+                GROUP BY respondent_legal_name
+                ORDER BY total_recovered DESC
+                LIMIT ?;
+            """, (limit,))
+            return [dict(row) for row in cur.fetchall()]
+        finally:
+            conn.close()
+
+    def seed_default_wage_theft_records(self) -> int:
+        """Seeds curated Twin Cities wage theft enforcement actions and settlements."""
+        from ..extractors.wage_theft import DEFAULT_TWIN_CITIES_WAGE_THEFT_CASES
+        return self.insert_wage_theft_records(DEFAULT_TWIN_CITIES_WAGE_THEFT_CASES)
+

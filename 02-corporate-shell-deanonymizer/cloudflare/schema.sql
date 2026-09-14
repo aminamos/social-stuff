@@ -51,3 +51,33 @@ CREATE INDEX IF NOT EXISTS idx_d1_parcel_taxpayer ON county_parcels(taxpayer_nam
 CREATE INDEX IF NOT EXISTS idx_d1_parcel_city ON county_parcels(city);
 CREATE INDEX IF NOT EXISTS idx_d1_parcel_county ON county_parcels(county);
 CREATE INDEX IF NOT EXISTS idx_d1_parcel_address ON county_parcels(address);
+
+-- Wage theft enforcement actions, settlements, and civil citations
+CREATE TABLE IF NOT EXISTS wage_theft_records (
+    case_id TEXT PRIMARY KEY,
+    source_agency TEXT NOT NULL,
+    respondent_legal_name TEXT NOT NULL,
+    trade_name TEXT,
+    address TEXT,
+    city TEXT DEFAULT 'Minneapolis',
+    state TEXT DEFAULT 'MN',
+    zip_code TEXT,
+    naics_code TEXT,
+    industry_description TEXT,
+    violation_type TEXT,
+    back_wages_recovered REAL DEFAULT 0.0,
+    civil_penalties_assessed REAL DEFAULT 0.0,
+    workers_affected INTEGER DEFAULT 0,
+    repeat_violator INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'VIOLATION_CONFIRMED',
+    findings_date TEXT,
+    settlement_amount REAL DEFAULT 0.0,
+    description TEXT,
+    synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_legal ON wage_theft_records(respondent_legal_name);
+CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_trade ON wage_theft_records(trade_name);
+CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_city ON wage_theft_records(city);
+CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_agency ON wage_theft_records(source_agency);
+

@@ -125,6 +125,45 @@ def generate_d1_parcel_seed_sql(store: LocalRentalStore, output_path: Path) -> P
     return output_path
 
 
+def generate_d1_wage_theft_seed_sql(store: LocalRentalStore, output_path: Path) -> Path:
+    """Generates a batch SQL seed file for wage_theft_records formatted for Cloudflare D1."""
+    conn = store._get_connection()
+    try:
+        cur = conn.execute("SELECT * FROM wage_theft_records;")
+        rows = cur.fetchall()
+    finally:
+        conn.close()
+
+    lines = [
+        "-- Cloudflare D1 Seed Script generated from Twin Cities Wage Theft Records",
+    ]
+
+    for r in rows:
+        def escape_sql(val):
+            if val is None:
+                return "NULL"
+            return "'" + str(val).replace("'", "''") + "'"
+
+        stmt = (
+            f"INSERT OR REPLACE INTO wage_theft_records ("
+            f"case_id, source_agency, respondent_legal_name, trade_name, address, city, state, zip_code, "
+            f"naics_code, industry_description, violation_type, back_wages_recovered, civil_penalties_assessed, "
+            f"workers_affected, repeat_violator, status, findings_date, settlement_amount, description, synced_at"
+            f") VALUES ("
+            f"{escape_sql(r['case_id'])}, {escape_sql(r['source_agency'])}, {escape_sql(r['respondent_legal_name'])}, "
+            f"{escape_sql(r['trade_name'])}, {escape_sql(r['address'])}, {escape_sql(r['city'])}, {escape_sql(r['state'])}, "
+            f"{escape_sql(r['zip_code'])}, {escape_sql(r['naics_code'])}, {escape_sql(r['industry_description'])}, "
+            f"{escape_sql(r['violation_type'])}, {float(r['back_wages_recovered'] or 0.0)}, {float(r['civil_penalties_assessed'] or 0.0)}, "
+            f"{int(r['workers_affected'] or 0)}, {int(r['repeat_violator'] or 0)}, {escape_sql(r['status'])}, "
+            f"{escape_sql(r['findings_date'])}, {float(r['settlement_amount'] or 0.0)}, {escape_sql(r['description'])}, {escape_sql(r['synced_at'])}"
+            f");"
+        )
+        lines.append(stmt)
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+    return output_path
+
+
+
 class CloudflareAPIClient:
     """Client for pushing data directly to Cloudflare D1 and R2 via Cloudflare REST API."""
 
