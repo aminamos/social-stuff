@@ -7,6 +7,7 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "test": "deno test src/ui.test.ts && deno test --no-check --sloppy-imports src/docs-route.test.ts",
+    "docs:upload": "bash scripts/publish-docs.sh",
     "check": "deno check src/ui.ts src/ui.test.ts src/data.ts"
   },
   "devDependencies": {
