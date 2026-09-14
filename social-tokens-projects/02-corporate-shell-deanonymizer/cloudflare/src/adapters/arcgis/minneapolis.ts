@@ -25,7 +25,7 @@ export const minneapolis: CityAdapter = {
     dataset: "Active_Rental_Licenses",
     pageSize: 2000,
     where: "1=1",
-    orderBy: "OBJECTID",
+    orderBy: "apn",
   },
   fieldMap: {
     apn: "apn",
