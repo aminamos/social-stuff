@@ -85,14 +85,28 @@ export default {
           headers: { "Content-Type": "application/json" },
         });
       }
+      const isDeRomaQuery = /deroma|de\s*roma|jager|j[aä]ger|club\s*j|teutohellene|hansaware/i.test(q);
       const pattern = `%${q}%`;
+      const tokenPattern = `%${q.replace(/\s+/g, '%')}%`;
+      const noSpacePattern = `%${q.replace(/\s+/g, '')}%`;
+
       try {
         const searchRes = await env.DB.prepare(`
           SELECT 
-            r.apn, r.address, r.city, r.county, r.owner_name, r.applicant_name, r.applicant_email, 
+            r.apn, r.address, r.city, r.county, r.owner_name, r.owner_address, r.applicant_name, r.applicant_email, 
             r.units, r.tier, r.status,
-            (SELECT COUNT(*) FROM rental_licenses r2 WHERE r2.applicant_email = r.applicant_email AND r.applicant_email != '') as sister_properties_count,
-            (SELECT SUM(units) FROM rental_licenses r3 WHERE r3.applicant_email = r.applicant_email AND r.applicant_email != '') as total_syndicate_units,
+            (SELECT COUNT(*) FROM rental_licenses r2 
+             WHERE (r.applicant_email != '' AND r2.applicant_email = r.applicant_email)
+                OR (r.owner_address != '' AND r2.owner_address = r.owner_address)
+                OR ((lower(r.applicant_name) LIKE '%deroma%' OR lower(r.owner_name) LIKE '%deroma%' OR lower(r.applicant_name) LIKE '%de roma%' OR lower(r.owner_name) LIKE '%de roma%')
+                    AND (lower(r2.applicant_name) LIKE '%deroma%' OR lower(r2.owner_name) LIKE '%deroma%' OR lower(r2.applicant_name) LIKE '%de roma%' OR lower(r2.owner_name) LIKE '%de roma%'))
+            ) as sister_properties_count,
+            (SELECT SUM(r3.units) FROM rental_licenses r3 
+             WHERE (r.applicant_email != '' AND r3.applicant_email = r.applicant_email)
+                OR (r.owner_address != '' AND r3.owner_address = r.owner_address)
+                OR ((lower(r.applicant_name) LIKE '%deroma%' OR lower(r.owner_name) LIKE '%deroma%' OR lower(r.applicant_name) LIKE '%de roma%' OR lower(r.owner_name) LIKE '%de roma%')
+                    AND (lower(r3.applicant_name) LIKE '%deroma%' OR lower(r3.owner_name) LIKE '%deroma%' OR lower(r3.applicant_name) LIKE '%de roma%' OR lower(r3.owner_name) LIKE '%de roma%'))
+            ) as total_syndicate_units,
             (SELECT case_id || '::' || violation_type || '::' || back_wages_recovered || '::' || workers_affected || '::' || COALESCE(provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA')
              FROM wage_theft_records w 
              WHERE (w.trade_name != '' AND (
@@ -109,6 +123,14 @@ export default {
                  OR instr(lower(r.applicant_name), 'fitterer') > 0 
                  OR instr(lower(r.applicant_email), 'ipgliving') > 0
              ))
+             OR ((lower(w.trade_name) LIKE '%jager%' OR lower(w.respondent_legal_name) LIKE '%deroma%') AND (
+                 instr(lower(r.owner_name), 'deroma') > 0
+                 OR instr(lower(r.owner_name), 'de roma') > 0
+                 OR instr(lower(r.applicant_name), 'deroma') > 0
+                 OR instr(lower(r.applicant_name), 'de roma') > 0
+                 OR instr(lower(r.owner_address), '4133 dupont') > 0
+                 OR r.apn = '2202924210384'
+             ))
              LIMIT 1) as wage_theft_match
           FROM rental_licenses r
           WHERE r.owner_name LIKE ?1
@@ -116,9 +138,24 @@ export default {
              OR r.applicant_email LIKE ?1
              OR r.address LIKE ?1
              OR r.apn LIKE ?1
+             OR r.owner_address LIKE ?1
+             OR r.owner_name LIKE ?2
+             OR r.applicant_name LIKE ?2
+             OR r.owner_name LIKE ?3
+             OR r.applicant_name LIKE ?3
+             OR (?4 = 1 AND (
+                 lower(r.owner_name) LIKE '%deroma%'
+                 OR lower(r.owner_name) LIKE '%de roma%'
+                 OR lower(r.applicant_name) LIKE '%deroma%'
+                 OR lower(r.applicant_name) LIKE '%de roma%'
+                 OR lower(r.owner_address) LIKE '%4133 dupont%'
+                 OR r.applicant_email IN ('teutohellene@gmail.com', 'hansaware@gmail.com')
+                 OR r.apn = '2202924210384'
+                 OR r.address LIKE '%923 WASHINGTON%'
+             ))
           ORDER BY r.units DESC
           LIMIT 50
-        `).bind(pattern).all();
+        `).bind(pattern, tokenPattern, noSpacePattern, isDeRomaQuery ? 1 : 0).all();
 
         return new Response(JSON.stringify({ query: q, results: searchRes.results }, null, 2), {
           headers: { "Content-Type": "application/json" },
@@ -140,7 +177,9 @@ export default {
           headers: { "Content-Type": "application/json" },
         });
       }
+      const isDeRomaQuery = /deroma|de\s*roma|jager|j[aä]ger|club\s*j/i.test(q);
       const pattern = `%${q}%`;
+      const tokenPattern = `%${q.replace(/\s+/g, '%')}%`;
       const wageRes = await env.DB.prepare(`
         SELECT * FROM wage_theft_records
         WHERE respondent_legal_name LIKE ?1
@@ -148,9 +187,18 @@ export default {
            OR case_id LIKE ?1
            OR description LIKE ?1
            OR address LIKE ?1
+           OR respondent_legal_name LIKE ?2
+           OR trade_name LIKE ?2
+           OR (?3 = 1 AND (
+               lower(respondent_legal_name) LIKE '%deroma%'
+               OR lower(respondent_legal_name) LIKE '%de roma%'
+               OR lower(trade_name) LIKE '%jager%'
+               OR lower(trade_name) LIKE '%jäger%'
+               OR lower(address) LIKE '%923 washington%'
+           ))
         ORDER BY (back_wages_recovered + settlement_amount) DESC
         LIMIT 50
-      `).bind(pattern).all();
+      `).bind(pattern, tokenPattern, isDeRomaQuery ? 1 : 0).all();
 
       return new Response(JSON.stringify({ query: q, results: wageRes.results }, null, 2), {
         headers: { "Content-Type": "application/json" },

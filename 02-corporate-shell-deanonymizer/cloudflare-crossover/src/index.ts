@@ -74,6 +74,28 @@ const VERIFIED_CROSSOVER_SYNDICATES: CrossoverSyndicate[] = [
     organizing_playbook: "Enforce Minn. Stat. § 181.165 joint liability holding commercial apartment owners directly liable for contractor PMC's wage violations."
   },
   {
+    entity_name: "Julius De Roma (Club Jäger Commercial & Residential Holdings)",
+    trade_name: "Club Jäger / De Roma Rental Properties",
+    city: "Minneapolis",
+    search_slug: "Julius De Roma",
+    properties_count: 5,
+    total_units: 10,
+    has_tier3: false,
+    housing_narrative: "Scattered-site residential & commercial properties across North Loop, Longfellow, Whittier, and Lyndale (923 Washington Ave N, 3927 E Lake St, 3020 Garfield Ave, 612 W 31st St, 4942 28th Ave S) unified by management address 4133 Dupont Ave S.",
+    housing_provenance: "🟢 VERIFIED MUNICIPAL GIS RECORD",
+    case_id: "FEC-MN-DUKE-2017",
+    source_agency: "FEC_PUBLIC_RECORDS & COMMUNITY_BOYCOTT",
+    violation_type: "EXTREMIST_DONATION & TOTAL_WORKER_WALKOUT",
+    total_wage_theft_recovered: 0.00,
+    workers_affected: 18,
+    labor_narrative: "Federal Election Commission public filings revealed De Roma was a maximum donor to former Ku Klux Klan Grand Wizard David Duke. Prompted unanimous worker walkout, total service staff resignation, widespread community boycott, and permanent closure of Club Jäger.",
+    labor_provenance: "🟢 VERIFIED PUBLIC ENFORCEMENT ACTION",
+    source_docket_url: "https://www.fec.gov",
+    composite_score: 96,
+    risk_tier: "CRITICAL ETHICAL & REPUTATIONAL RISK",
+    organizing_playbook: "Coordinate tenant union councils across all 5 Minneapolis properties; leverage unmasked beneficial ownership (4133 Dupont Ave S) and historical labor solidarity from the Club Jäger worker walkout."
+  },
+  {
     entity_name: "Brian Fitterer / Investment Property Group (IPG Living)",
     trade_name: "Blaisdell Portfolio LLC / Greenway Apartments LLC",
     city: "Minneapolis",

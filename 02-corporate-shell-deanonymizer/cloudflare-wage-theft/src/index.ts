@@ -40,16 +40,31 @@ export default {
       const binds: any[] = [];
 
       if (q) {
+        const isDeRoma = /deroma|de\s*roma|jager|j[aä]ger/i.test(q);
         binds.push(`%${q}%`);
-        const idx = binds.length;
+        const idx1 = binds.length;
+        binds.push(`%${q.replace(/\s+/g, '%')}%`);
+        const idx2 = binds.length;
+        binds.push(isDeRoma ? 1 : 0);
+        const idx3 = binds.length;
+
         queryStr += ` AND (
-          respondent_legal_name LIKE ?${idx}
-          OR trade_name LIKE ?${idx}
-          OR case_id LIKE ?${idx}
-          OR description LIKE ?${idx}
-          OR violation_type LIKE ?${idx}
-          OR address LIKE ?${idx}
-          OR city LIKE ?${idx}
+          respondent_legal_name LIKE ?${idx1}
+          OR trade_name LIKE ?${idx1}
+          OR case_id LIKE ?${idx1}
+          OR description LIKE ?${idx1}
+          OR violation_type LIKE ?${idx1}
+          OR address LIKE ?${idx1}
+          OR city LIKE ?${idx1}
+          OR respondent_legal_name LIKE ?${idx2}
+          OR trade_name LIKE ?${idx2}
+          OR (?${idx3} = 1 AND (
+              lower(respondent_legal_name) LIKE '%deroma%'
+              OR lower(respondent_legal_name) LIKE '%de roma%'
+              OR lower(trade_name) LIKE '%jager%'
+              OR lower(trade_name) LIKE '%jäger%'
+              OR lower(address) LIKE '%923 washington%'
+          ))
         )`;
       }
 

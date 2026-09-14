@@ -669,6 +669,7 @@ export function renderWageTheftUI(): string {
         <div class="chips-row">
           <span style="font-size: 0.8rem; color: var(--text-dim); margin-right: 4px;">Quick Filters:</span>
           <button class="chip" onclick="quickFilter('')">All Cases</button>
+          <button class="chip" onclick="quickFilter('Julius De Roma')">Julius De Roma (Club Jäger)</button>
           <button class="chip" onclick="quickFilter('Dominium')">Dominium</button>
           <button class="chip" onclick="quickFilter('Fitterer')">Fitterer / IPG Living</button>
           <button class="chip" onclick="quickFilter('Caretaker')">Caretaker Rent Deductions</button>

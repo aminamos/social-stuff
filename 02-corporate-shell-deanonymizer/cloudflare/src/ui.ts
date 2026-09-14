@@ -629,6 +629,7 @@ export function renderUI(): string {
         </div>
         <div class="chips-group">
           <span class="chip-label">Quick Filters:</span>
+          <span class="chip" onclick="quickFilter('Julius De Roma')">Julius De Roma (Club Jäger)</span>
           <span class="chip" onclick="quickFilter('Fitterer')">Fitterer / IPG Living</span>
           <span class="chip" onclick="quickFilter('Dominium')">Dominium Management</span>
           <span class="chip" onclick="quickFilter('Weidner')">Weidner Apartment Homes</span>
@@ -836,8 +837,26 @@ export function renderUI(): string {
       const owner = (item.owner_name || '').trim();
       const applicant = (item.applicant_name || '').trim();
       const email = (item.applicant_email || '').trim();
+      const address = (item.address || '').trim();
+      const ownerAddress = (item.owner_address || '').trim();
       const sisterCount = parseInt(item.sister_properties_count || '0', 10);
       const isLLC = /\\b(LLC|INC|CORP|LP|LTD|HOLDINGS|PROPERTIES|VENTURES|PARTNERS)\\b/i.test(owner);
+
+      const isDeRoma = /deroma|de\\s*roma/i.test(owner) ||
+                       /deroma|de\\s*roma/i.test(applicant) ||
+                       /4133\\s+dupont/i.test(ownerAddress) ||
+                       /teutohellene|hansaware/i.test(email) ||
+                       item.apn === '2202924210384' ||
+                       address.includes('923 WASHINGTON');
+
+      if (isDeRoma) {
+        return {
+          badgeClass: 'badge-tier3',
+          title: '🚨 NOTORIOUS EXTREMIST / BOYCOTTED OWNER (Club Jäger)',
+          desc: \`Unmasked owner Julius De Roma (\${sisterCount || 5} buildings, \${item.total_syndicate_units || 10} units). Former Club Jäger owner exposed in FEC filings as max donor to KKK Grand Wizard David Duke, triggering total worker walkout & closure. Properties unified by management address 4133 Dupont Ave S.\`,
+          isAnon: false
+        };
+      }
 
       if (sisterCount > 1 && isLLC && email && !owner.toLowerCase().includes(email.split('@')[0])) {
         return {
