@@ -130,3 +130,16 @@ def test_wage_theft_cloudflare_worker_files():
     assert 'name = "twin-cities-wage-theft-worker"' in wrangler_content
     assert 'database_name = "social-housing-db"' in wrangler_content
 
+
+def test_crossover_cloudflare_worker_files():
+    base_path = Path(__file__).resolve().parent.parent / "cloudflare-crossover"
+    assert (base_path / "wrangler.toml").exists()
+    assert (base_path / "package.json").exists()
+    assert (base_path / "src" / "index.ts").exists()
+    assert (base_path / "src" / "ui.ts").exists()
+
+    wrangler_content = (base_path / "wrangler.toml").read_text(encoding="utf-8")
+    assert 'name = "twin-cities-slumlord-labor-matrix"' in wrangler_content
+    assert 'database_name = "social-housing-db"' in wrangler_content
+
+

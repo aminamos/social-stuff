@@ -431,7 +431,10 @@ export function renderUI(): string {
       <button class="tab-btn" onclick="switchTab('slumlords')">⚠️ Tier 3 Habitability Violators</button>
       <button class="tab-btn" onclick="switchTab('cities')">🏙️ Municipalities (66 Cities)</button>
       <button class="tab-btn" onclick="switchTab('api')">⚡ REST API</button>
-      <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev" target="_blank" class="tab-btn" style="margin-left: auto; color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); text-decoration: none;">
+      <a href="https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev" target="_blank" class="tab-btn" style="margin-left: auto; color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.4); text-decoration: none;">
+        🎯 Dual Violator Matrix ↗
+      </a>
+      <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev" target="_blank" class="tab-btn" style="color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); text-decoration: none;">
         ⚖️ Wage Theft Registry ↗
       </a>
     </div>

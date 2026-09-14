@@ -479,7 +479,10 @@ export function renderWageTheftUI(): string {
       <button class="tab-btn" onclick="switchTab('offenders')">🏆 Top Corporate Violators</button>
       <button class="tab-btn" onclick="switchTab('report')">📢 Report Wage Theft (Confidential)</button>
       <button class="tab-btn" onclick="switchTab('api')">⚡ REST API & CSV</button>
-      <a href="https://mpls-rental-sync-worker.a-8c6.workers.dev" target="_blank" class="tab-btn" style="margin-left: auto; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">
+      <a href="https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev" target="_blank" class="tab-btn" style="margin-left: auto; color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.4);">
+        🎯 Dual Violators Matrix ↗
+      </a>
+      <a href="https://mpls-rental-sync-worker.a-8c6.workers.dev" target="_blank" class="tab-btn" style="color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">
         🏢 Landlord De-anonymizer ↗
       </a>
       <a href="/export.csv" class="tab-btn" style="color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
