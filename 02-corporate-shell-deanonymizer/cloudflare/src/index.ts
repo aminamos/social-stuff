@@ -6,6 +6,11 @@ import {
   syncOne,
   loadStates,
 } from "./sync";
+import {
+  VIOLATION_ADAPTERS,
+  getViolationAdapter,
+  syncViolationAdapter,
+} from "./violations";
 
 export interface Env {
   DB: D1Database;
@@ -73,6 +78,7 @@ export default {
       const states = await loadStates(env);
       const feeds = ADAPTERS.map((a) => ({
         feed_id: a.feed.id,
+        kind: "registry",
         label: a.feed.label,
         defaults: a.defaults,
         platform: a.source.platform,
@@ -81,7 +87,17 @@ export default {
         note: a.note || null,
         sync: states.get(a.feed.id) || null,
       }));
-      return json({ feeds });
+      const violationFeeds = VIOLATION_ADAPTERS.map((a) => ({
+        feed_id: a.feed.id,
+        kind: "violations",
+        label: a.feed.label,
+        enabled: a.enabled,
+        platform: a.source.platform,
+        dataset: a.source.dataset,
+        note: a.note || null,
+        sync: states.get(a.feed.id) || null,
+      }));
+      return json({ feeds: [...feeds, ...violationFeeds] });
     }
 
     if (url.pathname.startsWith("/sync/")) {
@@ -91,28 +107,85 @@ export default {
       const budgetParam = url.searchParams.get("budget");
       const budget = budgetParam ? parseInt(budgetParam, 10) : undefined;
       const result = await syncOne(env, id, { reset, budget });
-      if (!result) return json({ error: `Unknown jurisdiction: ${id}` }, { status: 404 });
-      return json({ status: "ok", result });
+      if (result) return json({ status: "ok", result });
+      const vAdapter = getViolationAdapter(id);
+      if (vAdapter) {
+        const states = await loadStates(env);
+        const vResult = await syncViolationAdapter(env, vAdapter, {
+          budget,
+          state: states.get(id),
+          reset,
+        });
+        return json({ status: "ok", result: vResult });
+      }
+      return json({ error: `Unknown jurisdiction: ${id}` }, { status: 404 });
     }
 
     // -------------------------------------------------------------- reference
 
     // Registry of ingest feeds and their sources
     if (url.pathname === "/feeds") {
-      return json({
-        count: ADAPTERS.length,
-        feeds: ADAPTERS.map((a) => ({
-          feed_id: a.feed.id,
-          label: a.feed.label,
-          defaults: a.defaults,
-          platform: a.source.platform,
-          dataset: a.source.dataset,
-          endpoint: a.source.endpoint,
-          linker: a.linker,
-          severity_map: a.severityMap,
-          note: a.note || null,
-        })),
-      });
+      const registry = ADAPTERS.map((a) => ({
+        feed_id: a.feed.id,
+        kind: "registry",
+        label: a.feed.label,
+        defaults: a.defaults,
+        platform: a.source.platform,
+        dataset: a.source.dataset,
+        endpoint: a.source.endpoint,
+        linker: a.linker,
+        severity_map: a.severityMap,
+        note: a.note || null,
+      }));
+      const violations = VIOLATION_ADAPTERS.map((a) => ({
+        feed_id: a.feed.id,
+        kind: "violations",
+        label: a.feed.label,
+        enabled: a.enabled,
+        platform: a.source.platform,
+        dataset: a.source.dataset,
+        endpoint: a.source.endpoint,
+        note: a.note || null,
+      }));
+      return json({ count: registry.length + violations.length, feeds: [...registry, ...violations] });
+    }
+
+    // Violation counts per feed plus BBL join resolution (matched vs
+    // unmatched parcels). Unmatched = open violations whose join_key has no
+    // registry row yet, i.e. the registry fill has not reached that BBL.
+    if (url.pathname === "/violations") {
+      try {
+        const perFeed = await env.DB.prepare(`
+          SELECT feed_id, COUNT(*) as rows,
+                 SUM(is_open) as open_rows,
+                 COUNT(DISTINCT join_key) as parcels
+          FROM violations
+          GROUP BY feed_id
+        `).all();
+        const matched = await env.DB.prepare(`
+          SELECT COUNT(DISTINCT v.join_key) as matched_parcels
+          FROM violations v
+          WHERE v.is_open = 1 AND v.join_key IS NOT NULL
+            AND EXISTS (SELECT 1 FROM rental_licenses r WHERE r.apn = v.join_key)
+        `).first() as any;
+        const total = await env.DB.prepare(`
+          SELECT COUNT(DISTINCT join_key) as open_parcels
+          FROM violations
+          WHERE is_open = 1 AND join_key IS NOT NULL
+        `).first() as any;
+        const matchedParcels = (matched?.matched_parcels as number) || 0;
+        const openParcels = (total?.open_parcels as number) || 0;
+        return json({
+          feeds: perFeed.results,
+          bbl_resolution: {
+            open_parcels: openParcels,
+            matched_parcels: matchedParcels,
+            unmatched_parcels: openParcels - matchedParcels,
+          },
+        });
+      } catch (err: any) {
+        return json({ error: err.message }, { status: 500 });
+      }
     }
 
     // List all municipalities and unit/license totals
@@ -167,6 +240,13 @@ export default {
             r.owner_name, r.owner_address, r.applicant_name, r.applicant_email,
             r.units, r.tier, r.severity_class, r.status,
             r.source_platform, r.source_dataset,
+            (SELECT COUNT(*) FROM violations v
+             WHERE v.join_key = r.apn AND v.is_open = 1) as open_violations,
+            (SELECT CASE MAX(CASE v.violation_class
+               WHEN 'C' THEN 3 WHEN 'B' THEN 2 WHEN 'A' THEN 1 ELSE 0 END)
+             WHEN 3 THEN 'C' WHEN 2 THEN 'B' WHEN 1 THEN 'A' ELSE NULL END
+             FROM violations v
+             WHERE v.join_key = r.apn AND v.is_open = 1) as worst_open_class,
             (SELECT COUNT(*) FROM rental_licenses r2
              WHERE r.link_key IS NOT NULL AND r2.link_key = r.link_key) as sister_properties_count,
             (SELECT SUM(r3.units) FROM rental_licenses r3
@@ -225,7 +305,10 @@ export default {
           AND (?5 = '' OR r.jurisdiction_id = ?5)
           AND (?6 = '' OR r.severity_class = ?6)
           AND (?7 = '' OR r.state = ?7)
-          AND (?8 = 0 OR r.severity_class = 'C')
+          AND (?8 = 0 OR r.severity_class = 'C'
+              OR EXISTS (SELECT 1 FROM violations v
+                         WHERE v.join_key = r.apn AND v.is_open = 1
+                           AND v.violation_class = 'C'))
           ORDER BY r.units DESC
           LIMIT 50
         `).bind(
@@ -343,13 +426,38 @@ export default {
         LIMIT 25
       `).all();
 
-      return json({ stats: totals, top_syndicates: topSyndicates.results });
+      let violationsSummary: unknown = null;
+      try {
+        const vTotals = await env.DB.prepare(`
+          SELECT COUNT(*) as violation_rows,
+                 SUM(is_open) as open_rows,
+                 COUNT(DISTINCT CASE WHEN is_open = 1 THEN join_key END) as open_parcels
+          FROM violations
+        `).first() as any;
+        const vMatched = await env.DB.prepare(`
+          SELECT COUNT(DISTINCT v.join_key) as matched_parcels
+          FROM violations v
+          WHERE v.is_open = 1 AND v.join_key IS NOT NULL
+            AND EXISTS (SELECT 1 FROM rental_licenses r WHERE r.apn = v.join_key)
+        `).first() as any;
+        const openParcels = (vTotals?.open_parcels as number) || 0;
+        const matchedParcels = (vMatched?.matched_parcels as number) || 0;
+        violationsSummary = {
+          ...(vTotals || {}),
+          matched_parcels: matchedParcels,
+          unmatched_parcels: openParcels - matchedParcels,
+        };
+      } catch {
+        violationsSummary = { unavailable: true };
+      }
+
+      return json({ stats: totals, top_syndicates: topSyndicates.results, violations: violationsSummary });
     }
 
     return new Response(
       "Multi-jurisdiction Housing & Labor Standards Registry Worker. " +
         "Endpoints: /, /sync, /sync/{feed}, /sync/status, /feeds, /cities, " +
-        "/search?q=...&jurisdiction=...&severity=..., /wage-theft?q=..., /wage-theft/top, /stats",
+        "/search?q=...&jurisdiction=...&severity=..., /violations, /wage-theft?q=..., /wage-theft/top, /stats",
       { status: 200 },
     );
   },

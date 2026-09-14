@@ -72,8 +72,10 @@ export interface PlatformSource {
  * How sister properties are linked for a jurisdiction.
  *
  * - email_or_owner_address: management email, else owner mailing address.
- * - registration_contacts: owner/agent names from a separate contacts dataset.
- * - bbl: borough-block-lot joins (NYC ACRIS/PLUTO).
+ * - registration_contacts: owner/agent names from a separate contacts dataset
+ *   (link_key null until that dataset is ingested).
+ * - bbl: borough-block-lot parcel equality (violations.join_key = registry
+ *   apn); link_key stays null by design.
  */
 export type LinkerStrategy =
   | "email_or_owner_address"
@@ -92,9 +94,117 @@ export interface CityAdapter {
   /** Prefix applied when storing the display label, e.g. "Grade " -> "Grade C". */
   severityLabelPrefix?: string;
   linker: LinkerStrategy;
+  /**
+   * Parcel join key kind. "bbl" means the canonical apn IS the parcel key
+   * (e.g. NYC borough-block-lot) that sister datasets join on.
+   */
+  parcelJoin?: "bbl";
+  /**
+   * Derived parcel id. When the source publishes no single parcel column
+   * (NYC HPD publishes boroid/block/lot, not BBL), this builds the apn from
+   * the raw row and takes precedence over fieldMap.apn.
+   */
+  computeApn?: (row: Record<string, unknown>) => string;
+  /**
+   * Derived street address. When the source splits the address across columns
+   * (NYC HPD housenumber + streetname), this composes it and takes precedence
+   * over fieldMap.address.
+   */
+  computeAddress?: (row: Record<string, unknown>) => string;
   /** Free-text note for operators (license, cadence, known gaps). */
   note?: string;
 }
+
+/** Borough digit -> borough name, per HPD boroid coding. */
+export const NYC_BOROUGH_NAMES: Record<string, string> = {
+  "1": "MANHATTAN",
+  "2": "BRONX",
+  "3": "BROOKLYN",
+  "4": "QUEENS",
+  "5": "STATEN ISLAND",
+};
+
+/**
+ * NYC Borough-Block-Lot: boroid digit + block left-padded to 5 + lot
+ * left-padded to 4. Verified against HPD's published bbl column, e.g.
+ * boroid 2 + block 2810 + lot 45 -> "2028100045".
+ */
+export function toBBL(boroid: unknown, block: unknown, lot: unknown): string {
+  const b = String(boroid ?? "").trim();
+  const bl = String(block ?? "").trim();
+  const l = String(lot ?? "").trim();
+  if (!/^[1-5]$/.test(b) || !bl || !l) return "";
+  const blPad = bl.padStart(5, "0");
+  const lPad = l.padStart(4, "0");
+  if (!/^[0-9]+$/.test(blPad) || !/^[0-9]+$/.test(lPad)) return "";
+  return `${b}${blPad}${lPad}`;
+}
+
+/** One violations feed. Cursor identity is feed.id, sharing sync_state. */
+export interface ViolationAdapter {
+  feed: Feed;
+  source: PlatformSource;
+  /** Raw row field holding the violation id (e.g. "violationid"). */
+  violationIdField: string;
+  /**
+   * Raw row field holding the parcel join key, verbatim (e.g. HPD "bbl",
+   * nullable). Falls back to computeJoinKey when empty.
+   */
+  joinKeyField?: string;
+  /** Derived join key when the verbatim field is null (BBL from boroid/block/lot). */
+  computeJoinKey?: (row: Record<string, unknown>) => string;
+  /** Raw row field holding the class letter (e.g. "class": A | B | C | I). */
+  classField: string;
+  /** Raw row field holding the detailed status verbatim (e.g. "currentstatus"). */
+  statusField: string;
+  /** Raw row field whose value decides open vs closed (e.g. "violationstatus"). */
+  openField: string;
+  /** Values of the open field that count as open (e.g. ["Open"]). */
+  openValues: string[];
+  /** Raw row field holding a short address, when published. */
+  addressField?: string;
+  /** Raw row field holding the borough, when published. */
+  boroField?: string;
+  /** Raw row field holding the violation text, when published. */
+  descriptionField?: string;
+  /** False = declared but never filled (Seattle, Chicago). */
+  enabled: boolean;
+  /** Free-text note for operators (scope, cadence, known gaps). */
+  note?: string;
+}
+
+export interface ViolationRecord {
+  feed_id: string;
+  violation_id: string;
+  join_key: string | null;
+  violation_class: string | null;
+  status: string;
+  is_open: number;
+  address: string;
+  boro: string;
+  description: string;
+  source_platform: PlatformId;
+  source_dataset: string;
+  row_hash: string;
+  synced_at: string;
+}
+
+/** Columns written on upsert, in bound-parameter order. */
+export const VIOLATION_COLUMNS = [
+  "feed_id",
+  "violation_id",
+  "join_key",
+  "violation_class",
+  "status",
+  "is_open",
+  "address",
+  "boro",
+  "description",
+  "source_platform",
+  "source_dataset",
+  "row_hash",
+  "synced_at",
+] as const;
 
 export interface CanonicalRecord {
   parcel_id: string;
@@ -292,6 +402,14 @@ export function linkKey(
   const usableName = name && name.length >= 3 && !isNonEntityName(name) ? name : "";
 
   switch (linker) {
+    case "bbl":
+      // BBL linkage is parcel equality (violations.join_key = registry apn),
+      // not a group key, so link_key stays null by design.
+      return null;
+    case "registration_contacts":
+      // Owner/agent names live in a separate contacts dataset that is not
+      // ingested yet; nothing safe to group on, so link_key stays null.
+      return null;
     case "name":
       return usableName ? `name:${jurisdictionId}:${usableName}` : null;
     case "email_or_owner_address":
