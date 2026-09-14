@@ -8,6 +8,12 @@ Every organization listed here has been audited for **active maintenance pipelin
 
 ---
 
+## 🌐 Live Sites
+
+* 🏠 **[Social Housing Info](https://social-housing-info.a-8c6.workers.dev/)** — public information resource on rent stabilization definitions, the NYC rent freeze, block-by-block housing development, community land trusts, and further reading.
+
+---
+
 ## 🗺️ Regional Guides
 
 * 🌲 **[Minnesota & Twin Cities](regions/minnesota.md)**: Hennepin County Design System, Minneapolis Institute of Art, UMN Mapping Prejudice, Science Museum of MN, Northern Widget, MinnPost.
