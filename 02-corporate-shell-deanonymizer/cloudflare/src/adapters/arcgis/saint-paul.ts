@@ -26,7 +26,7 @@ export const saintPaul: CityAdapter = {
     dataset: "Certificate_of_Occupancy_-_Residential",
     pageSize: 2000,
     where: "1=1",
-    orderBy: "OBJECTID",
+    orderBy: "PIN",
   },
   fieldMap: {
     apn: "PIN",
