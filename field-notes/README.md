@@ -1,6 +1,6 @@
 # AI & Environment Research ("Field Notes: AI & Earth")
 
-TanStack Start app with two surfaces: a calculator that converts hours of air conditioning not run into LLM tokens or queries, and a question-answering research assistant over a curated evidence library, optionally refreshed with live Kagi search. It deploys to Cloudflare Workers as `field-notes-ai-earth` (live: https://field-notes.awdnowusaa.cc). Local git repository initialized 2026-09-10; push to a private remote once created.
+TanStack Start app with two surfaces: a calculator that converts hours of air conditioning not run into LLM tokens or queries, and a question-answering research assistant over a curated evidence library, optionally refreshed with live Kagi search. It deploys to Cloudflare Workers as `field-notes-ai-earth` (live: https://field-notes.awdnowusaa.cc). Source is housed in [`aminamos/social-stuff`](https://github.com/aminamos/social-stuff) under `field-notes/`.
 
 ## Stack
 
