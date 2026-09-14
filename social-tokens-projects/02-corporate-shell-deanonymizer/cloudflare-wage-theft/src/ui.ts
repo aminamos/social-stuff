@@ -1,3 +1,82 @@
+export interface PrimarySource {
+  href: string;
+  label: string;
+  isPdf: boolean;
+}
+
+/** Human-readable label per enforcing agency. Single source of truth — serialized into the page for client-side use. */
+export const AGENCY_SOURCE_LABELS: Record<string, string> = {
+  MN_AG_OFFICE: "MN Attorney General — Labor Enforcement Report",
+  COURT_JUDGMENT: "MN District Court Record (MCRO Case Search)",
+  US_DOL_WHD: "US DOL Wage & Hour Division Enforcement Record",
+  MN_DLI: "MN Dept. of Labor & Industry Order",
+  MINNEAPOLIS_CIVIL_RIGHTS: "Minneapolis Civil Rights — Labor Standards Finding",
+  STPAUL_HREEO: "St. Paul HREEO Finding",
+};
+
+/** Fallback portal per agency when a record has no direct docket URL. */
+export const AGENCY_PORTAL_URLS: Record<string, string> = {
+  MN_AG_OFFICE: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2025.pdf",
+  COURT_JUDGMENT: "https://publicaccess.courts.state.mn.us",
+  US_DOL_WHD: "https://enforcement.dol.gov",
+  MN_DLI: "https://www.dli.mn.gov",
+  MINNEAPOLIS_CIVIL_RIGHTS: "https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards",
+  STPAUL_HREEO: "https://www.stpaul.gov/departments/human-rights-equal-economic-opportunity",
+};
+
+/** Agency portals rendered ONCE in a global strip — never repeated per case card. */
+export const GLOBAL_PORTALS: Array<{ href: string; title: string; sub: string }> = [
+  { href: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2025.pdf", title: "MN AG Labor Report 2025 (PDF)", sub: "State wage-theft enforcement findings" },
+  { href: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2024.pdf", title: "MN AG Labor Report 2024 (PDF)", sub: "State wage-theft enforcement findings" },
+  { href: "https://enforcement.dol.gov", title: "US DOL Enforcement Database", sub: "Federal WHD case search" },
+  { href: "https://publicaccess.courts.state.mn.us", title: "MN Court Records (MCRO)", sub: "District court case search" },
+  { href: "https://www.dli.mn.gov", title: "MN Dept. of Labor & Industry", sub: "State orders & wage claims" },
+  { href: "https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards", title: "Mpls Labor Standards", sub: "City findings & complaints" },
+];
+
+/** True only when the URL points at an actual document (not a portal homepage/search page). */
+export function isPdfUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  return /\.pdf(\?|#|$)/i.test(url.trim());
+}
+
+/** SNAKE_CASE status → short human label that fits in the card grid. */
+export function humanizeStatus(status: string | null | undefined): string {
+  const s = (status || "").trim();
+  const map: Record<string, string> = {
+    SETTLEMENT_REACHED: "Settlement reached",
+    JUDGMENT_ENTERED: "Judgment entered",
+    ACTIVE_LITIGATION: "Active litigation",
+    CONSENT_DECREE: "Consent decree",
+    VIOLATION_CONFIRMED: "Violation confirmed",
+  };
+  if (map[s]) return map[s];
+  return s
+    .toLowerCase()
+    .split("_")
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ")
+    .trim();
+}
+
+/**
+ * The ONE source link a case card (or markdown export) may show: the record's
+ * own docket URL, labeled by agency. "(PDF)" is appended only when the URL is
+ * an actual PDF — portal homepages are never labeled as documents.
+ */
+export function primarySourceFor(record: {
+  source_agency?: string | null;
+  source_docket_url?: string | null;
+}): PrimarySource {
+  const agency = (record.source_agency || "").trim();
+  const direct = (record.source_docket_url || "").trim();
+  const href = direct || AGENCY_PORTAL_URLS[agency] || "https://enforcement.dol.gov";
+  const isPdf = isPdfUrl(href);
+  const label =
+    (AGENCY_SOURCE_LABELS[agency] || "Official docket / agency record") + (isPdf ? " (PDF)" : "");
+  return { href, label, isPdf };
+}
+
 export function renderWageTheftUI(): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -293,10 +372,19 @@ export function renderWageTheftUI(): string {
       padding: 12px;
       margin-bottom: 14px;
     }
+    .financial-grid > div { min-width: 0; }
     .fin-item-val {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+    .fin-item-val.status-val {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
     }
     .fin-item-val.green { color: #34d399; }
     .fin-item-val.red { color: #f87171; }
@@ -755,6 +843,19 @@ export function renderWageTheftUI(): string {
         </div>
       </div>
 
+      <div style="background: rgba(56, 189, 248, 0.06); border: 1px solid rgba(56, 189, 248, 0.22); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;">
+        <div style="font-weight: 800; color: #93c5fd; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">
+          🏛️ Official sources & agency portals
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px;">
+          ${GLOBAL_PORTALS.map((p) => `
+          <a href="${p.href}" target="_blank" style="background: #090d16; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--card-border); color: #38bdf8; text-decoration: none; display: block; font-size: 0.8rem; font-weight: 700;">
+            ${p.title} ↗<br>
+            <span style="color: var(--text-dim); font-size: 0.72rem; font-weight: 400;">${p.sub}</span>
+          </a>`).join("")}
+        </div>
+      </div>
+
       <div id="searchResultsCount" style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 12px;"></div>
       <div id="casesGrid" class="results-grid"></div>
     </div>
@@ -1011,6 +1112,39 @@ export function renderWageTheftUI(): string {
   <script>
     let currentCasesResults = [];
 
+    // Agency labels/portals serialized from the server single source of truth.
+    const AGENCY_SOURCE_LABELS = ${JSON.stringify(AGENCY_SOURCE_LABELS)};
+    const AGENCY_PORTAL_URLS = ${JSON.stringify(AGENCY_PORTAL_URLS)};
+
+    function isPdfUrl(url) {
+      return !!url && /\\.pdf(\\?|#|$)/i.test(String(url).trim());
+    }
+
+    function humanizeStatus(status) {
+      const s = String(status || '').trim();
+      const map = {
+        SETTLEMENT_REACHED: 'Settlement reached',
+        JUDGMENT_ENTERED: 'Judgment entered',
+        ACTIVE_LITIGATION: 'Active litigation',
+        CONSENT_DECREE: 'Consent decree',
+        VIOLATION_CONFIRMED: 'Violation confirmed'
+      };
+      if (map[s]) return map[s];
+      return s.toLowerCase().split('_').map(function (w) {
+        return w ? w[0].toUpperCase() + w.slice(1) : w;
+      }).join(' ').trim();
+    }
+
+    // ONE source link per case: the record's own docket URL, labeled by agency.
+    // "(PDF)" is appended only for actual PDFs — never for portal homepages.
+    function primarySourceFor(c) {
+      const agency = String((c && c.source_agency) || '').trim();
+      const direct = String((c && c.source_docket_url) || '').trim();
+      const href = direct || AGENCY_PORTAL_URLS[agency] || 'https://enforcement.dol.gov';
+      const label = (AGENCY_SOURCE_LABELS[agency] || 'Official docket / agency record') + (isPdfUrl(href) ? ' (PDF)' : '');
+      return { href: href, label: label };
+    }
+
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
@@ -1052,11 +1186,8 @@ export function renderWageTheftUI(): string {
         '  - Civil Money Penalties: $' + penalties,
         '- **Affected Workforce**: ' + (c.workers_affected || 0) + ' workers',
         '- **Investigative Findings / Narrative**: ' + (c.description || 'Confirmed civil/administrative wage theft findings.'),
-        '- **Primary Legal Dockets & Source Documents**:',
-        c.source_docket_url ? '  - Primary Source Docket URL: ' + c.source_docket_url : '  - US DOL Wage & Hour Division Public Enforcement Database: https://enforcement.dol.gov',
-        '  - US DOL Wage & Hour Division Public Enforcement Database: https://enforcement.dol.gov',
-        '  - Minnesota Judicial Branch Public Access (MCRO Case Search): https://publicaccess.courts.state.mn.us',
-        '  - Minneapolis Civil Rights Labor Standards Findings: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards',
+        '- **Primary Source Document**:',
+        '  - ' + primarySourceFor(c).label + ': ' + primarySourceFor(c).href,
         '  - Cross-Reference Landlord Shell Entity: https://mpls-rental-sync-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(c.trade_name || c.respondent_legal_name || '')
       ].join('\\n');
 
@@ -1114,13 +1245,8 @@ export function renderWageTheftUI(): string {
         lines.push('- **Workers Impacted**: ' + (c.workers_affected || 0));
         lines.push('- **Status**: ' + (c.status || 'Active') + (c.repeat_violator ? ' [REPEAT OFFENDER]' : ''));
         lines.push('- **Case Summary**: ' + (c.description || ''));
-        lines.push('- **Source Records**:');
-        if (c.source_docket_url) {
-          lines.push('  - Direct Docket URL: ' + c.source_docket_url);
-        }
-        lines.push('  - US DOL WHD Enforcement Database: https://enforcement.dol.gov');
-        lines.push('  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us');
-        lines.push('  - Minneapolis Labor Standards Enforcement: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards');
+        lines.push('- **Primary Source Document**:');
+        lines.push('  - ' + primarySourceFor(c).label + ': ' + primarySourceFor(c).href);
         lines.push('');
       });
 
@@ -1301,12 +1427,12 @@ export function renderWageTheftUI(): string {
             </div>
           \`;
 
-          const primaryDocLink = c.source_docket_url ? \`
-            <a href="\${c.source_docket_url}" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
-              Official Docket Document / Report PDF ↗
+          const src = primarySourceFor(c);
+          const primaryDocLink = \`
+            <a href="\${src.href}" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
+              \${src.label} ↗
             </a>
-            <span>•</span>
-          \` : '';
+          \`;
 
           return \`
             <div class="case-card">
@@ -1340,28 +1466,17 @@ export function renderWageTheftUI(): string {
                     <div class="fin-item-lbl">Affected Workforce</div>
                   </div>
                   <div>
-                    <div class="fin-item-val" style="color:#38bdf8;">\${c.status}</div>
+                    <div class="fin-item-val status-val" style="color:#38bdf8;">\${humanizeStatus(c.status)}</div>
                     <div class="fin-item-lbl">Status</div>
                   </div>
                 </div>
 
                 <div style="margin-top: 10px; padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; font-size: 0.75rem; border: 1px solid var(--card-border);">
                   <div style="font-weight: 700; color: #94a3b8; margin-bottom: 4px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">
-                    📄 Source Documents & Official Dockets:
+                    📄 Primary source document:
                   </div>
                   <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     \${primaryDocLink}
-                    <a href="https://enforcement.dol.gov" target="_blank" style="color: #38bdf8; text-decoration: underline;">
-                      US DOL WHD Docket ↗
-                    </a>
-                    <span>•</span>
-                    <a href="https://publicaccess.courts.state.mn.us" target="_blank" style="color: #38bdf8; text-decoration: underline;">
-                      District Court Filings (MCRO) ↗
-                    </a>
-                    <span>•</span>
-                    <a href="https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards" target="_blank" style="color: #38bdf8; text-decoration: underline;">
-                      Mpls Civil Rights Findings PDF ↗
-                    </a>
                   </div>
                 </div>
               </div>

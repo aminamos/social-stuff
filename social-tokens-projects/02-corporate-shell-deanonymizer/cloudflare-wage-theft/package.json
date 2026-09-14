@@ -5,7 +5,9 @@
   "main": "src/index.ts",
   "scripts": {
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev"
+    "dev": "wrangler dev",
+    "test": "deno test src/ui.test.ts",
+    "check": "deno check src/ui.ts src/ui.test.ts src/data.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240903.0",
