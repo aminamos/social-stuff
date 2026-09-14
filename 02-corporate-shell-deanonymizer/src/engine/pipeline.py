@@ -19,22 +19,33 @@ from ..extractors.sos_filings import SOSFilingsExtractor
 from ..extractors.code_violations import CodeViolationsExtractor
 from ..extractors.mortgage_liens import MortgageLiensExtractor
 from ..extractors.live_minneapolis_client import LiveMinneapolisClient
+from ..extractors.document_ocr import DocumentOCRExtractor
+from ..extractors.live_sos_scraper import LiveSOSScraper
 from ..agents.entity_resolver import EntityResolverAgent
 from ..agents.dossier_generator import DossierGeneratorAgent
+from ..llm.client import BaseLLMClient, get_llm_client
 
 
 class DeAnonymizationPipeline:
     """End-to-end ingestion, entity resolution, graph compilation, and campaign synthesis pipeline."""
 
-    def __init__(self, model_name: str = "gemini-1.5-pro"):
-        self.model_name = model_name
-        self.tax_extractor = TaxRegistryExtractor(model_name=model_name)
-        self.sos_extractor = SOSFilingsExtractor(model_name=model_name)
-        self.violations_extractor = CodeViolationsExtractor(model_name=model_name)
-        self.mortgage_extractor = MortgageLiensExtractor(model_name=model_name)
-        self.live_client = LiveMinneapolisClient(model_name=model_name)
-        self.resolver_agent = EntityResolverAgent(model_name=model_name)
-        self.dossier_agent = DossierGeneratorAgent(model_name=model_name)
+    def __init__(
+        self,
+        provider: Optional[str] = None,
+        model: Optional[str] = None,
+        base_url: Optional[str] = None,
+        api_key: Optional[str] = None,
+    ):
+        self.llm = get_llm_client(provider=provider, model=model, base_url=base_url, api_key=api_key)
+        self.tax_extractor = TaxRegistryExtractor()
+        self.sos_extractor = SOSFilingsExtractor()
+        self.violations_extractor = CodeViolationsExtractor()
+        self.mortgage_extractor = MortgageLiensExtractor()
+        self.live_client = LiveMinneapolisClient()
+        self.document_ocr = DocumentOCRExtractor(llm_client=self.llm)
+        self.live_sos = LiveSOSScraper()
+        self.resolver_agent = EntityResolverAgent()
+        self.dossier_agent = DossierGeneratorAgent()
         self.graph = OwnershipGraph()
 
     def ingest_data(
@@ -127,6 +138,24 @@ class DeAnonymizationPipeline:
             self.graph.add_edge(edge)
 
         return live_data
+
+    def ingest_document(self, file_path: Path, doc_type: str = "filing") -> Any:
+        """Parses an unstructured document/PDF via local OCR and feeds it to the configured LLM."""
+        raw_text = self.document_ocr.extract_text_from_file(file_path)
+        if doc_type == "filing":
+            entity = self.document_ocr.extract_corporate_filing(raw_text)
+            self.graph.add_shell_entity(entity)
+            return entity
+        elif doc_type in ("mortgage", "deed"):
+            mortgage = self.document_ocr.extract_mortgage_lien(raw_text)
+            self.graph.add_mortgage(mortgage)
+            return mortgage
+        else:
+            return {"raw_text": raw_text[:500]}
+
+    def search_sos(self, entity_name: str) -> List[Dict[str, Any]]:
+        """Searches Secretary of State corporate registration databases."""
+        return self.live_sos.search_business_entity(entity_name)
 
     def investigate(self, address_or_pin: str) -> Dict[str, Any]:
         """Runs graph traversal and entity de-anonymization for a specific property."""

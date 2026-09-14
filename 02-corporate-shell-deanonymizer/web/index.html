@@ -31,7 +31,7 @@
     header {
       background: #090d16;
       border-bottom: 1px solid var(--border-color);
-      padding: 12px 24px;
+      padding: 10px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -53,6 +53,20 @@
       padding: 3px 8px;
       border-radius: 9999px;
       font-weight: 600;
+    }
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .select-model {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #e2e8f0;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      outline: none;
     }
     .token-counter {
       background: #1e1b4b;
@@ -244,8 +258,19 @@
       <span class="tag">SOCIAL TOKENS #02</span>
       <h1>Corporate Shell Entity & Slumlord De-anonymizer</h1>
     </div>
-    <div class="token-counter" id="tokenLedger">
-      Tokens: 6,348 | Prompt: 4,163 | Cost: $0.0161
+    <div class="header-controls">
+      <select class="select-model" id="llmProviderSelect" title="Select LLM Engine for Reasoning & Entity Resolution">
+        <option value="ollama">Local LLM: Ollama (llama3.2 / mistral)</option>
+        <option value="vllm">Local LLM: vLLM / Aphrodite (OpenAI-compat)</option>
+        <option value="openai">OpenAI (gpt-4o / gpt-4o-mini)</option>
+        <option value="groq">Groq (Llama 3.3 70B Versatile)</option>
+        <option value="deepseek">DeepSeek (V3 / R1)</option>
+        <option value="gemini">Google Gemini (Interactions API)</option>
+        <option value="offline" selected>Local Offline Engine (Heuristic Regex)</option>
+      </select>
+      <div class="token-counter" id="tokenLedger">
+        Tokens: 6,348 | Prompt: 4,163 | Cost: $0.0161
+      </div>
     </div>
   </header>
 
@@ -260,6 +285,7 @@
           <span class="chip" onclick="searchAddr('2815 Grand Ave S')">2815 Grand Ave S</span>
           <span class="chip" onclick="searchAddr('3104 Cedar Ave S')">3104 Cedar Ave S</span>
           <span class="chip" onclick="searchAddr('415 6th Ave SE')">415 6th Ave SE</span>
+          <span class="chip" style="background:#1e3a8a; color:#93c5fd;" onclick="searchAddr('Live: Fitterer')">⚡ Live: Fitterer (970 Units)</span>
         </div>
       </div>
 
@@ -514,7 +540,22 @@
     // Interaction & Search
     function searchAddr(addr) {
       document.getElementById("addressInput").value = addr;
-      if (addr.includes("415 6th")) {
+      if (addr.includes("Fitterer")) {
+        // Live Municipal Data Case
+        document.getElementById("targetAddrVal").innerText = "2310 ALDRICH AVE S (Live Portfolio)";
+        document.getElementById("paperLlcVal").innerText = "BLAISDELL PORTFOLIO LLC / GREENWAY LLC";
+        document.getElementById("beneficialOwnerVal").innerText = "Brian L. Fitterer (IPG Living)";
+        document.getElementById("totalUnitsVal").innerText = "970 Units (22 Buildings)";
+        document.getElementById("totalViolationsVal").innerText = "4 Buildings in Tier 3 (Severe Non-Compliance)";
+        document.getElementById("totalDebtVal").innerText = "Cross-City Syndicated Master Facility";
+        document.getElementById("sisterList").innerHTML = `
+          <div style="background:#1e293b; padding:8px; border-radius:6px;"><b>2119 PILLSBURY AVE</b> (49 units) - <span style="color:#ef4444">Tier 3 Chronic Violation</span></div>
+          <div style="background:#1e293b; padding:8px; border-radius:6px;"><b>2312 BLAISDELL AVE</b> (26 units) - <span style="color:#ef4444">Tier 3 Chronic Violation</span></div>
+          <div style="background:#1e293b; padding:8px; border-radius:6px;"><b>2820 BLAISDELL AVE</b> (24 units) - <span style="color:#ef4444">Tier 3 Chronic Violation</span></div>
+          <div style="background:#1e293b; padding:8px; border-radius:6px;"><b>1117 MARQUETTE AVE</b> (234 units) - Bolero Flats LLC</div>
+        `;
+        renderDossier("2310 Aldrich Ave S", "Brian L. Fitterer (IPG Living)", 22, 970, "Multi-Facility Commercial Notes", 4);
+      } else if (addr.includes("415 6th")) {
         // Sarah Jenkins
         document.getElementById("targetAddrVal").innerText = "415 6th Ave SE";
         document.getElementById("paperLlcVal").innerText = "DINKYTOWN STUDENT LOFTS LLC";

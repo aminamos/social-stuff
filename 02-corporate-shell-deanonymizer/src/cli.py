@@ -198,6 +198,52 @@ def cmd_live_search(args):
     )
 
 
+def cmd_ocr_ingest(args):
+    file_path = Path(args.file)
+    if not file_path.exists():
+        console.print(f"[bold red]File not found:[/] {file_path}")
+        sys.exit(1)
+
+    console.print(f"[bold cyan]Running document OCR & LLM extraction ({args.provider or 'auto'} / {args.model or 'default'})...[/]")
+    pipeline = DeAnonymizationPipeline(
+        provider=args.provider,
+        model=args.model,
+        base_url=args.base_url,
+    )
+    result = pipeline.ingest_document(file_path=file_path, doc_type=args.doc_type)
+
+    console.print(
+        Panel(
+            f"File: [bold white]{file_path.name}[/]\n"
+            f"Document Type: [bold cyan]{args.doc_type}[/]\n"
+            f"Extracted Result:\n{json.dumps(result.model_dump() if hasattr(result, 'model_dump') else result, indent=2)}",
+            title="[bold green]Document Extraction Complete[/]",
+            border_style="green",
+        )
+    )
+
+
+def cmd_live_sos(args):
+    console.print(f"[bold cyan]Searching Secretary of State Corporate Registration Database...[/]")
+    pipeline = DeAnonymizationPipeline()
+    records = pipeline.search_sos(args.name)
+
+    table = Table(title=f"Secretary of State Business Filings ({args.name})", show_header=True, header_style="bold green")
+    table.add_column("Filing Number", style="dim")
+    table.add_column("Legal Entity Name", style="bold white")
+    table.add_column("Entity Type", style="cyan")
+    table.add_column("Status", style="green")
+
+    for r in records:
+        table.add_row(
+            r.get("filing_number", "N/A"),
+            r.get("legal_name", "N/A"),
+            r.get("entity_type", "N/A"),
+            r.get("status", "N/A"),
+        )
+    console.print(table)
+
+
 def cmd_export_graph(args):
     fixtures_dir = Path(args.fixtures) if args.fixtures else get_default_fixtures_dir()
     pipeline = DeAnonymizationPipeline()
@@ -211,6 +257,9 @@ def cmd_export_graph(args):
 
 def main():
     parser = argparse.ArgumentParser(description="Corporate Shell Entity & Slumlord De-anonymizer CLI")
+    parser.add_argument("--provider", help="LLM provider: ollama, openai, groq, deepseek, offline")
+    parser.add_argument("--model", help="LLM model name (e.g. llama3.2, mistral, gpt-4o-mini)")
+    parser.add_argument("--base-url", help="Custom OpenAI-compatible base URL")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # investigate
@@ -236,6 +285,20 @@ def main():
     p_live.add_argument("--query", "-q", required=True, help="Landlord name, email domain, phone number, or street name")
     p_live.add_argument("--limit", "-l", type=int, default=25, help="Max properties to fetch")
     p_live.set_defaults(func=cmd_live_search)
+
+    # ocr-ingest
+    p_ocr = subparsers.add_parser("ocr-ingest", help="Run local OCR and LLM extraction on a PDF, image, or scan")
+    p_ocr.add_argument("--file", "-f", required=True, help="Path to document file (PDF, PNG, JPG, TXT)")
+    p_ocr.add_argument("--doc-type", choices=["filing", "mortgage", "deed", "general"], default="filing", help="Document type")
+    p_ocr.add_argument("--provider", help="LLM provider: ollama, openai, groq, offline")
+    p_ocr.add_argument("--model", help="LLM model name")
+    p_ocr.add_argument("--base-url", help="OpenAI-compatible base URL")
+    p_ocr.set_defaults(func=cmd_ocr_ingest)
+
+    # live-sos
+    p_sos = subparsers.add_parser("live-sos", help="Search Secretary of State corporate registration portal")
+    p_sos.add_argument("--name", "-n", required=True, help="Legal business entity name")
+    p_sos.set_defaults(func=cmd_live_sos)
 
     # export-graph
     p_exp = subparsers.add_parser("export-graph", help="Export ownership graph to Cytoscape JSON")
