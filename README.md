@@ -4,39 +4,41 @@ A curated, field-verified roadmap of civic tech groups, non-profits, public data
 
 Every organization listed here has been audited for **active maintenance pipelines in 2025–2026** so your pull requests won't sit unreviewed on abandoned forks.
 
-> 📊 **[Read the Complete Executive Summary & Master Roadmap (EXECUTIVE_SUMMARY.md)](EXECUTIVE_SUMMARY.md)** for the full analysis, maintenance gap audit, ranked quick-win action plan, and CDP expansion strategy.
+This repo is also where I show how I use AI to help civic tech and social causes — any civic or social cause, across the political spectrum. This work is nonpartisan: if you want help navigating pesky government regulations, or lowering your taxes legally, I'll help.
+
+> **[Read the Complete Executive Summary & Master Roadmap (EXECUTIVE_SUMMARY.md)](EXECUTIVE_SUMMARY.md)** for the full analysis, maintenance gap audit, ranked quick-win action plan, and CDP expansion strategy.
 
 ---
 
-## 🌐 Live Sites
+## Live Sites
 
-* 🏠 **[Social Housing Info](https://social-housing-info.a-8c6.workers.dev/)** — public information resource on rent stabilization definitions, the NYC rent freeze, block-by-block housing development, community land trusts, and further reading.
-* 🏢 **[Landlord De-anonymizer](https://mpls-rental-sync-worker.a-8c6.workers.dev)** — ownership graphs for Twin Cities rental properties, reconstructing corporate landlord networks from tax rolls, SOS filings, violations, and mortgage deeds.
-* ⚖️ **[Wage Theft & Labor Standards Registry](https://twin-cities-wage-theft-worker.a-8c6.workers.dev)** — searchable registry of wage theft and labor standards violations across the Twin Cities.
-* 🧩 **[Slumlord & Wage Theft Crossover Matrix](https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev)** — cross-index of corporate syndicates cited for both slumlord code violations and wage theft, with a crossover API and in-browser AI assistant.
-* 🌍 **[Field Notes: AI & Earth](https://field-notes.awdnowusaa.cc/)** ([source](field-notes/)) — evidence-first guide to AI energy, water, materials, and labor impacts, with an estimator converting everyday energy use into inference-token equivalents.
-* 🌎 **[Decarb My State](https://decarb-my-state.a-8c6.workers.dev)** — state-by-state decarbonization progress for all 50 states + DC: emissions through 2022 (EPA), power generation through 2024 (EIA). Source: [aminamos/decarbonize-my-state](https://github.com/aminamos/decarbonize-my-state).
-
----
-
-## 🗺️ Regional Guides
-
-* 🌲 **[Minnesota & Twin Cities](regions/minnesota.md)**: Hennepin County Design System, Minneapolis Institute of Art, UMN Mapping Prejudice, Science Museum of MN, Northern Widget, MinnPost.
-* ☕ **[Seattle & Puget Sound](regions/seattle.md)**: OneBusAway, Puget Sound Regional Council (PSRC), Clearviction.
-* 🗽 **[New York City](regions/nyc.md)**: NYC Planning (Data Engineering, Planning Labs, Equity Tool), BetaNYC, City of New York.
-* 🌉 **[San Francisco Bay Area](regions/sf-bay-area.md)**: Code for San Francisco (SF Brigade), Bay Area Metro (MTC/ABAG).
-* 🏙️ **[Chicago & Cook County](regions/chicago.md)**: Chi Hack Night (Govbot), DataMade (usaddress, LA Metro Translations).
-* 🌳 **[Oakland & East Bay](regions/oakland.md)**: Sudo Room, OpenOakland (WOEIP Air Quality), California Digital Library (CDL), Sudo Mesh.
+* **[Social Housing Info](https://social-housing-info.a-8c6.workers.dev/)** — public information resource on rent stabilization definitions, the NYC rent freeze, block-by-block housing development, community land trusts, and further reading.
+* **[Landlord De-anonymizer](https://mpls-rental-sync-worker.a-8c6.workers.dev)** — ownership graphs for Twin Cities rental properties, reconstructing corporate landlord networks from tax rolls, SOS filings, violations, and mortgage deeds.
+* **[Wage Theft & Labor Standards Registry](https://twin-cities-wage-theft-worker.a-8c6.workers.dev)** — searchable registry of wage theft and labor standards violations across the Twin Cities.
+* **[Slumlord & Wage Theft Crossover Matrix](https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev)** — cross-index of corporate syndicates cited for both slumlord code violations and wage theft, with a crossover API and in-browser AI assistant.
+* **[Field Notes: AI & Earth](https://field-notes.awdnowusaa.cc/)** ([source](field-notes/)) — evidence-first guide to AI energy, water, materials, and labor impacts, with an estimator converting everyday energy use into inference-token equivalents.
+* **[Decarb My State](https://decarb-my-state.a-8c6.workers.dev)** — state-by-state decarbonization progress for all 50 states + DC: emissions through 2022 (EPA), power generation through 2024 (EIA). Source: [aminamos/decarbonize-my-state](https://github.com/aminamos/decarbonize-my-state).
 
 ---
 
-## 🏛️ Special Project: [Council Data Project (CDP) Expansion Blueprint](cdp-expansion-blueprint.md)
+## Regional Guides
+
+* **[Minnesota & Twin Cities](regions/minnesota.md)**: Hennepin County Design System, Minneapolis Institute of Art, UMN Mapping Prejudice, Science Museum of MN, Northern Widget, MinnPost.
+* **[Seattle & Puget Sound](regions/seattle.md)**: OneBusAway, Puget Sound Regional Council (PSRC), Clearviction.
+* **[New York City](regions/nyc.md)**: NYC Planning (Data Engineering, Planning Labs, Equity Tool), BetaNYC, City of New York.
+* **[San Francisco Bay Area](regions/sf-bay-area.md)**: Code for San Francisco (SF Brigade), Bay Area Metro (MTC/ABAG).
+* **[Chicago & Cook County](regions/chicago.md)**: Chi Hack Night (Govbot), DataMade (usaddress, LA Metro Translations).
+* **[Oakland & East Bay](regions/oakland.md)**: Sudo Room, OpenOakland (WOEIP Air Quality), California Digital Library (CDL), Sudo Mesh.
+
+---
+
+## Special Project: [Council Data Project (CDP) Expansion Blueprint](cdp-expansion-blueprint.md)
 
 Strategic and technical expansion roadmap for **[aminamos/cdp](https://github.com/aminamos/cdp)**. Leverages the **Neon PostgreSQL 17 (`pgvector`) + Whisper** architecture to onboard new municipal jurisdictions (Minneapolis, St. Paul, Oakland, San Francisco, Chicago, and NYC) with tested API endpoints and local civic tech tie-ins.
 
 ---
 
-## 🪙 Social Tokens Projects ([`social-tokens-projects/`](social-tokens-projects/README.md))
+## Social Tokens Projects ([`social-tokens-projects/`](social-tokens-projects/README.md))
 
 High-leverage agent systems directing LLM tokens toward structural transparency and collective civic power — now housed in this repo (mirrored from [aminamos/social-tokens-projects](https://github.com/aminamos/social-tokens-projects)):
 
@@ -46,7 +48,13 @@ High-leverage agent systems directing LLM tokens toward structural transparency 
 
 ---
 
-## ⚡ Top 10 Quick Wins (Ranked by PR Acceptance Probability)
+## Ideas
+
+* **[Rural Areas: AI Force-Multiplier Ideas](rural-ideas.md)**: solo-build concepts for small towns, farms, rural clinics, and local businesses — Buffalo, Hennepin suburbs, Anoka/Ramsey/Washington counties, Menomonie WI, and Roseville MN.
+
+---
+
+## Top 10 Quick Wins (Ranked by PR Acceptance Probability)
 
 These issues feature active maintainers, isolated diffs, and immediate social or accessibility value:
 
@@ -65,34 +73,55 @@ These issues feature active maintainers, isolated diffs, and immediate social or
 
 ---
 
-## 🎯 Finding Issues by Tech Stack
+## Finding Issues by Tech Stack
 
-### 🎨 Frontend & Design Systems (HTML / SCSS / React / Vue)
+### Frontend & Design Systems (HTML / SCSS / React / Vue)
 * **Hennepin County** ([`ed-hcds-components`](https://github.com/HennepinCounty/ed-hcds-components)): Header search button ([#66](https://github.com/HennepinCounty/ed-hcds-components/issues/66)), dark background link styles ([#58](https://github.com/HennepinCounty/ed-hcds-components/issues/58)), grid/flex gap classes ([#61](https://github.com/HennepinCounty/ed-hcds-components/issues/61)).
 * **Code for San Francisco** ([`datasci-earthquake`](https://github.com/sfbrigade/datasci-earthquake)): FEMA hazard card ([#1053](https://github.com/sfbrigade/datasci-earthquake/issues/1053)), layer UI ([#1052](https://github.com/sfbrigade/datasci-earthquake/issues/1052)).
 * **Sudo Room** ([`MemberMatters`](https://github.com/sudoroom/MemberMatters)): Membership tier CSS styling ([#1](https://github.com/sudoroom/MemberMatters/issues/1)).
 * **OpenOakland** ([`woeip`](https://github.com/openoakland/woeip)): Air quality dashboard responsive layout regression ([#508](https://github.com/openoakland/woeip/issues/508)).
 
-### 🐍 Python, APIs & Civic Data Pipelines
+### Python, APIs & Civic Data Pipelines
 * **DataMade** ([`usaddress`](https://github.com/datamade/usaddress), [`la-metro-translations`](https://github.com/datamade/la-metro-translations)): Regex caching ([#410](https://github.com/datamade/usaddress/issues/410)), document translation API tests ([#92](https://github.com/datamade/la-metro-translations/issues/92)).
 * **BetaNYC** ([`New-York-City-Budget`](https://github.com/BetaNYC/New-York-City-Budget)): Sort order consistency ([#50](https://github.com/BetaNYC/New-York-City-Budget/issues/50)), match count reporting ([#49](https://github.com/BetaNYC/New-York-City-Budget/issues/49)).
 * **Puget Sound Regional Council** ([`future_land_use`](https://github.com/psrc/future_land_use)): HB 1110 transit stop walkshed wiring ([#3](https://github.com/psrc/future_land_use/issues/3)).
 * **UMN Libraries** ([`racial_covenants_processor`](https://github.com/UMNLibraries/racial_covenants_processor)): Multi-workflow parcel count rollup for Mapping Prejudice ([#151](https://github.com/UMNLibraries/racial_covenants_processor/issues/151)).
 * **Chi Hack Night** ([`govbot`](https://github.com/chihacknight/govbot)): Scraper organization reference fix ([#78](https://github.com/chihacknight/govbot/issues/78)), executive actions parser ([#28](https://github.com/chihacknight/govbot/issues/28)).
 
-### 📱 Mobile & Transit (iOS / Android)
+### Mobile & Transit (iOS / Android)
 * **OneBusAway** ([`onebusaway-ios`](https://github.com/OneBusAway/onebusaway-ios), [`onebusaway-android`](https://github.com/OneBusAway/onebusaway-android)): VoiceOver accessibility fix ([#1412](https://github.com/OneBusAway/onebusaway-ios/issues/1412)), offline banner ([#2301](https://github.com/OneBusAway/onebusaway-android/issues/2301)).
 * **Code for San Francisco** ([`resource-binder-app`](https://github.com/sfbrigade/resource-binder-app)): Android onboarding screen ([#5](https://github.com/sfbrigade/resource-binder-app/issues/5)).
+* **aminamos** ([`transit-alert-mirror`](https://github.com/aminamos/transit-alert-mirror)): Plain-English transit alert, detour, and service advisory enrichment engine.
+* **aminamos** ([`transit-mcp`](https://github.com/aminamos/transit-mcp)): Multi-city US public transit MCP server & CLI (MSP, Boston, SF Bay Area, Chicago, Portland).
+* **aminamos** ([`transit-operational-data-standard`](https://github.com/aminamos/transit-operational-data-standard)) (fork of [MobilityData/transit-operational-data-standard](https://github.com/MobilityData/transit-operational-data-standard)): open standard for transit schedules used by drivers, dispatchers, and planners.
+* **aminamos** ([`la-metro-translations`](https://github.com/aminamos/la-metro-translations)) (fork of [`datamade/la-metro-translations`](https://github.com/datamade/la-metro-translations), see DataMade entry above).
+* **aminamos** ([`ghost-bus-tracker`](https://github.com/aminamos/ghost-bus-tracker)): Automated public transit reliability and ghost bus tracker using GTFS & GTFS-RT feeds.
+* **aminamos** ([`onebusaway-stopinfo`](https://github.com/aminamos/onebusaway-stopinfo)): Web app that provides and collects detailed bus stop information to/from riders.
 
-### 🔌 Embedded, Hardware & IoT
+### Embedded, Hardware & IoT
 * **Science Museum of Minnesota** ([`laparoscopy-camera`](https://github.com/scimusmn/laparoscopy-camera)): Inverted button reading ([#5](https://github.com/scimusmn/laparoscopy-camera/issues/5)).
 * **Northern Widget** ([`Margay_Library`](https://github.com/NorthernWidget/Margay_Library), [`Project-Margay`](https://github.com/NorthernWidget/Project-Margay)): Doxygen docs pipeline ([#28](https://github.com/NorthernWidget/Margay_Library/issues/28)), BoM verification ([#47](https://github.com/NorthernWidget/Project-Margay/issues/47)).
 
 ---
 
-## 💡 The Contributor's Rulebook for Civic Tech
+## The Contributor's Rulebook for Civic Tech
 
 1. **Check Commit Recency First**: If the default branch has not seen commits in the last 6 months, verify with a polite comment on the issue before writing code.
 2. **Keep Diffs Surgical**: Volunteer reviewers have limited bandwidth. A 10-line diff solving one exact issue is merged 10x faster than a PR that also formats indentation or bumps 5 unrelated packages.
 3. **Respect Test Suites & Linters**: Run `npm test`, `pytest`, or equivalent locally. In public agencies like NYC Planning and Hennepin County, CI checks run automated compliance tests.
 4. **Prioritize Accessibility (a11y)**: Government and civic tech projects serve everyone, including individuals with low vision, motor impairments, and screen reader users. Accessible fixes are warmly welcomed by maintainers.
+
+---
+
+## In Review
+
+Opened PRs awaiting maintainer review. Move to Done once merged.
+
+| Project | Issue | PR | Status |
+|---|---|---|---|
+
+---
+
+## Done
+
+Merged PRs.
