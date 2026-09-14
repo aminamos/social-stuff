@@ -1,30 +1,55 @@
-# Field Notes · AI & Earth
+# AI & Environment Research ("Field Notes: AI & Earth")
 
-An evidence-first guide to AI, energy, water, materials, and people — with an
-interactive estimator converting everyday energy use (e.g. AC hours not run)
-into inference-token equivalents, plus an ask-a-question panel.
+TanStack Start app with two surfaces: a calculator that converts hours of air conditioning not run into LLM tokens or queries, and a question-answering research assistant over a curated evidence library, optionally refreshed with live Kagi search. It deploys to Cloudflare Workers as `field-notes-ai-earth` (live: https://field-notes.awdnowusaa.cc). Local git repository initialized 2026-09-10; push to a private remote once created.
 
-- **Live:** https://field-notes.awdnowusaa.cc/
-- **Cloudflare worker:** `field-notes-ai-earth` (account `8c6…1ade58`)
-- **Custom domain:** `field-notes.awdnowusaa.cc`
+## Stack
 
-## snapshot/
+- React 19 + TypeScript, TanStack Router/Start, Vite 7.
+- Cloudflare Workers via Wrangler 4 and `@cloudflare/vite-plugin`; worker entry `@tanstack/react-start/server-entry` with `nodejs_compat`.
+- LLM providers called from a server function: OpenAI first, then Anthropic, then the Hugging Face router as fallbacks.
 
-`snapshot/` is a byte-for-byte capture (2026-09-14) of the files served by the
-deployed worker: `index.html` plus the React bundle in `assets/`. Cloudflare
-does not offer worker-source download, so this snapshot stands in until the
-original build source (the machine that ran `wrangler deploy`) is located and
-committed here.
+## Layout
 
-To serve the snapshot locally for reference:
+- `src/routes/index.tsx` - the single route: equivalence table, ask form, evidence, method, and sources sections.
+- `src/lib/research.ts` - curated `sourceGroups`, quick questions, method notes, Kagi search, provider calls, and the `answerResearchQuestion` server function.
+- `src/lib/equivalence.ts` - place/model/device constants (EIA, Epoch AI, Oviedo 2026 figures) and the Wh-per-token math.
+- `src/styles.css` - all styling; `src/router.tsx`, `src/start.ts`, `src/routeTree.gen.ts` - framework wiring.
+- `wrangler.jsonc` - worker name, compatibility date/flags, and observability settings.
 
-```bash
-cd snapshot && python3 -m http.server 8080
+## Scripts
+
+```powershell
+npm install
+npm run dev        # vite dev
+npm run build      # vite build
+npm run deploy     # build + wrangler deploy
+npm run typecheck  # tsc --noEmit
+npm run cf-typegen # wrangler types
 ```
 
-## Reconnecting the source
+No test script is defined.
 
-1. Find the checkout containing this worker's React source + `wrangler.toml`
-   (`name = "field-notes-ai-earth"`).
-2. Copy it into this repo root (keeping `snapshot/` for provenance).
-3. `wrangler deploy` to update the live worker.
+## Configuration
+
+`.env.example` documents the core variables:
+
+- `META_API_KEY` - serves `Muse Spark 1.3 Free` from `https://api.meta.ai/v1/chat/completions` (Meta's model id is `muse-spark-1.3-contributor`).
+- `OPENCODE_API_KEY` - serves `DeepSeek 4.1` from `https://opencode.ai/zen/go/v1/chat/completions` (model `deepseek-v4.1-flash`; the `go` route requires an `x-opencode-session` header, which the server function generates per request).
+- `KAGI_API_KEY` - optional; refreshes evidence with the Kagi Search API.
+- Answer models live in `answerModels` (`src/lib/research.ts`), requested directly from each provider with `reasoning_effort: high`. The picker shows model names only, and the answer card names the model the provider reported in its response.
+- `.env` and `.dev.vars` exist locally and are not committed. Keep `.dev.vars` production-safe: `npm run build` copies it to `dist/server/.dev.vars`, and `wrangler deploy` uploads it as Worker secrets, so every local value becomes a production secret.
+
+## Notes
+
+- No tests; verify UI changes by running the dev server.
+- Generated or build output present locally: `dist/`, `.tanstack/`, `.wrangler/`, and `node_modules/`.
+- When every provider fails, the answer endpoint reports each provider's status and error message instead of a generic failure. The curated evidence library is still shown in the UI.
+
+## Provenance
+
+Housed here from `E:\development\ai-environment-research` on the Windows
+machine (source of the `field-notes-ai-earth` worker deploys, last deploy
+2026-09-10). Transferred 2026-09-14 at upstream commit `ee9d540` plus
+uncommitted working-tree edits (`.env.example`, `README.md`,
+`src/lib/research.ts`, `tsconfig.json`). Secrets (`.env`, `.dev.vars`) were
+not transferred — copy `.env.example` to `.env` and fill in keys locally.
