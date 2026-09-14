@@ -33,7 +33,7 @@ export default {
       return new Response(renderUI(), {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
-          "Cache-Control": "public, max-age=300",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
         },
       });
     }
@@ -78,6 +78,16 @@ export default {
 
     // Search across all cities with de-anonymization metrics and wage theft crossover
     if (url.pathname === "/search") {
+      const accept = request.headers.get("Accept") || "";
+      if (accept.includes("text/html")) {
+        return new Response(renderUI(), {
+          headers: {
+            "Content-Type": "text/html; charset=utf-8",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+          },
+        });
+      }
+
       const q = (url.searchParams.get("q") || "").trim();
       if (!q) {
         return new Response(JSON.stringify({ error: "Missing query param ?q=" }), {

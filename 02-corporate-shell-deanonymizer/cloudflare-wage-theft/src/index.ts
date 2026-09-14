@@ -22,13 +22,23 @@ export default {
       return new Response(renderWageTheftUI(), {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
-          "Cache-Control": "public, max-age=300",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
         },
       });
     }
 
     // Search and filter enforcement cases
     if (url.pathname === "/cases") {
+      const accept = request.headers.get("Accept") || "";
+      if (accept.includes("text/html")) {
+        return new Response(renderWageTheftUI(), {
+          headers: {
+            "Content-Type": "text/html; charset=utf-8",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+          },
+        });
+      }
+
       const q = (url.searchParams.get("q") || "").trim();
       const agency = (url.searchParams.get("agency") || "").trim();
       const repeatOnly = url.searchParams.get("repeat") === "true";

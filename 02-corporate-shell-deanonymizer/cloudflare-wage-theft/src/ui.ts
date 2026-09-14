@@ -978,7 +978,7 @@ export function renderWageTheftUI(): string {
         '  - US DOL Wage & Hour Division Public Enforcement Database: https://enforcement.dol.gov',
         '  - Minnesota Judicial Branch Public Access (MCRO Case Search): https://publicaccess.courts.state.mn.us',
         '  - Minneapolis Civil Rights Labor Standards Findings: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards',
-        '  - Cross-Reference Landlord Shell Entity: https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=' + encodeURIComponent(c.trade_name || c.respondent_legal_name || '')
+        '  - Cross-Reference Landlord Shell Entity: https://mpls-rental-sync-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(c.trade_name || c.respondent_legal_name || '')
       ].join('\\n');
 
       navigator.clipboard.writeText(md).then(() => {
@@ -1175,6 +1175,12 @@ export function renderWageTheftUI(): string {
 
     async function executeSearch() {
       const q = document.getElementById('searchInput').value.trim();
+      try {
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', q ? '/?q=' + encodeURIComponent(q) : '/');
+        }
+      } catch (e) {}
+
       const grid = document.getElementById('casesGrid');
       const countEl = document.getElementById('searchResultsCount');
 
@@ -1285,7 +1291,7 @@ export function renderWageTheftUI(): string {
                 <button class="copy-md-btn" id="copy-btn-\${idx}" onclick="copyCaseAsMarkdown(\${idx})">
                   📋 Copy as Markdown (LLM)
                 </button>
-                <a href="https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=\${encodeURIComponent(c.trade_name || c.respondent_legal_name)}" target="_blank" class="link-btn">
+                <a href="https://mpls-rental-sync-worker.a-8c6.workers.dev/?q=\${encodeURIComponent(c.trade_name || c.respondent_legal_name)}" target="_blank" class="link-btn">
                   Inspect Landlord Links 🔍
                 </a>
               </div>
@@ -1434,6 +1440,13 @@ export function renderWageTheftUI(): string {
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlQ = urlParams.get('q');
+        if (urlQ) {
+          document.getElementById('searchInput').value = urlQ;
+        }
+      } catch (e) {}
       executeSearch();
       loadStats();
     });

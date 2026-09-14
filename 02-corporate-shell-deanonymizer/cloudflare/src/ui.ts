@@ -900,6 +900,12 @@ export function renderUI(): string {
       const q = document.getElementById('searchInput').value.trim();
       if (!q) return;
 
+      try {
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', '/?q=' + encodeURIComponent(q));
+        }
+      } catch (e) {}
+
       const grid = document.getElementById('resultsGrid');
       const stats = document.getElementById('searchStats');
       grid.innerHTML = '<div class="loading"><div class="spinner"></div>Searching live registry...</div>';
@@ -1348,8 +1354,15 @@ export function renderUI(): string {
       box.innerHTML = '<div class="chat-msg system">💬 Chat cleared. Model remains cached in your local browser memory.</div>';
     }
 
-    // Auto-run default search on load
+    // Auto-run search on load, reading ?q= parameter if present
     window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlQ = urlParams.get('q');
+        if (urlQ) {
+          document.getElementById('searchInput').value = urlQ;
+        }
+      } catch (e) {}
       executeSearch();
     });
 

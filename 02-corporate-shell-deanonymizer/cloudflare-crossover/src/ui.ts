@@ -597,9 +597,19 @@ export function renderCrossoverUI(): string {
     <div id="matrixTab" class="tab-pane active">
       <div class="search-section">
         <div class="search-row">
-          <input type="text" id="searchInput" class="search-input" placeholder="Search crossover matrix by landlord, management email, or address (e.g. Fitterer, Dominium, Kleinman)..." value="">
+          <input type="text" id="searchInput" class="search-input" placeholder="Search crossover matrix by landlord, management email, or address (e.g. Julius De Roma, Fitterer, Dominium)..." value="">
           <button class="search-btn" onclick="executeSearch()">Filter Matrix</button>
           <button class="search-btn" onclick="exportMatrixAsMarkdown()" style="background: #10b981;">📥 Export as .MD</button>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center;">
+          <span style="font-size: 0.8rem; color: var(--text-dim); margin-right: 4px;">Quick Filters:</span>
+          <button class="chip" onclick="quickFilter('')">All Syndicates</button>
+          <button class="chip" onclick="quickFilter('Julius De Roma')">Julius De Roma (Club Jäger)</button>
+          <button class="chip" onclick="quickFilter('Fitterer')">Fitterer / IPG Living</button>
+          <button class="chip" onclick="quickFilter('Dominium')">Dominium</button>
+          <button class="chip" onclick="quickFilter('Property Maintenance')">PMC Renovation</button>
+          <button class="chip" onclick="quickFilter('Timberland')">Timberland Partners</button>
+          <button class="chip" onclick="quickFilter('Kleinman')">Kleinman Realty</button>
         </div>
       </div>
 
@@ -819,7 +829,7 @@ export function renderCrossoverUI(): string {
         '  - US DOL Enforcement Database: https://enforcement.dol.gov',
         '  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us',
         '  - Minneapolis Civil Rights Labor Standards: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards',
-        '  - Landlord De-anonymizer File: https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=' + encodeURIComponent(s.search_slug || ''),
+        '  - Landlord De-anonymizer File: https://mpls-rental-sync-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(s.search_slug || ''),
         '  - Wage Theft Registry File: https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(s.search_slug || '')
       ].filter(Boolean).join('\\n');
 
@@ -887,7 +897,7 @@ export function renderCrossoverUI(): string {
         lines.push('  - US DOL Enforcement: https://enforcement.dol.gov');
         lines.push('  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us');
         lines.push('  - Minneapolis Civil Rights Labor Standards: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards');
-        lines.push('  - Landlord De-anonymizer: https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=' + encodeURIComponent(s.search_slug || ''));
+        lines.push('  - Landlord De-anonymizer: https://mpls-rental-sync-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(s.search_slug || ''));
         lines.push('  - Wage Theft Registry: https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(s.search_slug || ''));
         lines.push('');
       });
@@ -1016,8 +1026,19 @@ export function renderCrossoverUI(): string {
       box.innerHTML = '<div class="chat-msg system">💬 Chat cleared. Model remains cached in your local browser memory.</div>';
     }
 
+    function quickFilter(val) {
+      document.getElementById('searchInput').value = val;
+      executeSearch();
+    }
+
     async function executeSearch() {
       const q = document.getElementById('searchInput').value.trim();
+      try {
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', q ? '/?q=' + encodeURIComponent(q) : '/');
+        }
+      } catch (e) {}
+
       const container = document.getElementById('matrixContainer');
       container.innerHTML = '<div class="loading"><div class="spinner"></div>Analyzing dual housing and labor crossover...</div>';
 
@@ -1050,7 +1071,7 @@ export function renderCrossoverUI(): string {
                 </div>
 
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                  <a href="https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=\${encodeURIComponent(s.search_slug)}" target="_blank" class="cta-btn cta-housing">
+                  <a href="https://mpls-rental-sync-worker.a-8c6.workers.dev/?q=\${encodeURIComponent(s.search_slug)}" target="_blank" class="cta-btn cta-housing">
                     🏢 Properties (\${s.total_units} units) ↗
                   </a>
                   <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=\${encodeURIComponent(s.search_slug)}" target="_blank" class="cta-btn cta-labor">
@@ -1240,6 +1261,13 @@ export function renderCrossoverUI(): string {
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlQ = urlParams.get('q');
+        if (urlQ) {
+          document.getElementById('searchInput').value = urlQ;
+        }
+      } catch (e) {}
       executeSearch();
     });
 
