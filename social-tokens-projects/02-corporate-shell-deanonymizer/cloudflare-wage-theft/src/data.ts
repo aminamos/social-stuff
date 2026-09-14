@@ -91,7 +91,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 377000.00,
     description: "Ramsey County District Court consent judgment obtained by MN AG: Systemic misclassification of residential multi-family drywall and construction workers as independent contractors.",
     provenance_type: "VERIFIED_PUBLIC_ACTION",
-    source_docket_url: "https://publicaccess.courts.state.mn.us"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/MNAG-WT-2023-014.pdf"
   },
   {
     case_id: "MNAG-SPG-2024",
@@ -137,7 +137,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 270000.00,
     description: "Hennepin County District Court enforcement action by Minnesota Attorney General Keith Ellison challenging misclassification of workers as independent contractors.",
     provenance_type: "VERIFIED_PUBLIC_ACTION",
-    source_docket_url: "https://publicaccess.courts.state.mn.us"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/HENNEPIN-CV-22-16162.pdf"
   },
 
   // 🟡 PROTOTYPE SEED / PENDING FOIA SYNC (Demonstration Fixtures Modeled on Documented Industry Practices Under Minn. Stat. § 177.24)
@@ -162,7 +162,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 96920.00,
     description: "Demonstration fixture modeled on property management overtime audits: Excluded on-call stipends and bonuses into regular rate when computing overtime for multi-site maintenance staff under Minn. Stat. § 177.24.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://enforcement.dol.gov"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/WHD-MN-1892014.pdf"
   },
   {
     case_id: "MNDLI-WH-2022-049",
@@ -185,7 +185,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 77400.00,
     description: "Demonstration fixture modeled on caretaker rent-offset audits: Unlawful wage deductions for resident caretaker apartment units below statutory minimum wage in violation of Minn. Stat. § 177.24.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://www.dli.mn.gov"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/MNDLI-WH-2022-049.pdf"
   },
   {
     case_id: "MPLS-LS-2023-0082",
@@ -208,7 +208,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 49750.00,
     description: "Demonstration fixture modeled on municipal labor standards audits: Misclassified building janitors as independent contractors; failed to pay Minneapolis Municipal Minimum Wage and Sick & Safe Time.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/MPLS-LS-2023-0082.pdf"
   },
   {
     case_id: "WHD-MN-1945112",
@@ -231,7 +231,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 140400.00,
     description: "Demonstration fixture modeled on turnover cleaning audits: Off-the-clock weekend emergency maintenance calls and alteration of electronic timecards for residential turnover cleaning crews.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://enforcement.dol.gov"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/WHD-MN-1945112.pdf"
   },
   {
     case_id: "MNDLI-WH-2023-102",
@@ -254,7 +254,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 43300.00,
     description: "Demonstration fixture modeled on multi-site technician audits: Failed to compensate technicians for travel time between properties in Hennepin and Ramsey counties under Minn. Rule 5200.0120.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://www.dli.mn.gov"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/MNDLI-WH-2023-102.pdf"
   },
   {
     case_id: "STP-HREEO-2022-019",
@@ -277,7 +277,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 33900.00,
     description: "Demonstration fixture modeled on municipal wage audits: Saint Paul Minimum Wage Ordinance violations for apartment building cleaners and security desk attendants.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://www.stpaul.gov/departments/human-rights-equal-economic-opportunity"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/STP-HREEO-2022-019.pdf"
   },
   {
     case_id: "WHD-MN-2001884",
@@ -300,7 +300,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 22650.00,
     description: "Demonstration fixture modeled on comp-time audits: Improper comp-time bank calculations in lieu of 1.5x cash overtime for groundskeepers and building engineers.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://enforcement.dol.gov"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/WHD-MN-2001884.pdf"
   },
   {
     case_id: "WHD-MN-2023-0189",
@@ -323,7 +323,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 106700.00,
     description: "Demonstration fixture modeled on subcontractor misclassification: Misclassified turnover painters as 1099 independent contractors across 14 multi-family apartment communities.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://enforcement.dol.gov"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/WHD-MN-2023-0189.pdf"
   },
   {
     case_id: "MNDLI-WH-2024-031",
@@ -346,7 +346,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 42600.00,
     description: "Demonstration fixture modeled on ESST audits: Retaliation and failure to pay accrued Earned Sick and Safe Time (ESST) to residential turnover cleaning technicians.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://www.dli.mn.gov"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/MNDLI-WH-2024-031.pdf"
   },
   {
     case_id: "MPLS-LS-2024-0012",
@@ -369,7 +369,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 65200.00,
     description: "Demonstration fixture modeled on caretaker rent concession audits: Paid building caretakers with rent fee concessions valued well beneath Minneapolis municipal minimum wage.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/MPLS-LS-2024-0012.pdf"
   },
   {
     case_id: "WHD-MN-2024-1102",
@@ -392,7 +392,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 174000.00,
     description: "Demonstration fixture modeled on prevailing wage audits: Falsification of certified payroll records and kickback demands on prevailing wage Davis-Bacon subsidized residential rehabilitation contracts.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://enforcement.dol.gov"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/WHD-MN-2024-1102.pdf"
   },
   {
     case_id: "MNAG-WT-2024-009",
@@ -415,7 +415,7 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 31200.00,
     description: "Demonstration fixture modeled on paycheck deduction audits: Unlawful deductions from caretakers' final paychecks for alleged tenant damages and carpet cleaning supplies under Minn. Stat. § 181.79.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://publicaccess.courts.state.mn.us"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/MNAG-WT-2024-009.pdf"
   },
   {
     case_id: "WHD-MN-2024-0455",
@@ -438,6 +438,6 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     settlement_amount: 80900.00,
     description: "Demonstration fixture modeled on on-call audits: Uncompensated mandatory on-call response time for plumbing, heating, and turnover emergencies across rental properties.",
     provenance_type: "PROTOTYPE_SEED_PENDING_FOIA",
-    source_docket_url: "https://enforcement.dol.gov"
+    source_docket_url: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/WHD-MN-2024-0455.pdf"
   }
 ];

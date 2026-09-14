@@ -211,29 +211,33 @@ export default {
           "Workers Affected", "Repeat Violator", "Status", "Findings Date", "Description", "Data Provenance", "Docket URL"
         ];
 
+        // Every field is quoted: raw values like violation_type routinely
+        // contain commas ("CASE,FLSA"), which shifted columns and hid the
+        // real docket URL in an unnamed trailing column.
+        const csvCell = (v: unknown): string => `"${String(v ?? "").replace(/"/g, '""')}"`;
         let csv = headers.join(",") + "\n";
         for (const row of allCases.results as any[]) {
           const vals = [
-            row.case_id,
-            row.source_agency,
-            `"${(row.respondent_legal_name || "").replace(/"/g, '""')}"`,
-            `"${(row.trade_name || "").replace(/"/g, '""')}"`,
-            `"${(row.address || "").replace(/"/g, '""')}"`,
-            row.city,
-            row.state,
-            row.zip_code,
-            `"${(row.industry_description || "").replace(/"/g, '""')}"`,
-            row.violation_type,
-            row.back_wages_recovered,
-            row.civil_penalties_assessed,
-            row.settlement_amount,
-            row.workers_affected,
-            row.repeat_violator ? "YES" : "NO",
-            row.status,
-            row.findings_date,
-            `"${(row.description || "").replace(/"/g, '""')}"`,
-            row.provenance_type === 'VERIFIED_PUBLIC_ACTION' ? "VERIFIED_PUBLIC_ACTION" : "PROTOTYPE_SEED_PENDING_FOIA",
-            `"${(row.source_docket_url || "").replace(/"/g, '""')}"`
+            csvCell(row.case_id),
+            csvCell(row.source_agency),
+            csvCell(row.respondent_legal_name),
+            csvCell(row.trade_name),
+            csvCell(row.address),
+            csvCell(row.city),
+            csvCell(row.state),
+            csvCell(row.zip_code),
+            csvCell(row.industry_description),
+            csvCell(row.violation_type),
+            csvCell(row.back_wages_recovered),
+            csvCell(row.civil_penalties_assessed),
+            csvCell(row.settlement_amount),
+            csvCell(row.workers_affected),
+            csvCell(row.repeat_violator ? "YES" : "NO"),
+            csvCell(row.status),
+            csvCell(row.findings_date),
+            csvCell(row.description),
+            csvCell(row.provenance_type === 'VERIFIED_PUBLIC_ACTION' ? "VERIFIED_PUBLIC_ACTION" : "PROTOTYPE_SEED_PENDING_FOIA"),
+            csvCell(row.source_docket_url)
           ];
           csv += vals.join(",") + "\n";
         }
