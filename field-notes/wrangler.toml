@@ -1,0 +1,6 @@
+name = "field-notes-ai-earth"
+compatibility_date = "2024-09-01"
+
+# NOTE: placeholder. The original source for this worker has not been located
+# yet — see README.md. `snapshot/` holds the served-file capture.
+# Do NOT deploy from this directory until the real source is committed here.
