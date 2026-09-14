@@ -1,3 +1,5 @@
+import { renderUI } from "./ui";
+
 export interface Env {
   DB: D1Database;
   R2_BUCKET: R2Bucket;
@@ -25,6 +27,16 @@ export default {
 
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    // Interactive Web UI for Organizers, Tenants & Public
+    if (url.pathname === "/" || url.pathname === "") {
+      return new Response(renderUI(), {
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "public, max-age=300",
+        },
+      });
+    }
 
     // Trigger Minneapolis Sync
     if (url.pathname === "/sync") {
@@ -64,7 +76,7 @@ export default {
       });
     }
 
-    // Search across all cities
+    // Search across all cities with de-anonymization metrics and wage theft crossover
     if (url.pathname === "/search") {
       const q = (url.searchParams.get("q") || "").trim();
       if (!q) {
@@ -74,21 +86,49 @@ export default {
         });
       }
       const pattern = `%${q}%`;
-      const searchRes = await env.DB.prepare(`
-        SELECT apn, address, city, county, owner_name, applicant_name, applicant_email, units, tier, status
-        FROM rental_licenses
-        WHERE owner_name LIKE ?1
-           OR applicant_name LIKE ?1
-           OR applicant_email LIKE ?1
-           OR address LIKE ?1
-           OR apn LIKE ?1
-        ORDER BY units DESC
-        LIMIT 50
-      `).bind(pattern).all();
+      try {
+        const searchRes = await env.DB.prepare(`
+          SELECT 
+            r.apn, r.address, r.city, r.county, r.owner_name, r.applicant_name, r.applicant_email, 
+            r.units, r.tier, r.status,
+            (SELECT COUNT(*) FROM rental_licenses r2 WHERE r2.applicant_email = r.applicant_email AND r.applicant_email != '') as sister_properties_count,
+            (SELECT SUM(units) FROM rental_licenses r3 WHERE r3.applicant_email = r.applicant_email AND r.applicant_email != '') as total_syndicate_units,
+            (SELECT case_id || '::' || violation_type || '::' || back_wages_recovered || '::' || workers_affected 
+             FROM wage_theft_records w 
+             WHERE (w.trade_name != '' AND (
+                 instr(lower(r.owner_name), lower(w.trade_name)) > 0 
+                 OR instr(lower(r.applicant_name), lower(w.trade_name)) > 0 
+                 OR instr(lower(r.applicant_email), lower(w.trade_name)) > 0
+             ))
+             OR (w.respondent_legal_name != '' AND (
+                 instr(lower(r.owner_name), lower(w.respondent_legal_name)) > 0 
+                 OR instr(lower(r.applicant_name), lower(w.respondent_legal_name)) > 0
+             ))
+             OR (lower(w.trade_name) LIKE '%fitterer%' AND (
+                 instr(lower(r.owner_name), 'fitterer') > 0 
+                 OR instr(lower(r.applicant_name), 'fitterer') > 0 
+                 OR instr(lower(r.applicant_email), 'ipgliving') > 0
+             ))
+             LIMIT 1) as wage_theft_match
+          FROM rental_licenses r
+          WHERE r.owner_name LIKE ?1
+             OR r.applicant_name LIKE ?1
+             OR r.applicant_email LIKE ?1
+             OR r.address LIKE ?1
+             OR r.apn LIKE ?1
+          ORDER BY r.units DESC
+          LIMIT 50
+        `).bind(pattern).all();
 
-      return new Response(JSON.stringify({ query: q, results: searchRes.results }, null, 2), {
-        headers: { "Content-Type": "application/json" },
-      });
+        return new Response(JSON.stringify({ query: q, results: searchRes.results }, null, 2), {
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err: any) {
+        return new Response(JSON.stringify({ error: err.message, stack: err.stack }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Search wage theft and labor enforcement records
