@@ -157,19 +157,38 @@ Output:
 +-----------------------------------------------------------------------------+
 ```
 
-### 3. Scan All Portfolios Across the City
-Cluster and rank corporate landlord networks:
+### 4. Citywide Registry Sync & Ranking (All 23,303 Properties)
+Sync the complete public database of every active rental property in Minneapolis to local SQLite in ~11 seconds:
 ```bash
-python -m src.cli clusters
+python -m src.cli sync-all-licenses
 ```
 
-### 4. Generate a Tactical Tenant Union Action Dossier
-Generate a comprehensive markdown dossier for organizers, city council testimony, or press releases:
+Rank the largest multi-building corporate landlord syndicates in Minneapolis by unit count:
 ```bash
-python -m src.cli dossier --address "1420 11th Ave S" --output strike_dossier.md
+python -m src.cli top-syndicates --limit 10
 ```
 
-### 5. Interactive Web Dashboard
+### 5. Cloudflare R2 & D1 Pipeline (Zero-Cost Serverless Housing Registry)
+Export the entire active rental registry for Cloudflare R2 object storage and Cloudflare D1 serverless SQL:
+
+```bash
+# 1. Export compressed JSON snapshot for Cloudflare R2 (1.64 MB)
+python -m src.cli export-r2 --output data/minneapolis_rental_licenses_snapshot.json.gz
+
+# 2. Generate Cloudflare D1 batch SQL seed script
+python -m src.cli generate-d1-seed --output data/d1_seed.sql
+
+# 3. Deploy seed to remote Cloudflare D1 database
+npx wrangler d1 execute mpls-housing-db --file=data/d1_seed.sql --remote
+```
+
+### 6. Automated Cloudflare Edge Worker
+A turnkey Cloudflare Worker is provided in [`cloudflare/`](file:///E:/Development/social-tokens-projects/02-corporate-shell-deanonymizer/cloudflare):
+- **Polite Rate Limiting**: Batches in chunks of 2,000 records with a 350ms delay between calls, completing the full crawl in ~5 seconds without stressing municipal servers.
+- **Daily Cron Schedule**: Runs at 4:00 AM UTC (`0 4 * * *`), updates D1, and archives a compressed snapshot to R2.
+- **Costs**: **$0.00 / month** (1.64 MB R2 storage vs 10 GB free quota; 23k write rows vs 100k free/day quota).
+
+### 7. Interactive Web Dashboard
 Open `web/index.html` in any web browser to explore the interactive canvas force-directed graph, click through nodes, and copy action dossiers directly.
 
 ---

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import time
 import json
 import argparse
 from pathlib import Path
@@ -244,6 +245,102 @@ def cmd_live_sos(args):
     console.print(table)
 
 
+def cmd_sync_all(args):
+    from .engine.local_store import LocalRentalStore
+    store = LocalRentalStore()
+    console.print(f"[bold cyan]Connecting to City of Minneapolis Open Data to sync all active rental licenses...[/]")
+    t0 = time.time()
+    count = store.sync_all_from_api(live_client=None)
+    duration = time.time() - t0
+    console.print(
+        Panel(
+            f"[bold green]Successfully synced {count:,} active rental licenses![/]\n"
+            f"Stored in local SQLite database: [dim]{store.db_path}[/]\n"
+            f"Time elapsed: [bold yellow]{duration:.2f} seconds[/]",
+            title="[bold green]Citywide Registry Sync Complete[/]",
+            border_style="green",
+        )
+    )
+
+
+def cmd_top_syndicates(args):
+    from .engine.local_store import LocalRentalStore
+    store = LocalRentalStore()
+    if store.count() == 0:
+        console.print("[yellow]Local database empty. Syncing first...[/]")
+        store.sync_all_from_api(live_client=None)
+
+    syndicates = store.get_top_syndicates_by_email(limit=args.limit)
+    table = Table(
+        title=f"Top {args.limit} Largest Multi-Building Landlord Syndicates in Minneapolis",
+        show_header=True,
+        header_style="bold magenta",
+    )
+    table.add_column("Management / Applicant Email", style="bold cyan")
+    table.add_column("Key Contact", style="white")
+    table.add_column("Buildings", justify="right", style="yellow")
+    table.add_column("Shell LLCs", justify="right", style="dim")
+    table.add_column("Total Units", justify="right", style="bold green")
+    table.add_column("Tier 3 (Worst)", justify="right", style="bold red")
+
+    for s in syndicates:
+        table.add_row(
+            s["applicant_email"],
+            s["applicant_name"] or "N/A",
+            str(s["property_count"]),
+            str(s["shell_count"]),
+            f"{s['total_units']:,}",
+            str(s["tier3_count"]),
+        )
+    console.print(table)
+
+
+def cmd_export_r2(args):
+    from .engine.local_store import LocalRentalStore
+    from .engine.cloudflare_sync import export_r2_snapshot
+    store = LocalRentalStore()
+    if store.count() == 0:
+        console.print("[yellow]Local database empty. Syncing first...[/]")
+        store.sync_all_from_api(live_client=None)
+
+    out_path = Path(args.output) if args.output else Path("data/minneapolis_rental_licenses_snapshot.json.gz")
+    export_r2_snapshot(store, out_path)
+    size_mb = out_path.stat().st_size / (1024 * 1024)
+    console.print(
+        Panel(
+            f"[bold green]Compressed R2 Snapshot Created:[/] {out_path.resolve()}\n"
+            f"Total Records: [bold yellow]{store.count():,}[/]\n"
+            f"Compressed Gzip Size: [bold cyan]{size_mb:.2f} MB[/] (Free within Cloudflare R2 10GB quota)\n"
+            f"S3/R2 Path: [dim]r2://mpls-rental-registry/snapshots/{out_path.name}[/]",
+            title="[bold green]Cloudflare R2 Snapshot Ready[/]",
+            border_style="green",
+        )
+    )
+
+
+def cmd_generate_d1_seed(args):
+    from .engine.local_store import LocalRentalStore
+    from .engine.cloudflare_sync import generate_d1_seed_sql
+    store = LocalRentalStore()
+    if store.count() == 0:
+        console.print("[yellow]Local database empty. Syncing first...[/]")
+        store.sync_all_from_api(live_client=None)
+
+    out_path = Path(args.output) if args.output else Path("data/d1_seed.sql")
+    generate_d1_seed_sql(store, out_path)
+    size_mb = out_path.stat().st_size / (1024 * 1024)
+    console.print(
+        Panel(
+            f"[bold green]Cloudflare D1 SQL Seed Script Generated:[/] {out_path.resolve()}\n"
+            f"Total Statements: [bold yellow]{store.count():,} rows[/]\n"
+            f"SQL File Size: [bold cyan]{size_mb:.2f} MB[/]\n"
+            f"Deploy Command: [bold white]npx wrangler d1 execute mpls-housing-db --file={out_path.name} --remote[/]",
+            title="[bold green]Cloudflare D1 Seed Script Ready[/]",
+            border_style="green",
+        )
+    )
+
+
 def cmd_export_graph(args):
     fixtures_dir = Path(args.fixtures) if args.fixtures else get_default_fixtures_dir()
     pipeline = DeAnonymizationPipeline()
@@ -299,6 +396,25 @@ def main():
     p_sos = subparsers.add_parser("live-sos", help="Search Secretary of State corporate registration portal")
     p_sos.add_argument("--name", "-n", required=True, help="Legal business entity name")
     p_sos.set_defaults(func=cmd_live_sos)
+
+    # sync-all-licenses
+    p_sync = subparsers.add_parser("sync-all-licenses", help="Bulk-download all 23,000+ active rental licenses in Minneapolis to local SQLite")
+    p_sync.set_defaults(func=cmd_sync_all)
+
+    # top-syndicates
+    p_top = subparsers.add_parser("top-syndicates", help="Rank largest multi-building corporate syndicates in Minneapolis")
+    p_top.add_argument("--limit", "-l", type=int, default=20, help="Number of syndicates to display")
+    p_top.set_defaults(func=cmd_top_syndicates)
+
+    # export-r2
+    p_r2 = subparsers.add_parser("export-r2", help="Export compressed JSON snapshot for Cloudflare R2")
+    p_r2.add_argument("--output", "-o", help="Output .json.gz file path")
+    p_r2.set_defaults(func=cmd_export_r2)
+
+    # generate-d1-seed
+    p_d1 = subparsers.add_parser("generate-d1-seed", help="Generate SQL seed script for Cloudflare D1")
+    p_d1.add_argument("--output", "-o", help="Output .sql file path")
+    p_d1.set_defaults(func=cmd_generate_d1_seed)
 
     # export-graph
     p_exp = subparsers.add_parser("export-graph", help="Export ownership graph to Cytoscape JSON")
