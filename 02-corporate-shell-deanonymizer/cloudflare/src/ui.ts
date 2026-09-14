@@ -4,7 +4,7 @@ export function renderUI(): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Twin Cities Landlord De-anonymizer | Tenant Union Intelligence</title>
+  <title>Corporate Shell Entity & Slumlord De-anonymizer | Tenant Union Intelligence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -197,7 +197,7 @@ export function renderUI(): string {
     /* Cards Grid */
     .cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
       gap: 18px;
       margin-top: 16px;
     }
@@ -552,6 +552,76 @@ export function renderUI(): string {
     }
     a { color: #60a5fa; text-decoration: none; }
     a:hover { text-decoration: underline; }
+
+    /* ---- Mobile layout ---- */
+    @media (max-width: 720px) {
+      header { padding: 24px 0 18px 0; }
+      h1 { font-size: 1.5rem; line-height: 1.2; }
+      .subtitle { font-size: 0.92rem; margin-bottom: 16px; }
+      .container { padding: 0 14px; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 18px 0 22px 0; }
+      .stat-card { padding: 12px 8px; }
+      .stat-val { font-size: 1.2rem; }
+      .stat-label { font-size: 0.68rem; }
+
+      /* Tab nav: sticky one-line snap scroller with a visible scrollbar so the
+         remaining tabs are obviously reachable, and the nav stays in view. */
+      .nav-tabs, .tabs-bar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--bg);
+        gap: 6px;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: #475569 transparent;
+      }
+      .nav-tabs::-webkit-scrollbar, .tabs-bar::-webkit-scrollbar { height: 6px; }
+      .nav-tabs::-webkit-scrollbar-thumb, .tabs-bar::-webkit-scrollbar-thumb { background: #475569; border-radius: 9999px; }
+      .nav-tabs::-webkit-scrollbar-track, .tabs-bar::-webkit-scrollbar-track { background: transparent; }
+      .tab-btn { scroll-snap-align: start; padding: 8px 12px; font-size: 0.82rem; }
+      .tab-btn[style*="margin-left: auto"] { margin-left: 0 !important; }
+
+      /* Scroll-affordance fade: a soft edge signals tabs continue off-screen */
+      .nav-scroll { position: relative; }
+      .nav-scroll::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 12px;
+        width: 34px;
+        pointer-events: none;
+        background: linear-gradient(90deg, rgba(9, 13, 22, 0), var(--bg) 88%);
+        transition: opacity 0.2s ease;
+      }
+      .nav-scroll.at-end::after { opacity: 0; }
+
+      /* Search controls stack instead of overflowing the viewport */
+      .search-box { padding: 16px; border-radius: 12px; margin-bottom: 16px; }
+      .search-input-group, .search-row { flex-wrap: wrap; }
+      .search-input { flex: 1 1 100%; min-width: 0; font-size: 0.95rem; padding: 12px 14px; }
+      .search-btn { flex: 1 1 auto; padding: 11px 14px; font-size: 0.9rem; }
+      .chips-group { gap: 6px; }
+      .chip { font-size: 0.75rem; padding: 5px 10px; }
+
+      /* Single-column cards; removes min-width based overflow */
+      .cards-grid, .results-grid, .matrix-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+      .landlord-card, .case-card { padding: 16px; }
+      .card-action-row, .ai-input-row, .ai-controls-row { flex-wrap: wrap; }
+      .ai-input { flex: 1 1 100%; min-width: 0; }
+      .ai-model-select { width: 100%; }
+      .ai-chat-box { height: 340px; }
+
+      /* Offenders table: drop secondary columns so it fits without side-scroll */
+      #offendersTab .data-table th:nth-child(3), #offendersTab .data-table td:nth-child(3),
+      #offendersTab .data-table th:nth-child(5), #offendersTab .data-table td:nth-child(5),
+      #offendersTab .data-table th:nth-child(8), #offendersTab .data-table td:nth-child(8) { display: none; }
+      .data-table th, .data-table td { padding: 10px 8px; font-size: 0.78rem; }
+    }
   </style>
   <script type="module">
     import * as webllm from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm";
@@ -566,31 +636,31 @@ export function renderUI(): string {
         <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#34d399;"></span>
         Social Tokens Project #2 • Live Civic Intelligence
       </div>
-      <h1>Twin Cities Landlord De-anonymizer</h1>
+      <h1>Corporate Shell Entity & Slumlord De-anonymizer</h1>
       <p class="subtitle">
-        Unmasking corporate shell LLCs, hidden sister buildings, habitability citations, and wage theft enforcement across Minneapolis, Saint Paul, and Hennepin & Ramsey counties.
+        Unmasking corporate shell LLCs, hidden sister buildings, and habitability records across every municipal rental registry we ingest.
       </p>
 
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-val">35,978</div>
+          <div class="stat-val" id="statLicenses">—</div>
           <div class="stat-label">Rental Licenses</div>
         </div>
         <div class="stat-card">
-          <div class="stat-val">172,974</div>
+          <div class="stat-val" id="statUnits">—</div>
           <div class="stat-label">Tenant Units</div>
         </div>
         <div class="stat-card">
-          <div class="stat-val">66</div>
+          <div class="stat-val" id="statJurisdictions">—</div>
           <div class="stat-label">Cities / Municipalities</div>
         </div>
         <div class="stat-card">
-          <div class="stat-val">3,919</div>
+          <div class="stat-val" id="statMultiFamily">—</div>
           <div class="stat-label">Multi-Family Parcels</div>
         </div>
         <div class="stat-card">
-          <div class="stat-val" style="color: #38bdf8;">2,140+</div>
-          <div class="stat-label">Unmasked Shell LLCs</div>
+          <div class="stat-val" id="statEntities" style="color: #38bdf8;">—</div>
+          <div class="stat-label">Corporate Entity Owners</div>
         </div>
       </div>
     </div>
@@ -598,11 +668,12 @@ export function renderUI(): string {
 
   <main class="container">
     <!-- Navigation Tabs -->
+    <div class="nav-scroll">
     <div class="nav-tabs">
       <button class="tab-btn active" onclick="switchTab('search')">🔍 Property Search & De-anonymizer</button>
-      <button class="tab-btn" onclick="switchTab('syndicates')">🏆 Top Corporate Syndicates</button>
+      <button class="tab-btn" onclick="switchTab('syndicates')">🏆 Multi-Property Networks</button>
       <button class="tab-btn" onclick="switchTab('slumlords')">⚠️ Tier 3 Habitability Violators</button>
-      <button class="tab-btn" onclick="switchTab('cities')">🏙️ Municipalities (66 Cities)</button>
+      <button class="tab-btn" onclick="switchTab('cities')">🏙️ Municipalities</button>
       <button class="tab-btn" onclick="switchTab('api')">⚡ REST API</button>
       <button class="tab-btn" onclick="switchTab('ai')" style="color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4);">🤖 In-Browser AI Assistant</button>
       <a href="https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev" target="_blank" class="tab-btn" style="margin-left: auto; color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.4); text-decoration: none;">
@@ -611,6 +682,7 @@ export function renderUI(): string {
       <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev" target="_blank" class="tab-btn" style="color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); text-decoration: none;">
         ⚖️ Wage Theft Registry ↗
       </a>
+    </div>
     </div>
 
     <!-- TAB 1: Search & De-anonymizer -->
@@ -648,16 +720,16 @@ export function renderUI(): string {
 
     <!-- TAB 2: Top Syndicates -->
     <div id="tab-syndicates" style="display: none;">
-      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Largest Multi-Building Landlord Networks</h2>
+      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Largest Multi-Property Landlord Networks</h2>
       <p style="color: var(--text-dim); margin-bottom: 16px;">
-        Ranked by unmasked residential unit footprint across disparate paper LLCs consolidated by common management emails.
+        Parcels grouped by a shared link key: a management email (links across cities) or a normalized entity/contact name (links within a city). The link type is shown on each row.
       </p>
       <div class="data-table-container">
         <table>
           <thead>
             <tr>
-              <th>Management / Applicant Email</th>
-              <th>Key Contact Name</th>
+              <th>Linked By</th>
+              <th>Entity / Contact</th>
               <th style="text-align: right;">Sister Buildings</th>
               <th style="text-align: right;">Total Units</th>
               <th>Network Status</th>
@@ -683,9 +755,9 @@ export function renderUI(): string {
 
     <!-- TAB 4: Cities Coverage -->
     <div id="tab-cities" style="display: none;">
-      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">All 66 Municipalities Across Hennepin & Ramsey Counties</h2>
+      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Every Municipality in the Registry</h2>
       <p style="color: var(--text-dim); margin-bottom: 16px;">
-        Unified municipal coverage comprising 448,087 Hennepin parcels and 167,853 Ramsey parcels.
+        One unified registry. Municipal coverage grows as feeds are added; source platform and dataset are recorded on every record.
       </p>
       <div class="data-table-container">
         <table>
@@ -784,7 +856,7 @@ export function renderUI(): string {
 
         <div id="aiChatBox" class="ai-chat-box">
           <div class="chat-msg system">
-            💬 Welcome to the Twin Cities Housing Intelligence AI. Ask anything about landlords, shell LLCs, or habitability tiers. Model executes locally on your hardware.
+            💬 Welcome to the Housing Intelligence AI. Ask anything about landlords, shell LLCs, or habitability records across the registry. Model executes locally on your hardware.
           </div>
         </div>
 
@@ -792,12 +864,12 @@ export function renderUI(): string {
           <span style="font-size: 0.75rem; color: var(--text-dim); align-self: center;">Suggested:</span>
           <button class="chip" onclick="askSuggestedQuestion('Who is Brian Fitterer and which properties does IPG Living own?')">Brian Fitterer / IPG</button>
           <button class="chip" onclick="askSuggestedQuestion('What does a Tier 3 housing habitability classification mean in Minneapolis?')">Tier 3 Explained</button>
-          <button class="chip" onclick="askSuggestedQuestion('How many apartment units does Dominium control across the Twin Cities?')">Dominium Portfolio</button>
+          <button class="chip" onclick="askSuggestedQuestion('Which landlords appear in more than one city in the registry?')">Dominium Portfolio</button>
           <button class="chip" onclick="askSuggestedQuestion('Which landlords have confirmed wage theft enforcement records on file?')">Wage Theft Overlap</button>
         </div>
 
         <div class="ai-input-row">
-          <input type="text" id="aiPromptInput" class="ai-input" placeholder="Ask a question about Twin Cities landlords, sister buildings, or tenant rights..." onkeypress="if(event.key==='Enter') sendAiMessage()">
+          <input type="text" id="aiPromptInput" class="ai-input" placeholder="Ask a question about landlords, sister buildings, or tenant rights..." onkeypress="if(event.key==='Enter') sendAiMessage()">
           <button class="search-btn" id="aiSendBtn" onclick="sendAiMessage()">Ask AI</button>
           <button class="copy-md-btn" onclick="clearAiChat()">Clear</button>
         </div>
@@ -815,7 +887,17 @@ export function renderUI(): string {
   <script>
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+      // Works from a click (window.event) and from code, where there is none.
+      const evt = window.event;
+      const target = (evt && evt.target && evt.target.classList && evt.target.classList.contains('tab-btn'))
+        ? evt.target
+        : document.querySelector('.tab-btn[onclick*="' + tabId + '"]');
+      if (target) {
+        target.classList.add('active');
+        if (target.scrollIntoView) {
+          target.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+        }
+      }
 
       const tabs = ['search', 'syndicates', 'slumlords', 'wagetheft', 'cities', 'api', 'ai'];
       tabs.forEach(t => {
@@ -884,6 +966,13 @@ export function renderUI(): string {
           badgeClass: 'badge-transparent',
           title: 'DIRECT / NON-ANONYMOUS (PUBLIC/CIVIC)',
           desc: \`Direct public housing authority or civic institution. Ownership is transparent and not masked behind shell companies.\`,
+          isAnon: false
+        };
+      } else if (!owner) {
+        return {
+          badgeClass: 'badge-syndicate',
+          title: 'OWNERSHIP NOT PUBLISHED',
+          desc: \`This jurisdiction does not publish an owner of record for this parcel\${applicant ? ' (registered contact: ' + applicant + ')' : ''}. Ownership is unknown here, not absent.\`,
           isAnon: false
         };
       } else {
@@ -958,7 +1047,7 @@ export function renderUI(): string {
             <div class="landlord-card">
               <div class="card-top">
                 <div class="card-header-tags">
-                  <span class="city-badge">\${item.city || 'Twin Cities'}, \${item.county || 'MN'}</span>
+                  <span class="city-badge">\${item.city || 'Unknown City'}, \${item.county || 'MN'}</span>
                   <span class="units-tag">\${item.units || 1} \${(item.units || 1) === 1 ? 'Unit' : 'Units'}</span>
                 </div>
 
@@ -1000,7 +1089,7 @@ export function renderUI(): string {
 
                 <div class="detail-row">
                   <div class="detail-key">Habitability:</div>
-                  <div class="detail-val">\${item.tier || 'Tier 1'} (\${item.status || 'Active'})</div>
+                  <div class="detail-val">\${item.tier || 'Not published'} (\${item.status || 'Active'})</div>
                 </div>
 
                 \${wageTheftHTML}
@@ -1050,15 +1139,21 @@ export function renderUI(): string {
         const data = await resp.json();
         const top = data.top_syndicates || [];
 
-        tbody.innerHTML = top.map(s => \`
+        tbody.innerHTML = top.map(s => {
+          const kind = (s.link_key || '').split(':')[0];
+          const label = s.sample_owner || s.sample_contact || (s.link_key || '');
+          const contact = s.sample_email || s.sample_contact || '—';
+          const states = s.state_count > 1 ? s.state_count + ' states' : (s.sample_city || '');
+          return \`
           <tr>
-            <td style="font-family: 'JetBrains Mono', monospace; color: #38bdf8; font-weight: 600;">\${s.applicant_email}</td>
-            <td><strong>\${s.applicant_name || 'N/A'}</strong></td>
-            <td style="text-align: right; font-weight: 700; color: #fbbf24;">\${s.props} Buildings</td>
+            <td><span class="city-badge">\${kind}</span> <span style="font-size:0.75rem; color: var(--text-dim);">\${states}</span></td>
+            <td><strong>\${label}</strong><br><span style="font-size:0.75rem; color: var(--text-dim); font-family:'JetBrains Mono',monospace;">\${contact}</span></td>
+            <td style="text-align: right; font-weight: 700; color: #fbbf24;">\${s.props} \${s.props === 1 ? 'Property' : 'Properties'}</td>
             <td style="text-align: right; font-weight: 800; color: #34d399;">\${(s.total_units || 0).toLocaleString()} Units</td>
-            <td><span class="deanonymized-badge badge-deanon">UNMASKED MULTI-LLC NETWORK</span></td>
+            <td><span class="deanonymized-badge badge-deanon">MULTI-PROPERTY NETWORK</span></td>
           </tr>
-        \`).join('');
+        \`;
+        }).join('');
       } catch (e) {
         tbody.innerHTML = \`<tr><td colspan="5" style="color: red;">Error: \${e.message}</td></tr>\`;
       }
@@ -1068,12 +1163,12 @@ export function renderUI(): string {
       const grid = document.getElementById('slumlordsGrid');
       grid.innerHTML = '<div class="loading"><div class="spinner"></div>Loading chronic violators...</div>';
       try {
-        const resp = await fetch('/search?q=Tier%203');
+        const resp = await fetch('/search?severity=C');
         const data = await resp.json();
         const results = (data.results || []).slice(0, 18);
 
         if (results.length === 0) {
-          grid.innerHTML = '<div style="color: var(--text-dim); padding: 20px;">No Tier 3 records found.</div>';
+          grid.innerHTML = '<div style="color: var(--text-dim); padding: 20px;">No Class C / Tier 3 records found.</div>';
           return;
         }
 
@@ -1081,16 +1176,16 @@ export function renderUI(): string {
           <div class="landlord-card" style="border-color: #ef4444;">
             <div class="card-top">
               <div class="card-header-tags">
-                <span class="city-badge">\${item.city}, \${item.county}</span>
+                <span class="city-badge">\${item.city}, \${item.county}, \${item.state}</span>
                 <span class="units-tag" style="color: #ef4444;">\${item.units} Units</span>
               </div>
               <div class="property-address">\${item.address}</div>
-              <div><span class="deanonymized-badge badge-tier3">⚠️ TIER 3 CHRONIC SLUMLORD</span></div>
+              <div><span class="deanonymized-badge badge-tier3">⚠️ \${(item.tier || 'CLASS C').toUpperCase()} CHRONIC SLUMLORD</span></div>
               <div class="explanation-box" style="border-color: #ef4444;">
-                <strong>Habitability Severity:</strong> Under mandatory municipal quarterly monitoring due to chronic health, safety, and tenant code violations.
+                <strong>Habitability Severity:</strong> Class C / Tier 3 is the worst published band: immediately hazardous conditions or chronic non-compliance under mandatory monitoring.
               </div>
-              <div class="detail-row"><div class="detail-key">Paper Shell:</div><div class="detail-val" style="color:#60a5fa;">\${item.owner_name}</div></div>
-              <div class="detail-row"><div class="detail-key">Contact:</div><div class="detail-val">\${item.applicant_name} (\${item.applicant_email || 'No email'})</div></div>
+              <div class="detail-row"><div class="detail-key">Paper Shell:</div><div class="detail-val" style="color:#60a5fa;">\${item.owner_name || 'Not published'}</div></div>
+              <div class="detail-row"><div class="detail-key">Contact:</div><div class="detail-val">\${item.applicant_name || '—'} (\${item.applicant_email || 'No email'})</div></div>
             </div>
             <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--card-border); font-size: 0.8rem; color: var(--text-dim);">
               APN: \${item.apn}
@@ -1100,6 +1195,21 @@ export function renderUI(): string {
       } catch (e) {
         grid.innerHTML = \`<div style="color: red; padding: 20px;">Error: \${e.message}</div>\`;
       }
+    }
+
+    async function loadHeaderStats() {
+      try {
+        const resp = await fetch('/stats');
+        const data = await resp.json();
+        const s = data.stats || {};
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+        const n = (v) => (v == null ? '—' : Number(v).toLocaleString());
+        set('statLicenses', n(s.total));
+        set('statUnits', n(s.units_total));
+        set('statJurisdictions', n(s.jurisdictions));
+        set('statMultiFamily', n(s.multifamily_parcels));
+        set('statEntities', n(s.entity_owners));
+      } catch (e) {}
     }
 
     async function loadCities() {
@@ -1140,11 +1250,11 @@ export function renderUI(): string {
       }
 
       const md = [
-        '### Property Dossier: ' + (item.address || 'Unknown Address') + ', ' + (item.city || 'Twin Cities') + ', ' + (item.county || 'MN'),
+        '### Property Dossier: ' + (item.address || 'Unknown Address') + ', ' + (item.city || 'Unknown City') + ', ' + (item.county || 'MN'),
         '- **Housing Data Provenance**: 🟢 VERIFIED MUNICIPAL GIS RECORD (Minneapolis Open Data / Hennepin County Assessor)',
         '- **APN / Parcel ID**: \`' + (item.apn || 'N/A') + '\`',
         '- **Units**: ' + (item.units || 1),
-        '- **Habitability Tier**: ' + (item.tier || 'Tier 1') + ' (' + (item.status || 'Active') + ')' + (isTier3 ? ' ⚠️ CHRONIC SLUMLORD LIST' : ''),
+        '- **Habitability Tier**: ' + (item.tier || 'Not published') + ' (' + (item.status || 'Active') + ')' + (isTier3 ? ' ⚠️ CHRONIC SLUMLORD LIST' : ''),
         '- **Paper Shell Owner**: ' + (item.owner_name || 'N/A'),
         '- **Management Contact**: ' + (item.applicant_name || 'N/A'),
         '- **Management Email**: ' + (item.applicant_email || 'N/A'),
@@ -1181,7 +1291,7 @@ export function renderUI(): string {
       }
       const q = document.getElementById('searchInput').value.trim() || 'all';
       let lines = [
-        '# Twin Cities Rental Property Investigation Dossier',
+        '# Rental Property Investigation Dossier',
         '**Query**: ' + q,
         '**Generated**: ' + new Date().toISOString(),
         '**Source**: https://mpls-rental-sync-worker.a-8c6.workers.dev',
@@ -1205,11 +1315,11 @@ export function renderUI(): string {
           wageTheftText = 'Case ' + parts[0] + ' (' + parts[1] + '): $' + parseFloat(parts[2] || 0).toLocaleString() + ' recovered for ' + parts[3] + ' workers [' + provTag + ']';
         }
 
-        lines.push('## ' + (idx + 1) + '. ' + (item.address || 'Unknown Address') + ', ' + (item.city || 'Twin Cities') + ', ' + (item.county || 'MN'));
+        lines.push('## ' + (idx + 1) + '. ' + (item.address || 'Unknown Address') + ', ' + (item.city || 'Unknown City') + ', ' + (item.county || 'MN'));
         lines.push('- **Housing Data Provenance**: 🟢 VERIFIED MUNICIPAL GIS RECORD');
         lines.push('- **APN / PIN**: \`' + (item.apn || 'N/A') + '\`');
         lines.push('- **Units**: ' + (item.units || 1));
-        lines.push('- **Habitability Tier**: ' + (item.tier || 'Tier 1') + ' (' + (item.status || 'Active') + ')' + (isTier3 ? ' [TIER 3 SLUMLORD]' : ''));
+        lines.push('- **Habitability Tier**: ' + (item.tier || 'Not published') + ' (' + (item.status || 'Active') + ')' + (isTier3 ? ' [TIER 3 SLUMLORD]' : ''));
         lines.push('- **Paper Owner LLC**: ' + (item.owner_name || 'N/A'));
         lines.push('- **Management / Agent**: ' + (item.applicant_name || 'N/A'));
         lines.push('- **Contact Email**: ' + (item.applicant_email || 'N/A'));
@@ -1235,15 +1345,15 @@ export function renderUI(): string {
       const check = document.getElementById('aiGroundingCheck');
       if (!check || !check.checked) return '';
 
-      let text = 'CURRENT VERIFIED RECORDS LOADED IN REGISTRY:\n';
+      let text = 'CURRENT VERIFIED RECORDS LOADED IN REGISTRY:\\n';
       const items = (currentSearchResults || []).slice(0, 15);
       if (items.length === 0) {
-        text += '- Note: No specific search query loaded yet. Twin Cities registry covers 35,978 rental licenses and 172,974 units across Hennepin & Ramsey counties.\n';
+        text += '- Note: No specific search query loaded yet. The registry spans every jurisdiction listed at /cities.\\n';
       } else {
         items.forEach((item, idx) => {
-          text += (idx + 1) + '. Address: ' + (item.address || 'N/A') + ', ' + (item.city || 'Twin Cities') + ' | APN: ' + (item.apn || 'N/A') + ' | Units: ' + (item.units || 1) + ' | Tier: ' + (item.tier || 'Tier 1') + ' | Owner Shell: ' + (item.owner_name || 'N/A') + ' | Contact: ' + (item.applicant_name || 'N/A') + ' (' + (item.applicant_email || '') + ') | Sister Properties: ' + (item.sister_properties_count || 1) + ' (' + (item.total_syndicate_units || 'N/A') + ' units)';
+          text += (idx + 1) + '. Address: ' + (item.address || 'N/A') + ', ' + (item.city || 'Unknown City') + ' | APN: ' + (item.apn || 'N/A') + ' | Units: ' + (item.units || 1) + ' | Tier: ' + (item.tier || 'Not published') + ' | Owner Shell: ' + (item.owner_name || 'N/A') + ' | Contact: ' + (item.applicant_name || 'N/A') + ' (' + (item.applicant_email || '') + ') | Sister Properties: ' + (item.sister_properties_count || 1) + ' (' + (item.total_syndicate_units || 'N/A') + ' units)';
           if (item.wage_theft_match) text += ' | Labor Record: ' + item.wage_theft_match;
-          text += '\n';
+          text += '\\n';
         });
       }
       return text;
@@ -1307,7 +1417,7 @@ export function renderUI(): string {
       }
 
       const contextData = getGroundedContext();
-      const systemPrompt = "You are a local civic housing and labor rights intelligence assistant for the Twin Cities (Minneapolis, St. Paul, Hennepin & Ramsey Counties). You run 100% locally and privately in the user's browser via WebGPU with ZERO server-side data collection and ZERO cloud datacenter electricity waste. Your answers are strictly grounded in public records (rental licenses, APNs, shell owners, Tier 3 inspection grades, wage theft judgments). If a property or entity is in the context records, cite its exact numbers, APN, tier, and sister buildings. If not found in the loaded context, give general legal context under Minnesota tenant and labor law (e.g. Minn. Stat. § 504B, Minneapolis Code of Ordinances Title 12). Keep responses concise, objective, and clear.\n\n" + contextData;
+      const systemPrompt = "You are a civic housing and labor rights intelligence assistant for a multi-jurisdiction rental registry. You run 100% locally and privately in the user's browser via WebGPU with ZERO server-side data collection and ZERO cloud datacenter electricity waste. Your answers are strictly grounded in public records (rental licenses, APNs, shell owners, Tier 3 inspection grades, wage theft judgments). If a property or entity is in the context records, cite its exact numbers, APN, tier, and sister buildings. If not found in the loaded context, give general legal context under Minnesota tenant and labor law (e.g. Minn. Stat. § 504B, Minneapolis Code of Ordinances Title 12). Keep responses concise, objective, and clear.\\n\\n" + contextData;
 
       const assistantMsgEl = appendChatMessage('assistant', 'Thinking...');
 
@@ -1363,6 +1473,7 @@ export function renderUI(): string {
           document.getElementById('searchInput').value = urlQ;
         }
       } catch (e) {}
+      loadHeaderStats();
       executeSearch();
     });
 
@@ -1371,6 +1482,20 @@ export function renderUI(): string {
         executeSearch();
       }
     });
+
+    (function () {
+      const wrap = document.querySelector('.nav-scroll');
+      if (!wrap) return;
+      const nav = wrap.querySelector('.nav-tabs, .tabs-bar');
+      if (!nav) return;
+      const update = () => {
+        const atEnd = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 4;
+        wrap.classList.toggle('at-end', atEnd);
+      };
+      nav.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    })();
   </script>
 </body>
 </html>

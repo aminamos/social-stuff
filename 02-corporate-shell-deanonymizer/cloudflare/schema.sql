@@ -1,9 +1,21 @@
--- Cloudflare D1 Schema for Twin Cities Metro Housing & Parcel Registry
+-- Cloudflare D1 Schema for the multi-jurisdiction Housing & Labor Registry.
+--
+-- rental_licenses is city-agnostic. Every city is ingested by a CityAdapter
+-- (see src/adapters) through a shared platform client (see src/platforms).
+--   feed_id         the ingest feed that wrote the row (cursor identity)
+--   jurisdiction_id the property's municipality
+--   parcel_id       globally unique key: "{STATE}:{COUNTY}:{local_id}"
+
 CREATE TABLE IF NOT EXISTS rental_licenses (
-    apn TEXT PRIMARY KEY,
-    address TEXT NOT NULL,
-    city TEXT DEFAULT 'Minneapolis',
-    county TEXT DEFAULT 'Hennepin',
+    parcel_id TEXT PRIMARY KEY,
+    apn TEXT NOT NULL,
+    feed_id TEXT NOT NULL,
+    jurisdiction_id TEXT NOT NULL,
+    city TEXT,
+    county TEXT,
+    state TEXT,
+    address TEXT,
+    units INTEGER DEFAULT 1,
     owner_name TEXT,
     owner_address TEXT,
     owner_city TEXT,
@@ -14,18 +26,38 @@ CREATE TABLE IF NOT EXISTS rental_licenses (
     applicant_name TEXT,
     applicant_phone TEXT,
     applicant_email TEXT,
-    units INTEGER DEFAULT 1,
-    tier TEXT,
+    severity_class TEXT,          -- canonical A | B | C
+    tier TEXT,                    -- raw source label, e.g. "Tier 3", "Grade C"
     status TEXT,
-    synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    source_platform TEXT,         -- arcgis | socrata | ckan
+    source_dataset TEXT,
+    link_key TEXT,                -- sister-property grouping key
+    synced_at TEXT
 );
 
-CREATE INDEX IF NOT EXISTS idx_d1_applicant_email ON rental_licenses(applicant_email);
-CREATE INDEX IF NOT EXISTS idx_d1_owner_name ON rental_licenses(owner_name);
-CREATE INDEX IF NOT EXISTS idx_d1_address ON rental_licenses(address);
-CREATE INDEX IF NOT EXISTS idx_d1_tier ON rental_licenses(tier);
-CREATE INDEX IF NOT EXISTS idx_d1_city ON rental_licenses(city);
-CREATE INDEX IF NOT EXISTS idx_d1_county ON rental_licenses(county);
+CREATE INDEX IF NOT EXISTS idx_rl_feed ON rental_licenses(feed_id);
+CREATE INDEX IF NOT EXISTS idx_rl_jurisdiction ON rental_licenses(jurisdiction_id);
+CREATE INDEX IF NOT EXISTS idx_rl_owner_name ON rental_licenses(owner_name);
+CREATE INDEX IF NOT EXISTS idx_rl_applicant_name ON rental_licenses(applicant_name);
+CREATE INDEX IF NOT EXISTS idx_rl_applicant_email ON rental_licenses(applicant_email);
+CREATE INDEX IF NOT EXISTS idx_rl_owner_address ON rental_licenses(owner_address);
+CREATE INDEX IF NOT EXISTS idx_rl_address ON rental_licenses(address);
+CREATE INDEX IF NOT EXISTS idx_rl_apn ON rental_licenses(apn);
+CREATE INDEX IF NOT EXISTS idx_rl_city ON rental_licenses(city, county);
+CREATE INDEX IF NOT EXISTS idx_rl_tier ON rental_licenses(tier);
+CREATE INDEX IF NOT EXISTS idx_rl_link_key ON rental_licenses(link_key);
+
+-- Per-feed crawl cursor. A single invocation must never exceed the platform's
+-- D1 queries-per-invocation limit, so large feeds resume here.
+CREATE TABLE IF NOT EXISTS sync_state (
+    feed_id TEXT PRIMARY KEY,
+    offset INTEGER NOT NULL DEFAULT 0,
+    rows_total INTEGER NOT NULL DEFAULT 0,
+    started_at TEXT,
+    updated_at TEXT,
+    completed_at TEXT,
+    last_error TEXT
+);
 
 -- Multi-city property parcels across Hennepin and Ramsey counties
 CREATE TABLE IF NOT EXISTS county_parcels (
@@ -80,4 +112,3 @@ CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_legal ON wage_theft_records(respond
 CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_trade ON wage_theft_records(trade_name);
 CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_city ON wage_theft_records(city);
 CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_agency ON wage_theft_records(source_agency);
-

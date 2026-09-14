@@ -535,6 +535,74 @@ export function renderCrossoverUI(): string {
       width: 0%;
       transition: width 0.2s ease;
     }
+
+    /* ---- Mobile layout ---- */
+    @media (max-width: 720px) {
+      header { padding: 24px 0 18px 0; }
+      h1 { font-size: 1.5rem; line-height: 1.2; }
+      .subtitle { font-size: 0.92rem; margin-bottom: 16px; }
+      .container { padding: 0 14px; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 18px; }
+      .stat-card { padding: 12px 8px; }
+      .stat-val { font-size: 1.25rem; }
+      .stat-label { font-size: 0.68rem; }
+
+      /* Tab nav: sticky one-line snap scroller with a visible scrollbar so the
+         remaining tabs are obviously reachable, and the nav stays in view. */
+      .tabs-bar, .nav-tabs {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--bg);
+        gap: 6px;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: #475569 transparent;
+      }
+      .tabs-bar::-webkit-scrollbar, .nav-tabs::-webkit-scrollbar { height: 6px; }
+      .tabs-bar::-webkit-scrollbar-thumb, .nav-tabs::-webkit-scrollbar-thumb { background: #475569; border-radius: 9999px; }
+      .tabs-bar::-webkit-scrollbar-track, .nav-tabs::-webkit-scrollbar-track { background: transparent; }
+      .tab-btn { scroll-snap-align: start; padding: 8px 12px; font-size: 0.82rem; }
+      .tab-btn[style*="margin-left: auto"] { margin-left: 0 !important; }
+
+      /* Scroll-affordance fade: a soft edge signals tabs continue off-screen */
+      .nav-scroll { position: relative; }
+      .nav-scroll::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 12px;
+        width: 34px;
+        pointer-events: none;
+        background: linear-gradient(90deg, rgba(9, 13, 22, 0), var(--bg) 88%);
+        transition: opacity 0.2s ease;
+      }
+      .nav-scroll.at-end::after { opacity: 0; }
+
+      /* Search controls stack instead of overflowing the viewport */
+      .search-section { padding: 16px; border-radius: 12px; margin-bottom: 16px; }
+      .search-row, .search-input-group { flex-wrap: wrap; }
+      .search-input { flex: 1 1 100%; min-width: 0; font-size: 0.95rem; padding: 12px 14px; }
+      .search-btn { flex: 1 1 auto; padding: 11px 14px; font-size: 0.9rem; }
+      .chip { font-size: 0.75rem; padding: 5px 10px; }
+
+      /* Matrix cards collapse to a single readable column */
+      .matrix-grid, .results-grid, .cards-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+      .dual-card { padding: 16px; gap: 16px; }
+      .pillar-overview { border-right: none; border-bottom: 1px solid var(--card-border); padding-right: 0; padding-bottom: 16px; }
+      .card-action-row, .ai-input-row, .ai-controls-row { flex-wrap: wrap; }
+      .ai-input { flex: 1 1 100%; min-width: 0; }
+      .ai-model-select { width: 100%; }
+      .ai-chat-box { height: 340px; }
+
+      /* Inline two-column form rows become single column */
+      .form-card div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: minmax(0, 1fr) !important; }
+      .form-card { padding: 22px 16px; }
+    }
   </style>
   <script type="module">
     import * as webllm from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm";
@@ -576,6 +644,7 @@ export function renderCrossoverUI(): string {
 
   <main class="container" style="margin-top: 24px;">
     <!-- Tabs Navigation -->
+    <div class="nav-scroll">
     <div class="tabs-bar">
       <button class="tab-btn active" onclick="switchTab('matrix')">🎯 Dual Violators Matrix</button>
       <button class="tab-btn" onclick="switchTab('report')">📢 Report Dual Exploitation</button>
@@ -591,6 +660,7 @@ export function renderCrossoverUI(): string {
       <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev" target="_blank" class="tab-btn" style="color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
         ⚖️ Wage Theft Registry ↗
       </a>
+    </div>
     </div>
 
     <!-- TAB 1: DUAL VIOLATORS MATRIX -->
@@ -794,6 +864,9 @@ export function renderCrossoverUI(): string {
       document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
       event.target.classList.add('active');
       document.getElementById(tabId + 'Tab').classList.add('active');
+      if (event.target.scrollIntoView) {
+        event.target.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+      }
     }
 
     function copyDualCardAsMarkdown(idx) {
@@ -913,10 +986,10 @@ export function renderCrossoverUI(): string {
       const check = document.getElementById('aiGroundingCheck');
       if (!check || !check.checked) return '';
 
-      let text = 'CURRENT VERIFIED CROSSOVER SYNDICATES (HOUSING & LABOR DUAL VIOLATIONS):\n';
+      let text = 'CURRENT VERIFIED CROSSOVER SYNDICATES (HOUSING & LABOR DUAL VIOLATIONS):\\n';
       const items = (currentMatrixResults || []).slice(0, 10);
       items.forEach((s, idx) => {
-        text += (idx + 1) + '. Entity: ' + s.entity_name + ' (' + s.trade_name + ') | Risk: ' + s.risk_tier + ' (' + s.composite_score + '/100) | Location: ' + s.city + ', MN | Units: ' + s.total_units + ' across ' + s.properties_count + ' properties | Tier 3 Slumlord: ' + (s.has_tier3 ? 'YES' : 'NO') + ' | Housing Profile: ' + s.housing_narrative + ' | Labor Case: ' + s.case_id + ' (' + s.source_agency + ' - ' + s.violation_type + ') | Stolen Wages Recovered: $' + parseFloat(s.total_wage_theft_recovered || 0).toLocaleString() + ' | Workers: ' + s.workers_affected + ' | Labor Summary: ' + s.labor_narrative + ' | Recommended Action Playbook: ' + s.organizing_playbook + '\n';
+        text += (idx + 1) + '. Entity: ' + s.entity_name + ' (' + s.trade_name + ') | Risk: ' + s.risk_tier + ' (' + s.composite_score + '/100) | Location: ' + s.city + ', MN | Units: ' + s.total_units + ' across ' + s.properties_count + ' properties | Tier 3 Slumlord: ' + (s.has_tier3 ? 'YES' : 'NO') + ' | Housing Profile: ' + s.housing_narrative + ' | Labor Case: ' + s.case_id + ' (' + s.source_agency + ' - ' + s.violation_type + ') | Stolen Wages Recovered: $' + parseFloat(s.total_wage_theft_recovered || 0).toLocaleString() + ' | Workers: ' + s.workers_affected + ' | Labor Summary: ' + s.labor_narrative + ' | Recommended Action Playbook: ' + s.organizing_playbook + '\\n';
       });
       return text;
     }
@@ -979,7 +1052,7 @@ export function renderCrossoverUI(): string {
       }
 
       const contextData = getGroundedContext();
-      const systemPrompt = "You are a specialized civic housing and labor rights intelligence assistant for the Twin Cities Crossover Matrix. You run 100% locally and privately in the user's browser via WebGPU with ZERO server-side data collection and ZERO cloud datacenter electricity consumption. Answer questions using the verified dual-violation syndicate profiles provided in the context. Emphasize joint organizing strategies, such as tenant rent escrow actions synchronized with building caretaker wage claims under Minnesota's 2023 Joint Contractor Liability Law (Minn. Stat. § 181.165), retaliation protections under Minn. Stat. § 181.932, and municipal Tier 3 habitability enforcement. Keep answers concise, factual, and empowering.\n\n" + contextData;
+      const systemPrompt = "You are a specialized civic housing and labor rights intelligence assistant for the Twin Cities Crossover Matrix. You run 100% locally and privately in the user's browser via WebGPU with ZERO server-side data collection and ZERO cloud datacenter electricity consumption. Answer questions using the verified dual-violation syndicate profiles provided in the context. Emphasize joint organizing strategies, such as tenant rent escrow actions synchronized with building caretaker wage claims under Minnesota's 2023 Joint Contractor Liability Law (Minn. Stat. § 181.165), retaliation protections under Minn. Stat. § 181.932, and municipal Tier 3 habitability enforcement. Keep answers concise, factual, and empowering.\\n\\n" + contextData;
 
       const assistantMsgEl = appendChatMessage('assistant', 'Thinking...');
 
@@ -1274,6 +1347,20 @@ export function renderCrossoverUI(): string {
     document.getElementById('searchInput').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') executeSearch();
     });
+
+    (function () {
+      const wrap = document.querySelector('.nav-scroll');
+      if (!wrap) return;
+      const nav = wrap.querySelector('.tabs-bar, .nav-tabs');
+      if (!nav) return;
+      const update = () => {
+        const atEnd = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 4;
+        wrap.classList.toggle('at-end', atEnd);
+      };
+      nav.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    })();
   </script>
 </body>
 </html>

@@ -237,6 +237,15 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
+    console.log(JSON.stringify({
+      event: "request",
+      path: url.pathname,
+      country: request.cf?.country ?? null,
+      region: request.cf?.region ?? null,
+      city: request.cf?.city ?? null,
+      asn: request.cf?.asn ?? null,
+    }));
+
     // Root Interactive Web Application
     if (url.pathname === "/" || url.pathname === "") {
       return new Response(renderCrossoverUI(), {

@@ -207,7 +207,7 @@ export function renderWageTheftUI(): string {
     /* Cards Grid */
     .results-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
       gap: 16px;
       margin-top: 16px;
     }
@@ -575,6 +575,80 @@ export function renderWageTheftUI(): string {
       width: 0%;
       transition: width 0.2s ease;
     }
+
+    /* ---- Mobile layout ---- */
+    @media (max-width: 720px) {
+      header { padding: 24px 0 18px 0; }
+      h1 { font-size: 1.5rem; line-height: 1.2; }
+      .subtitle { font-size: 0.92rem; margin-bottom: 16px; }
+      .container { padding: 0 14px; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 18px 0 22px 0; }
+      .stat-card { padding: 12px 8px; }
+      .stat-val { font-size: 1.2rem; }
+      .stat-label { font-size: 0.68rem; }
+
+      /* Tab nav: sticky one-line snap scroller with a visible scrollbar so the
+         remaining tabs are obviously reachable, and the nav stays in view. */
+      .tabs-bar, .nav-tabs {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--bg);
+        gap: 6px;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: #475569 transparent;
+      }
+      .tabs-bar::-webkit-scrollbar, .nav-tabs::-webkit-scrollbar { height: 6px; }
+      .tabs-bar::-webkit-scrollbar-thumb, .nav-tabs::-webkit-scrollbar-thumb { background: #475569; border-radius: 9999px; }
+      .tabs-bar::-webkit-scrollbar-track, .nav-tabs::-webkit-scrollbar-track { background: transparent; }
+      .tab-btn { scroll-snap-align: start; padding: 8px 12px; font-size: 0.82rem; }
+      .tab-btn[style*="margin-left: auto"] { margin-left: 0 !important; }
+
+      /* Scroll-affordance fade: a soft edge signals tabs continue off-screen */
+      .nav-scroll { position: relative; }
+      .nav-scroll::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 12px;
+        width: 34px;
+        pointer-events: none;
+        background: linear-gradient(90deg, rgba(9, 13, 22, 0), var(--bg) 88%);
+        transition: opacity 0.2s ease;
+      }
+      .nav-scroll.at-end::after { opacity: 0; }
+
+      /* Search controls stack instead of overflowing the viewport */
+      .search-section { padding: 16px; border-radius: 12px; margin-bottom: 16px; }
+      .search-row, .search-input-group { flex-wrap: wrap; }
+      .search-input { flex: 1 1 100%; min-width: 0; font-size: 0.95rem; padding: 12px 14px; }
+      .search-btn { flex: 1 1 auto; padding: 11px 14px; font-size: 0.9rem; }
+      .chips-row { gap: 6px; }
+      .chip { font-size: 0.75rem; padding: 5px 10px; }
+
+      /* Single-column cards; removes min-width based overflow */
+      .results-grid, .cards-grid, .matrix-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+      .case-card, .landlord-card { padding: 16px; }
+      .card-action-row, .ai-input-row, .ai-controls-row, .card-footer { flex-wrap: wrap; }
+      .ai-input { flex: 1 1 100%; min-width: 0; }
+      .ai-model-select { width: 100%; }
+      .ai-chat-box { height: 340px; }
+
+      /* Inline two-column form rows become single column */
+      .form-card div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: minmax(0, 1fr) !important; }
+      .form-card { padding: 20px 16px; }
+
+      /* Offenders table: drop secondary columns so it fits without side-scroll */
+      #offendersTab .data-table th:nth-child(3), #offendersTab .data-table td:nth-child(3),
+      #offendersTab .data-table th:nth-child(5), #offendersTab .data-table td:nth-child(5),
+      #offendersTab .data-table th:nth-child(8), #offendersTab .data-table td:nth-child(8) { display: none; }
+      .data-table th, .data-table td { padding: 10px 8px; font-size: 0.78rem; }
+    }
   </style>
   <script type="module">
     import * as webllm from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm";
@@ -638,6 +712,7 @@ export function renderWageTheftUI(): string {
     </div>
 
     <!-- Navigation Tabs -->
+    <div class="nav-scroll">
     <div class="tabs-bar">
       <button class="tab-btn active" onclick="switchTab('cases')">⚖️ Enforcement Cases</button>
       <button class="tab-btn" onclick="switchTab('offenders')">🏆 Top Corporate Violators</button>
@@ -656,6 +731,7 @@ export function renderWageTheftUI(): string {
       <button onclick="exportWageTheftAsMarkdown()" class="tab-btn" style="color: #a7f3d0; border: 1px solid rgba(52, 211, 153, 0.4);">
         📥 Export .MD
       </button>
+    </div>
     </div>
 
     <!-- TAB 1: CASES -->
@@ -940,6 +1016,9 @@ export function renderWageTheftUI(): string {
       document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
       event.target.classList.add('active');
       document.getElementById(tabId + 'Tab').classList.add('active');
+      if (event.target.scrollIntoView) {
+        event.target.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+      }
 
       if (tabId === 'offenders') loadTopOffenders();
     }
@@ -1056,13 +1135,13 @@ export function renderWageTheftUI(): string {
       const check = document.getElementById('aiGroundingCheck');
       if (!check || !check.checked) return '';
 
-      let text = 'CURRENT VERIFIED LABOR STANDARDS & WAGE THEFT ENFORCEMENT ACTIONS:\n';
+      let text = 'CURRENT VERIFIED LABOR STANDARDS & WAGE THEFT ENFORCEMENT ACTIONS:\\n';
       const items = (currentCasesResults || []).slice(0, 15);
       if (items.length === 0) {
-        text += '- Note: Registry tracks federal US DOL, Minnesota DLI, and Minneapolis Civil Rights wage theft judgments across property managers and subcontractors.\n';
+        text += '- Note: Registry tracks federal US DOL, Minnesota DLI, and Minneapolis Civil Rights wage theft judgments across property managers and subcontractors.\\n';
       } else {
         items.forEach((c, idx) => {
-          text += (idx + 1) + '. Employer: ' + (c.respondent_legal_name || 'N/A') + ' (d/b/a ' + (c.trade_name || 'N/A') + ') | Case ID: ' + (c.case_id || 'N/A') + ' | Agency: ' + (c.source_agency || 'N/A') + ' | Violation: ' + (c.violation_type || 'N/A') + ' | Back Wages: $' + parseFloat(c.back_wages_recovered || 0).toLocaleString() + ' | Penalties: $' + parseFloat(c.civil_penalties_assessed || 0).toLocaleString() + ' | Workers: ' + (c.workers_affected || 0) + ' | Status: ' + (c.status || 'N/A') + (c.repeat_violator ? ' [REPEAT]' : '') + ' | Summary: ' + (c.description || 'N/A') + '\n';
+          text += (idx + 1) + '. Employer: ' + (c.respondent_legal_name || 'N/A') + ' (d/b/a ' + (c.trade_name || 'N/A') + ') | Case ID: ' + (c.case_id || 'N/A') + ' | Agency: ' + (c.source_agency || 'N/A') + ' | Violation: ' + (c.violation_type || 'N/A') + ' | Back Wages: $' + parseFloat(c.back_wages_recovered || 0).toLocaleString() + ' | Penalties: $' + parseFloat(c.civil_penalties_assessed || 0).toLocaleString() + ' | Workers: ' + (c.workers_affected || 0) + ' | Status: ' + (c.status || 'N/A') + (c.repeat_violator ? ' [REPEAT]' : '') + ' | Summary: ' + (c.description || 'N/A') + '\\n';
         });
       }
       return text;
@@ -1126,7 +1205,7 @@ export function renderWageTheftUI(): string {
       }
 
       const contextData = getGroundedContext();
-      const systemPrompt = "You are a specialized civic worker rights and labor standards intelligence assistant for the Twin Cities (Minnesota). You run 100% locally and privately in the user's browser via WebGPU with ZERO server-side data tracking and ZERO cloud datacenter electricity consumption. Answer questions using the verified enforcement dockets provided in the context. Emphasize Minnesota labor protections such as Minn. Stat. § 181.165 (joint contractor liability holding property owners liable for subcontractor wage theft), § 177.24 (minimum wage and caretaker rent deduction limits), § 181.932 (whistleblower protection against retaliation), and City of Minneapolis Labor Standards ordinances. Keep answers concise, factual, and empowering.\n\n" + contextData;
+      const systemPrompt = "You are a specialized civic worker rights and labor standards intelligence assistant for the Twin Cities (Minnesota). You run 100% locally and privately in the user's browser via WebGPU with ZERO server-side data tracking and ZERO cloud datacenter electricity consumption. Answer questions using the verified enforcement dockets provided in the context. Emphasize Minnesota labor protections such as Minn. Stat. § 181.165 (joint contractor liability holding property owners liable for subcontractor wage theft), § 177.24 (minimum wage and caretaker rent deduction limits), § 181.932 (whistleblower protection against retaliation), and City of Minneapolis Labor Standards ordinances. Keep answers concise, factual, and empowering.\\n\\n" + contextData;
 
       const assistantMsgEl = appendChatMessage('assistant', 'Thinking...');
 
@@ -1454,6 +1533,20 @@ export function renderWageTheftUI(): string {
     document.getElementById('searchInput').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') executeSearch();
     });
+
+    (function () {
+      const wrap = document.querySelector('.nav-scroll');
+      if (!wrap) return;
+      const nav = wrap.querySelector('.tabs-bar, .nav-tabs');
+      if (!nav) return;
+      const update = () => {
+        const atEnd = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 4;
+        wrap.classList.toggle('at-end', atEnd);
+      };
+      nav.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    })();
   </script>
 </body>
 </html>

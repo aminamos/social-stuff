@@ -1,32 +1,53 @@
 import { renderUI } from "./ui";
+import { ADAPTERS } from "./adapters";
+import {
+  D1_QUERY_BUDGET,
+  runSyncTick,
+  syncOne,
+  loadStates,
+} from "./sync";
 
 export interface Env {
   DB: D1Database;
   R2_BUCKET: R2Bucket;
   AUTH_SECRET?: string;
+  SOCRATA_APP_TOKEN?: string;
 }
 
-const MINNEAPOLIS_API_URL =
-  "https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0/query";
+function json(body: unknown, init: ResponseInit = {}): Response {
+  return new Response(JSON.stringify(body, null, 2), {
+    ...init,
+    headers: { "Content-Type": "application/json", ...(init.headers || {}) },
+  });
+}
 
-const STPAUL_COFO_API_URL =
-  "https://services1.arcgis.com/9meaaHE3uiba0zr8/arcgis/rest/services/Certificate_of_Occupancy_-_Residential/FeatureServer/0/query";
-
-const CHUNK_SIZE = 2000;
-const DELAY_MS = 350;
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function authorized(request: Request, env: Env): boolean {
+  if (!env.AUTH_SECRET) return true;
+  return request.headers.get("Authorization") === `Bearer ${env.AUTH_SECRET}`;
 }
 
 export default {
+  /**
+   * Two schedules:
+   *   - 04:00 daily  -> start a fresh full cycle for every jurisdiction
+   *   - every 15 min -> resume unfinished jurisdictions within the D1 budget
+   */
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
-    ctx.waitUntil(syncRegistry(env));
-    ctx.waitUntil(syncStPaulRegistry(env));
+    const isDaily = event.cron === "0 4 * * *";
+    ctx.waitUntil(runSyncTick(env, { reset: isDaily }));
   },
 
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    console.log(JSON.stringify({
+      event: "request",
+      path: url.pathname,
+      country: request.cf?.country ?? null,
+      region: request.cf?.region ?? null,
+      city: request.cf?.city ?? null,
+      asn: request.cf?.asn ?? null,
+    }));
 
     // Interactive Web UI for Organizers, Tenants & Public
     if (url.pathname === "/" || url.pathname === "") {
@@ -38,45 +59,78 @@ export default {
       });
     }
 
-    // Trigger Minneapolis Sync
-    if (url.pathname === "/sync") {
-      const auth = request.headers.get("Authorization");
-      if (env.AUTH_SECRET && auth !== `Bearer ${env.AUTH_SECRET}`) {
-        return new Response("Unauthorized", { status: 401 });
-      }
-      ctx.waitUntil(syncRegistry(env));
-      return new Response(JSON.stringify({ status: "Minneapolis sync initiated in background" }), {
-        headers: { "Content-Type": "application/json" },
-      });
+    // ---------------------------------------------------------------- ingest
+
+    if (url.pathname === "/sync" && request.method === "POST") {
+      if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
+      const reset = url.searchParams.get("reset") === "1";
+      const budget = parseInt(url.searchParams.get("budget") || String(D1_QUERY_BUDGET), 10);
+      const results = await runSyncTick(env, { reset, budget });
+      return json({ status: "sync tick complete", budget, results });
     }
 
-    // Trigger St Paul Sync
-    if (url.pathname === "/sync/stpaul") {
-      const auth = request.headers.get("Authorization");
-      if (env.AUTH_SECRET && auth !== `Bearer ${env.AUTH_SECRET}`) {
-        return new Response("Unauthorized", { status: 401 });
-      }
-      ctx.waitUntil(syncStPaulRegistry(env));
-      return new Response(JSON.stringify({ status: "Saint Paul C of O sync initiated in background" }), {
-        headers: { "Content-Type": "application/json" },
+    if (url.pathname === "/sync/status") {
+      const states = await loadStates(env);
+      const feeds = ADAPTERS.map((a) => ({
+        feed_id: a.feed.id,
+        label: a.feed.label,
+        defaults: a.defaults,
+        platform: a.source.platform,
+        dataset: a.source.dataset,
+        linker: a.linker,
+        note: a.note || null,
+        sync: states.get(a.feed.id) || null,
+      }));
+      return json({ feeds });
+    }
+
+    if (url.pathname.startsWith("/sync/")) {
+      if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
+      const id = url.pathname.slice("/sync/".length);
+      const reset = url.searchParams.get("reset") === "1";
+      const budgetParam = url.searchParams.get("budget");
+      const budget = budgetParam ? parseInt(budgetParam, 10) : undefined;
+      const result = await syncOne(env, id, { reset, budget });
+      if (!result) return json({ error: `Unknown jurisdiction: ${id}` }, { status: 404 });
+      return json({ status: "ok", result });
+    }
+
+    // -------------------------------------------------------------- reference
+
+    // Registry of ingest feeds and their sources
+    if (url.pathname === "/feeds") {
+      return json({
+        count: ADAPTERS.length,
+        feeds: ADAPTERS.map((a) => ({
+          feed_id: a.feed.id,
+          label: a.feed.label,
+          defaults: a.defaults,
+          platform: a.source.platform,
+          dataset: a.source.dataset,
+          endpoint: a.source.endpoint,
+          linker: a.linker,
+          severity_map: a.severityMap,
+          note: a.note || null,
+        })),
       });
     }
 
     // List all municipalities and unit/license totals
     if (url.pathname === "/cities") {
       const citiesRes = await env.DB.prepare(`
-        SELECT city, county, COUNT(*) as license_count, SUM(units) as total_units
+        SELECT jurisdiction_id, city, county, state,
+               COUNT(*) as license_count,
+               SUM(units) as total_units
         FROM rental_licenses
-        GROUP BY city, county
+        GROUP BY jurisdiction_id, city, county, state
         ORDER BY license_count DESC
       `).all();
 
-      return new Response(JSON.stringify({ cities: citiesRes.results }, null, 2), {
-        headers: { "Content-Type": "application/json" },
-      });
+      return json({ cities: citiesRes.results });
     }
 
-    // Search across all cities with de-anonymization metrics and wage theft crossover
+    // ----------------------------------------------------------------- search
+
     if (url.pathname === "/search") {
       const accept = request.headers.get("Accept") || "";
       if (accept.includes("text/html")) {
@@ -89,48 +143,48 @@ export default {
       }
 
       const q = (url.searchParams.get("q") || "").trim();
-      if (!q) {
-        return new Response(JSON.stringify({ error: "Missing query param ?q=" }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
+      const jurisdiction = (url.searchParams.get("jurisdiction") || "").trim();
+      const severity = (url.searchParams.get("severity") || "").trim().toUpperCase();
+      const state = (url.searchParams.get("state") || "").trim().toUpperCase();
+      const atRisk = url.searchParams.get("at_risk") === "1";
+
+      if (!q && !jurisdiction && !severity && !state && !atRisk) {
+        return json(
+          { error: "Provide at least one of ?q=, ?jurisdiction=, ?severity=, ?state=, ?at_risk=1" },
+          { status: 400 },
+        );
       }
+
       const isDeRomaQuery = /deroma|de\s*roma|jager|j[aä]ger|club\s*j|teutohellene|hansaware/i.test(q);
       const pattern = `%${q}%`;
-      const tokenPattern = `%${q.replace(/\s+/g, '%')}%`;
-      const noSpacePattern = `%${q.replace(/\s+/g, '')}%`;
+      const tokenPattern = `%${q.replace(/\s+/g, "%")}%`;
+      const noSpacePattern = `%${q.replace(/\s+/g, "")}%`;
 
       try {
         const searchRes = await env.DB.prepare(`
-          SELECT 
-            r.apn, r.address, r.city, r.county, r.owner_name, r.owner_address, r.applicant_name, r.applicant_email, 
-            r.units, r.tier, r.status,
-            (SELECT COUNT(*) FROM rental_licenses r2 
-             WHERE (r.applicant_email != '' AND r2.applicant_email = r.applicant_email)
-                OR (r.owner_address != '' AND r2.owner_address = r.owner_address)
-                OR ((lower(r.applicant_name) LIKE '%deroma%' OR lower(r.owner_name) LIKE '%deroma%' OR lower(r.applicant_name) LIKE '%de roma%' OR lower(r.owner_name) LIKE '%de roma%')
-                    AND (lower(r2.applicant_name) LIKE '%deroma%' OR lower(r2.owner_name) LIKE '%deroma%' OR lower(r2.applicant_name) LIKE '%de roma%' OR lower(r2.owner_name) LIKE '%de roma%'))
-            ) as sister_properties_count,
-            (SELECT SUM(r3.units) FROM rental_licenses r3 
-             WHERE (r.applicant_email != '' AND r3.applicant_email = r.applicant_email)
-                OR (r.owner_address != '' AND r3.owner_address = r.owner_address)
-                OR ((lower(r.applicant_name) LIKE '%deroma%' OR lower(r.owner_name) LIKE '%deroma%' OR lower(r.applicant_name) LIKE '%de roma%' OR lower(r.owner_name) LIKE '%de roma%')
-                    AND (lower(r3.applicant_name) LIKE '%deroma%' OR lower(r3.owner_name) LIKE '%deroma%' OR lower(r3.applicant_name) LIKE '%de roma%' OR lower(r3.owner_name) LIKE '%de roma%'))
-            ) as total_syndicate_units,
+          SELECT
+            r.parcel_id, r.apn, r.feed_id, r.jurisdiction_id, r.address, r.city, r.county, r.state,
+            r.owner_name, r.owner_address, r.applicant_name, r.applicant_email,
+            r.units, r.tier, r.severity_class, r.status,
+            r.source_platform, r.source_dataset,
+            (SELECT COUNT(*) FROM rental_licenses r2
+             WHERE r.link_key IS NOT NULL AND r2.link_key = r.link_key) as sister_properties_count,
+            (SELECT SUM(r3.units) FROM rental_licenses r3
+             WHERE r.link_key IS NOT NULL AND r3.link_key = r.link_key) as total_syndicate_units,
             (SELECT case_id || '::' || violation_type || '::' || back_wages_recovered || '::' || workers_affected || '::' || COALESCE(provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA')
-             FROM wage_theft_records w 
+             FROM wage_theft_records w
              WHERE (w.trade_name != '' AND (
-                 instr(lower(r.owner_name), lower(w.trade_name)) > 0 
-                 OR instr(lower(r.applicant_name), lower(w.trade_name)) > 0 
+                 instr(lower(r.owner_name), lower(w.trade_name)) > 0
+                 OR instr(lower(r.applicant_name), lower(w.trade_name)) > 0
                  OR instr(lower(r.applicant_email), lower(w.trade_name)) > 0
              ))
              OR (w.respondent_legal_name != '' AND (
-                 instr(lower(r.owner_name), lower(w.respondent_legal_name)) > 0 
+                 instr(lower(r.owner_name), lower(w.respondent_legal_name)) > 0
                  OR instr(lower(r.applicant_name), lower(w.respondent_legal_name)) > 0
              ))
              OR (lower(w.trade_name) LIKE '%fitterer%' AND (
-                 instr(lower(r.owner_name), 'fitterer') > 0 
-                 OR instr(lower(r.applicant_name), 'fitterer') > 0 
+                 instr(lower(r.owner_name), 'fitterer') > 0
+                 OR instr(lower(r.applicant_name), 'fitterer') > 0
                  OR instr(lower(r.applicant_email), 'ipgliving') > 0
              ))
              OR ((lower(w.trade_name) LIKE '%jager%' OR lower(w.respondent_legal_name) LIKE '%deroma%') AND (
@@ -143,53 +197,65 @@ export default {
              ))
              LIMIT 1) as wage_theft_match
           FROM rental_licenses r
-          WHERE r.owner_name LIKE ?1
-             OR r.applicant_name LIKE ?1
-             OR r.applicant_email LIKE ?1
-             OR r.address LIKE ?1
-             OR r.apn LIKE ?1
-             OR r.owner_address LIKE ?1
-             OR r.owner_name LIKE ?2
-             OR r.applicant_name LIKE ?2
-             OR r.owner_name LIKE ?3
-             OR r.applicant_name LIKE ?3
-             OR (?4 = 1 AND (
-                 lower(r.owner_name) LIKE '%deroma%'
-                 OR lower(r.owner_name) LIKE '%de roma%'
-                 OR lower(r.applicant_name) LIKE '%deroma%'
-                 OR lower(r.applicant_name) LIKE '%de roma%'
-                 OR lower(r.owner_address) LIKE '%4133 dupont%'
-                 OR r.applicant_email IN ('teutohellene@gmail.com', 'hansaware@gmail.com')
-                 OR r.apn = '2202924210384'
-                 OR r.address LIKE '%923 WASHINGTON%'
-             ))
+          WHERE (
+              r.owner_name LIKE ?1
+              OR r.applicant_name LIKE ?1
+              OR r.applicant_email LIKE ?1
+              OR r.address LIKE ?1
+              OR r.apn LIKE ?1
+              OR r.owner_address LIKE ?1
+              OR r.city LIKE ?1
+              OR r.state LIKE ?1
+              OR r.tier LIKE ?1
+              OR r.owner_name LIKE ?2
+              OR r.applicant_name LIKE ?2
+              OR r.owner_name LIKE ?3
+              OR r.applicant_name LIKE ?3
+              OR (?4 = 1 AND (
+                  lower(r.owner_name) LIKE '%deroma%'
+                  OR lower(r.owner_name) LIKE '%de roma%'
+                  OR lower(r.applicant_name) LIKE '%deroma%'
+                  OR lower(r.applicant_name) LIKE '%de roma%'
+                  OR lower(r.owner_address) LIKE '%4133 dupont%'
+                  OR r.applicant_email IN ('teutohellene@gmail.com', 'hansaware@gmail.com')
+                  OR r.apn = '2202924210384'
+                  OR r.address LIKE '%923 WASHINGTON%'
+              ))
+          )
+          AND (?5 = '' OR r.jurisdiction_id = ?5)
+          AND (?6 = '' OR r.severity_class = ?6)
+          AND (?7 = '' OR r.state = ?7)
+          AND (?8 = 0 OR r.severity_class = 'C')
           ORDER BY r.units DESC
           LIMIT 50
-        `).bind(pattern, tokenPattern, noSpacePattern, isDeRomaQuery ? 1 : 0).all();
+        `).bind(
+          pattern,
+          tokenPattern,
+          noSpacePattern,
+          isDeRomaQuery ? 1 : 0,
+          jurisdiction,
+          severity,
+          state,
+          atRisk ? 1 : 0,
+        ).all();
 
-        return new Response(JSON.stringify({ query: q, results: searchRes.results }, null, 2), {
-          headers: { "Content-Type": "application/json" },
-        });
+        return json({ query: q, jurisdiction, severity, state, at_risk: atRisk, results: searchRes.results });
       } catch (err: any) {
-        return new Response(JSON.stringify({ error: err.message, stack: err.stack }), {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        });
+        return json({ error: err.message, stack: err.stack }, { status: 500 });
       }
     }
+
+    // ------------------------------------------------------------------ labor
 
     // Search wage theft and labor enforcement records
     if (url.pathname === "/wage-theft") {
       const q = (url.searchParams.get("q") || "").trim();
       if (!q) {
-        return new Response(JSON.stringify({ error: "Missing query param ?q=" }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
+        return json({ error: "Missing query param ?q=" }, { status: 400 });
       }
       const isDeRomaQuery = /deroma|de\s*roma|jager|j[aä]ger|club\s*j/i.test(q);
       const pattern = `%${q}%`;
-      const tokenPattern = `%${q.replace(/\s+/g, '%')}%`;
+      const tokenPattern = `%${q.replace(/\s+/g, "%")}%`;
       const wageRes = await env.DB.prepare(`
         SELECT * FROM wage_theft_records
         WHERE respondent_legal_name LIKE ?1
@@ -210,15 +276,13 @@ export default {
         LIMIT 50
       `).bind(pattern, tokenPattern, isDeRomaQuery ? 1 : 0).all();
 
-      return new Response(JSON.stringify({ query: q, results: wageRes.results }, null, 2), {
-        headers: { "Content-Type": "application/json" },
-      });
+      return json({ query: q, results: wageRes.results });
     }
 
     // Top wage theft offenders
     if (url.pathname === "/wage-theft/top") {
       const topRes = await env.DB.prepare(`
-        SELECT 
+        SELECT
           respondent_legal_name,
           trade_name,
           city,
@@ -234,246 +298,59 @@ export default {
         LIMIT 20
       `).all();
 
-      return new Response(JSON.stringify({ top_wage_theft_offenders: topRes.results }, null, 2), {
-        headers: { "Content-Type": "application/json" },
-      });
+      return json({ top_wage_theft_offenders: topRes.results });
     }
 
     if (url.pathname === "/stats") {
-      const countRes = await env.DB.prepare("SELECT COUNT(*) as total FROM rental_licenses").first();
-      const topSyndicates = await env.DB.prepare(`
-        SELECT applicant_email, applicant_name, COUNT(*) as props, SUM(units) as total_units
+      const totals = await env.DB.prepare(`
+        SELECT
+          COUNT(*) as total,
+          SUM(units) as units_total,
+          SUM(CASE WHEN units > 1 THEN 1 ELSE 0 END) as multifamily_parcels,
+          SUM(CASE WHEN lower(owner_name) LIKE '%llc%'
+                     OR lower(owner_name) LIKE '% inc%'
+                     OR lower(owner_name) LIKE '% corp%'
+                     OR lower(owner_name) LIKE '% lp%'
+                     OR lower(owner_name) LIKE '% ltd%'
+                     OR lower(owner_name) LIKE '% holdings%'
+                     OR lower(owner_name) LIKE '% properties%'
+                     OR lower(owner_name) LIKE '% ventures%'
+                     OR lower(owner_name) LIKE '% partners%'
+                   THEN 1 ELSE 0 END) as entity_owners,
+          COUNT(DISTINCT jurisdiction_id) as jurisdictions,
+          COUNT(DISTINCT state) as states
         FROM rental_licenses
-        WHERE applicant_email != ''
-        GROUP BY applicant_email
+      `).first();
+
+      const topSyndicates = await env.DB.prepare(`
+        SELECT
+          r.link_key,
+          COUNT(*) as props,
+          SUM(r.units) as total_units,
+          MIN(r.city) as sample_city,
+          (SELECT COUNT(DISTINCT x.state) FROM rental_licenses x WHERE x.link_key = r.link_key) as state_count,
+          (SELECT x.owner_name FROM rental_licenses x
+             WHERE x.link_key = r.link_key AND x.owner_name != '' LIMIT 1) as sample_owner,
+          (SELECT x.applicant_name FROM rental_licenses x
+             WHERE x.link_key = r.link_key AND x.applicant_name != '' LIMIT 1) as sample_contact,
+          (SELECT x.applicant_email FROM rental_licenses x
+             WHERE x.link_key = r.link_key AND x.applicant_email != '' LIMIT 1) as sample_email
+        FROM rental_licenses r
+        WHERE r.link_key IS NOT NULL
+        GROUP BY r.link_key
         HAVING props > 1
         ORDER BY total_units DESC
-        LIMIT 10
+        LIMIT 25
       `).all();
 
-      return new Response(JSON.stringify({ stats: countRes, top_syndicates: topSyndicates.results }, null, 2), {
-        headers: { "Content-Type": "application/json" },
-      });
+      return json({ stats: totals, top_syndicates: topSyndicates.results });
     }
 
     return new Response(
-      "Twin Cities Metro Housing & Labor Standards Registry Worker. Endpoints: /sync, /sync/stpaul, /cities, /search?q=..., /wage-theft?q=..., /wage-theft/top, /stats",
-      { status: 200 }
+      "Multi-jurisdiction Housing & Labor Standards Registry Worker. " +
+        "Endpoints: /, /sync, /sync/{feed}, /sync/status, /feeds, /cities, " +
+        "/search?q=...&jurisdiction=...&severity=..., /wage-theft?q=..., /wage-theft/top, /stats",
+      { status: 200 },
     );
-
   },
 };
-
-async function syncRegistry(env: Env): Promise<void> {
-  let offset = 0;
-  let allRecords: any[] = [];
-  const syncedAt = new Date().toISOString();
-
-  while (true) {
-    const params = new URLSearchParams({
-      where: "1=1",
-      outFields:
-        "apn,address,ownerName,ownerAddress1,ownerCity,ownerState,ownerZip,ownerPhone,ownerEmail,applicantName,applicantPhone,applicantEmail,licensedUnits,tier,status",
-      returnGeometry: "false",
-      resultOffset: offset.toString(),
-      resultRecordCount: CHUNK_SIZE.toString(),
-      f: "json",
-    });
-
-    const response = await fetch(`${MINNEAPOLIS_API_URL}?${params.toString()}`, {
-      headers: {
-        "User-Agent": "TenantUnionResearchBot/1.0 (+https://github.com/aminamos/social-tokens-projects)",
-        Accept: "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      console.error(`ArcGIS fetch failed at offset ${offset}: ${response.statusText}`);
-      break;
-    }
-
-    const data: any = await response.json();
-    const features = data.features || [];
-    if (features.length === 0) break;
-
-    // Collect records
-    const batchStatements: D1PreparedStatement[] = [];
-    for (const f of features) {
-      const a = f.attributes || {};
-      const apn = (a.apn || "").trim();
-      if (!apn) continue;
-
-      allRecords.push(a);
-
-      batchStatements.push(
-        env.DB.prepare(`
-          INSERT INTO rental_licenses (
-            apn, address, city, county, owner_name, owner_address, owner_city, owner_state, owner_zip,
-            owner_phone, owner_email, applicant_name, applicant_phone, applicant_email,
-            units, tier, status, synced_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          ON CONFLICT(apn) DO UPDATE SET
-            address=excluded.address,
-            city=excluded.city,
-            county=excluded.county,
-            owner_name=excluded.owner_name,
-            owner_address=excluded.owner_address,
-            applicant_name=excluded.applicant_name,
-            applicant_email=excluded.applicant_email,
-            applicant_phone=excluded.applicant_phone,
-            units=excluded.units,
-            tier=excluded.tier,
-            status=excluded.status,
-            synced_at=excluded.synced_at
-        `).bind(
-          apn,
-          (a.address || "").trim(),
-          "Minneapolis",
-          "Hennepin",
-          (a.ownerName || "").trim(),
-          (a.ownerAddress1 || "").trim(),
-          (a.ownerCity || "").trim(),
-          (a.ownerState || "").trim(),
-          (a.ownerZip || "").trim(),
-          (a.ownerPhone || "").trim(),
-          (a.ownerEmail || "").trim(),
-          (a.applicantName || "").trim(),
-          (a.applicantPhone || "").trim(),
-          (a.applicantEmail || "").trim(),
-          parseInt(a.licensedUnits || "1", 10),
-          (a.tier || "Tier 1").trim(),
-          (a.status || "Active").trim(),
-          syncedAt
-        )
-      );
-
-      if (batchStatements.length >= 100) {
-        await env.DB.batch(batchStatements.splice(0, 100));
-      }
-    }
-
-    if (batchStatements.length > 0) {
-      await env.DB.batch(batchStatements);
-    }
-
-    if (features.length < CHUNK_SIZE) break;
-    offset += CHUNK_SIZE;
-    await sleep(DELAY_MS);
-  }
-
-  if (allRecords.length > 0) {
-    const today = new Date().toISOString().split("T")[0];
-    const key = `snapshots/minneapolis_rental_licenses_${today}.json`;
-    const jsonStr = JSON.stringify(allRecords);
-
-    await env.R2_BUCKET.put(key, jsonStr, {
-      httpMetadata: { contentType: "application/json" },
-      customMetadata: { recordCount: allRecords.length.toString(), syncedAt },
-    });
-    console.log(`Saved ${allRecords.length} records snapshot to R2: ${key}`);
-  }
-}
-
-async function syncStPaulRegistry(env: Env): Promise<void> {
-  let offset = 0;
-  let allRecords: any[] = [];
-  const syncedAt = new Date().toISOString();
-
-  while (true) {
-    const params = new URLSearchParams({
-      where: "1=1",
-      outFields: "OBJECTID,PROPNAME,UNITS,PRIMOCCTYPE,ADDRESS,SUB_TYPE,STATUS,PIN,GRADE,RENEWAL_DUE",
-      returnGeometry: "false",
-      resultOffset: offset.toString(),
-      resultRecordCount: CHUNK_SIZE.toString(),
-      f: "json",
-    });
-
-    const response = await fetch(`${STPAUL_COFO_API_URL}?${params.toString()}`, {
-      headers: {
-        "User-Agent": "TenantUnionResearchBot/1.0 (+https://github.com/aminamos/social-tokens-projects)",
-        Accept: "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      console.error(`Saint Paul fetch failed at offset ${offset}: ${response.statusText}`);
-      break;
-    }
-
-    const data: any = await response.json();
-    const features = data.features || [];
-    if (features.length === 0) break;
-
-    const batchStatements: D1PreparedStatement[] = [];
-    for (const f of features) {
-      const a = f.attributes || {};
-      const pin = (a.PIN || a.OBJECTID || "").toString().trim();
-      if (!pin) continue;
-
-      allRecords.push(a);
-
-      batchStatements.push(
-        env.DB.prepare(`
-          INSERT INTO rental_licenses (
-            apn, address, city, county, owner_name, owner_address, owner_city, owner_state, owner_zip,
-            owner_phone, owner_email, applicant_name, applicant_phone, applicant_email,
-            units, tier, status, synced_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          ON CONFLICT(apn) DO UPDATE SET
-            address=excluded.address,
-            city=excluded.city,
-            county=excluded.county,
-            owner_name=excluded.owner_name,
-            units=excluded.units,
-            tier=excluded.tier,
-            status=excluded.status,
-            synced_at=excluded.synced_at
-        `).bind(
-          `STP-${pin}`,
-          (a.ADDRESS || "").trim(),
-          "Saint Paul",
-          "Ramsey",
-          (a.PROPNAME || "Unknown St. Paul Landlord").trim(),
-          "",
-          "Saint Paul",
-          "MN",
-          "",
-          "",
-          "",
-          (a.PRIMOCCTYPE || "").trim(),
-          "",
-          "",
-          parseInt(a.UNITS || "1", 10),
-          a.GRADE ? `Grade ${a.GRADE}` : "Grade A",
-          (a.STATUS || "Active").trim(),
-          syncedAt
-        )
-      );
-
-      if (batchStatements.length >= 100) {
-        await env.DB.batch(batchStatements.splice(0, 100));
-      }
-    }
-
-    if (batchStatements.length > 0) {
-      await env.DB.batch(batchStatements);
-    }
-
-    if (features.length < CHUNK_SIZE) break;
-    offset += CHUNK_SIZE;
-    await sleep(DELAY_MS);
-  }
-
-  if (allRecords.length > 0) {
-    const today = new Date().toISOString().split("T")[0];
-    const key = `snapshots/stpaul_rental_cofo_${today}.json`;
-    const jsonStr = JSON.stringify(allRecords);
-
-    await env.R2_BUCKET.put(key, jsonStr, {
-      httpMetadata: { contentType: "application/json" },
-      customMetadata: { recordCount: allRecords.length.toString(), syncedAt },
-    });
-    console.log(`Saved ${allRecords.length} St. Paul records snapshot to R2: ${key}`);
-  }
-}
