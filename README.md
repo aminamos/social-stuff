@@ -25,6 +25,16 @@ Strategic and technical expansion roadmap for **[aminamos/cdp](https://github.co
 
 ---
 
+## 🪙 Social Tokens Projects ([`social-tokens-projects/`](social-tokens-projects/README.md))
+
+High-leverage agent systems directing LLM tokens toward structural transparency and collective civic power — now housed in this repo (mirrored from [aminamos/social-tokens-projects](https://github.com/aminamos/social-tokens-projects)):
+
+* **01 — Eviction Defense & Right-to-Counsel Navigator** ([`social-tokens-projects/01-eviction-defense-navigator/`](social-tokens-projects/01-eviction-defense-navigator/README.md)): verified answers, fee waivers, discovery requests.
+* **02 — Corporate Shell Entity & Slumlord De-anonymization** ([`social-tokens-projects/02-corporate-shell-deanonymizer/`](social-tokens-projects/02-corporate-shell-deanonymizer/README.md)): ownership graphs from tax rolls, SOS filings, violations, mortgage deeds + 3 Cloudflare Workers.
+* **06 — SSDI Hearing-Stage Pilot** ([`social-tokens-projects/06-ssdi-hearing-pilot/`](social-tokens-projects/06-ssdi-hearing-pilot/README.md)): 5-step back-office pipeline with attorney sign-off.
+
+---
+
 ## ⚡ Top 10 Quick Wins (Ranked by PR Acceptance Probability)
 
 These issues feature active maintainers, isolated diffs, and immediate social or accessibility value:
