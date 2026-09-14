@@ -138,6 +138,66 @@ def cmd_clusters(args):
     console.print(table)
 
 
+def cmd_live_search(args):
+    console.print(f"[bold cyan]Connecting to Live City of Minneapolis Open Data FeatureServer...[/]")
+    pipeline = DeAnonymizationPipeline()
+    live_result = pipeline.load_from_live_query(query=args.query, limit=args.limit)
+
+    props = live_result["properties"]
+    if not props:
+        console.print(f"[bold yellow]No properties found matching query '{args.query}' in live database.[/]")
+        return
+
+    console.print(
+        Panel(
+            f"Query: [bold white]{args.query}[/]\n"
+            f"Properties Found: [bold green]{len(props)}[/]\n"
+            f"Total Residential Units: [bold magenta]{sum(p.unit_count for p in props):,}[/]",
+            title="[bold green]Live Municipal Open Data Results[/]",
+            border_style="green",
+        )
+    )
+
+    table = Table(title=f"Live Unmasked Rental Properties ({args.query})", show_header=True, header_style="bold cyan")
+    table.add_column("Property Address", style="bold white")
+    table.add_column("APN / Parcel", style="dim")
+    table.add_column("Units", justify="right")
+    table.add_column("Owner of Record", style="yellow")
+    table.add_column("License Status / Tier", style="magenta")
+    table.add_column("Applicant / Manager Contact", style="cyan")
+
+    for p in props:
+        table.add_row(
+            p.address,
+            p.parcel_id,
+            str(p.unit_count),
+            p.owner_of_record,
+            p.rental_license_status,
+            p.rental_license_contact_name or "N/A",
+        )
+    console.print(table)
+
+    # Clusters from live data
+    clusters = pipeline.get_all_clusters()
+    if len(clusters) > 1:
+        console.print("\n[bold yellow]Identified Multi-Building Portfolios / Syndicates:[/]")
+        for c in clusters:
+            console.print(f"- [bold white]{c.cluster_alias}[/]: {len(c.property_addresses)} buildings ({c.total_units} units)")
+
+    # Token Accounting
+    accounting = pipeline.get_total_token_accounting()
+    console.print(
+        Panel(
+            f"Prompt Tokens: {accounting['total_prompt_tokens']:,} | "
+            f"Completion Tokens: {accounting['total_completion_tokens']:,} | "
+            f"[bold green]Total Tokens: {accounting['total_tokens']:,}[/] | "
+            f"[bold yellow]Inference Cost: ${accounting['total_estimated_cost_usd']:.4f}[/]",
+            title="[bold blue]Live Pipeline Token Accounting[/]",
+            border_style="blue",
+        )
+    )
+
+
 def cmd_export_graph(args):
     fixtures_dir = Path(args.fixtures) if args.fixtures else get_default_fixtures_dir()
     pipeline = DeAnonymizationPipeline()
@@ -170,6 +230,12 @@ def main():
     p_cls = subparsers.add_parser("clusters", help="List all unmasked beneficial owner clusters")
     p_cls.add_argument("--fixtures", "-f", help="Path to fixtures folder")
     p_cls.set_defaults(func=cmd_clusters)
+
+    # live-search
+    p_live = subparsers.add_parser("live-search", help="Query live Minneapolis Open Data FeatureServer to unmask a landlord or management network")
+    p_live.add_argument("--query", "-q", required=True, help="Landlord name, email domain, phone number, or street name")
+    p_live.add_argument("--limit", "-l", type=int, default=25, help="Max properties to fetch")
+    p_live.set_defaults(func=cmd_live_search)
 
     # export-graph
     p_exp = subparsers.add_parser("export-graph", help="Export ownership graph to Cytoscape JSON")

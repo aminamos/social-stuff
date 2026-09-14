@@ -18,6 +18,7 @@ from ..extractors.tax_registry import TaxRegistryExtractor
 from ..extractors.sos_filings import SOSFilingsExtractor
 from ..extractors.code_violations import CodeViolationsExtractor
 from ..extractors.mortgage_liens import MortgageLiensExtractor
+from ..extractors.live_minneapolis_client import LiveMinneapolisClient
 from ..agents.entity_resolver import EntityResolverAgent
 from ..agents.dossier_generator import DossierGeneratorAgent
 
@@ -31,6 +32,7 @@ class DeAnonymizationPipeline:
         self.sos_extractor = SOSFilingsExtractor(model_name=model_name)
         self.violations_extractor = CodeViolationsExtractor(model_name=model_name)
         self.mortgage_extractor = MortgageLiensExtractor(model_name=model_name)
+        self.live_client = LiveMinneapolisClient(model_name=model_name)
         self.resolver_agent = EntityResolverAgent(model_name=model_name)
         self.dossier_agent = DossierGeneratorAgent(model_name=model_name)
         self.graph = OwnershipGraph()
@@ -101,6 +103,31 @@ class DeAnonymizationPipeline:
             mortgage_records=mortgage_records,
         )
 
+    def load_from_live_query(self, query: str, limit: int = 50) -> Dict[str, Any]:
+        """Queries live City of Minneapolis Open Data and builds the ownership graph."""
+        live_data = self.live_client.search_live_portfolio(query=query, limit=limit)
+        properties = live_data["properties"]
+        entities = live_data["entities"]
+        people = live_data["people"]
+
+        for p in properties:
+            self.graph.add_property(p)
+        for e in entities:
+            self.graph.add_shell_entity(e)
+        for person in people:
+            self.graph.add_person(person)
+
+        edges = self.resolver_agent.resolve_relationships(
+            properties=properties,
+            entities=entities,
+            people=people,
+            mortgages=[],
+        )
+        for edge in edges:
+            self.graph.add_edge(edge)
+
+        return live_data
+
     def investigate(self, address_or_pin: str) -> Dict[str, Any]:
         """Runs graph traversal and entity de-anonymization for a specific property."""
         return self.graph.find_sister_properties(address_or_pin)
@@ -123,6 +150,7 @@ class DeAnonymizationPipeline:
             self.sos_extractor.get_token_report(),
             self.violations_extractor.get_token_report(),
             self.mortgage_extractor.get_token_report(),
+            self.live_client.get_token_report(),
             self.resolver_agent.get_token_report(),
             self.dossier_agent.get_token_report(),
         ]

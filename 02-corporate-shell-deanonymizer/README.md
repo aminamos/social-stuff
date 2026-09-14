@@ -110,7 +110,36 @@ python -m pip install -r requirements.txt
 python -m pytest
 ```
 
-### 1. Investigate a Property Address
+### 1. Live Municipal Open Data Search (Real-time City of Minneapolis)
+Query the City of Minneapolis Open Data FeatureServer directly to de-anonymize real corporate landlord portfolios:
+```bash
+python -m src.cli live-search --query "Fitterer"
+```
+
+Output:
+```text
+Connecting to Live City of Minneapolis Open Data FeatureServer...
++--------------------- Live Municipal Open Data Results ----------------------+
+| Query: Fitterer                                                             |
+| Properties Found: 22                                                        |
+| Total Residential Units: 970                                                |
++-----------------------------------------------------------------------------+
+                  Live Unmasked Rental Properties (Fitterer)                   
++-----------------------------------------------------------------------------+
+| Property Address    | APN / Parcel  | Units | Owner of Record  | Tier       |
+|---------------------+---------------+-------+------------------+------------|
+| 2310 ALDRICH AVE S  | 3302924110... |    28 | Brian Fitterer   | Tier 1     |
+| 2119 PILLSBURY AVE  | 3402924210... |    49 | Brian Fitterer   | Tier 3     |
+| 2221 BLAISDELL AVE  | 3402924210... |    29 | BLAISDELL LLC    | Tier 2     |
+| 2215 BLAISDELL AVE  | 3402924210... |    23 | BLAISDELL LLC    | Tier 2     |
+| 2312 BLAISDELL AVE  | 3402924210... |    26 | BLAISDELL LLC    | Tier 3     |
+| 2820 BLAISDELL AVE  | 3402924340... |    24 | GREENWAY LLC     | Tier 3     |
+| 1117 MARQUETTE AVE  | 2702924130... |   234 | Bolero Flats LLC | Tier 2     |
++-----------------------------------------------------------------------------+
+```
+*Discovered: 22 properties and 970 units fragmented across disparate LLCs (`BLAISDELL PORTFOLIO LLC`, `GREENWAY APARTMENTS LLC`, `Bolero Flats Apartments LLC`), linked by applicant manager emails (`blaisdell@ipgliving.com`) and Tier 3 habitability citations.*
+
+### 2. Investigate a Property Address (Graph Crossover & Traversal)
 Unmask the real beneficial owners and find all sister properties across town:
 ```bash
 python -m src.cli investigate --address "1420 11th Ave S"
@@ -128,19 +157,19 @@ Output:
 +-----------------------------------------------------------------------------+
 ```
 
-### 2. Scan All Portfolios Across the City
+### 3. Scan All Portfolios Across the City
 Cluster and rank corporate landlord networks:
 ```bash
 python -m src.cli clusters
 ```
 
-### 3. Generate a Tactical Tenant Union Action Dossier
+### 4. Generate a Tactical Tenant Union Action Dossier
 Generate a comprehensive markdown dossier for organizers, city council testimony, or press releases:
 ```bash
-python -m src.cli dossier --address "1420 11th Ave S" --output dossier.md
+python -m src.cli dossier --address "1420 11th Ave S" --output strike_dossier.md
 ```
 
-### 4. Interactive Web Dashboard
+### 5. Interactive Web Dashboard
 Open `web/index.html` in any web browser to explore the interactive canvas force-directed graph, click through nodes, and copy action dossiers directly.
 
 ---
