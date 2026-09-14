@@ -4,6 +4,8 @@ A curated, field-verified roadmap of civic tech groups, non-profits, public data
 
 Every organization listed here has been audited for **active maintenance pipelines in 2025–2026** so your pull requests won't sit unreviewed on abandoned forks.
 
+> 📊 **[Read the Complete Executive Summary & Master Roadmap (EXECUTIVE_SUMMARY.md)](EXECUTIVE_SUMMARY.md)** for the full analysis, maintenance gap audit, ranked quick-win action plan, and CDP expansion strategy.
+
 ---
 
 ## 🗺️ Regional Guides
