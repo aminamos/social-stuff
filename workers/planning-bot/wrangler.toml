@@ -1,0 +1,15 @@
+name = "rural-planning-bot"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "rural-planning-bot"
+database_id = "be37fd0c-9235-4361-83f0-1e0fb3c46636"
+
+[[r2_buckets]]
+binding = "R2_DATA"
+bucket_name = "rural-planning-bot-data"
+
+[observability]
+enabled = true

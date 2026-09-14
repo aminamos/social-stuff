@@ -1,0 +1,61 @@
+county,status,county_seat,gis_portal_url,gis_parcels_service_url,zoning_ordinance_url,city_code_url,needs_review
+Aitkin,needs_review,,,https://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/8501_Parcels_Merged_Classified/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Becker,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Beltrami,needs_review,,https://gishub-beltramicounty.hub.arcgis.com/,https://arcgis.co.beltrami.mn.us/arcgis/rest/services/BeltramiData/BeltramiOpenData/MapServer/2,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found
+Big Stone,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Brown,needs_review,,,https://gis.co.brown.mn.us/server/rest/services/BrownCountyMaster/Parcel_Tax_Vendor/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Cass,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Chippewa,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Clearwater,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Cook,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Cottonwood,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Crow Wing,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Douglas,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Faribault,needs_review,,https://faribault-county-hub-FCSWCD.hub.arcgis.com,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found
+Freeborn,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Goodhue,needs_review,,,https://services8.arcgis.com/81iGvYZfKpMfrgYJ/arcgis/rest/services/Soft_Parcels_City_of_RedWing_WFL1/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Grant,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Hubbard,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Itasca,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Jackson,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Kanabec,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Kandiyohi,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Kittson,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Koochiching,needs_review,,,https://services.arcgis.com/n4v88Dv33V9Mhi0b/arcgis/rest/services/Public_Access_Layers/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Lac qui Parle,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Lake,needs_review,,,https://services4.arcgis.com/z5QlFXK0gOIvsPsP/arcgis/rest/services/shp_plan_tax_parcels_MW/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Lake of the Woods,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Lincoln,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Lyon,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Mahnomen,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Marshall,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Martin,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+McLeod,needs_review,,,https://services8.arcgis.com/AgCkxHOg7dxK30Pb/arcgis/rest/services/McLeod_Potential_Solar_Sites/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Meeker,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Morrison,needs_review,,,https://services1.arcgis.com/lQjrBHFnTgKBR9zX/arcgis/rest/services/Parcels/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Mower,needs_review,,,https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/Austin__MN_WFL1/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Murray,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Nobles,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Norman,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Otter Tail,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Pennington,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Pine,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Pipestone,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Pope,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Red Lake,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Redwood,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Renville,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Rice,needs_review,,,https://asr-arcgis01.ricecountymn.gov/arcgis/rest/services/Maps/TaxParcels/MapServer/1,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Roseau,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Sibley,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Steele,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Stevens,needs_review,,,https://services2.arcgis.com/7iPhaYyq6PkRoVhV/arcgis/rest/services/Feb_2026_Parcels/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Swift,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Todd,needs_review,,,https://services.arcgis.com/qWbGMYB49y8mLbRt/arcgis/rest/services/MnDOT_EV_Site_Parcels_Viewer/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Traverse,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Wadena,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Waseca,needs_review,,,https://gis.wasecacounty.gov/arcgis/rest/services/Public/Cadastral/FeatureServer/0,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Watonwan,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Wilkin,needs_review,,,,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Winona,needs_review,,,https://services.arcgis.com/n4v88Dv33V9Mhi0b/arcgis/rest/services/Public_Access_Layers/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal
+Yellow Medicine,needs_review,,,https://services.arcgis.com/n4v88Dv33V9Mhi0b/arcgis/rest/services/Public_Access_Layers/FeatureServer,,,county seat + city code URL not yet researched; county zoning ordinance URL not yet found; no verified ArcGIS Hub GIS portal

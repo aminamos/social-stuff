@@ -1,0 +1,840 @@
+[
+  {
+    "county": "Aitkin",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/8501_Parcels_Merged_Classified/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Becker",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Beltrami",
+    "county_seat": null,
+    "gis_portal_url": "https://gishub-beltramicounty.hub.arcgis.com/",
+    "gis_parcels_service_url": "https://arcgis.co.beltrami.mn.us/arcgis/rest/services/BeltramiData/BeltramiOpenData/MapServer/2",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found"
+    ]
+  },
+  {
+    "county": "Big Stone",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Brown",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://gis.co.brown.mn.us/server/rest/services/BrownCountyMaster/Parcel_Tax_Vendor/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Cass",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Chippewa",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Clearwater",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Cook",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Cottonwood",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Crow Wing",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Douglas",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Faribault",
+    "county_seat": null,
+    "gis_portal_url": "https://faribault-county-hub-FCSWCD.hub.arcgis.com",
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found"
+    ]
+  },
+  {
+    "county": "Freeborn",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Goodhue",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://services8.arcgis.com/81iGvYZfKpMfrgYJ/arcgis/rest/services/Soft_Parcels_City_of_RedWing_WFL1/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Grant",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Hubbard",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Itasca",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Jackson",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Kanabec",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Kandiyohi",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Kittson",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Koochiching",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://services.arcgis.com/n4v88Dv33V9Mhi0b/arcgis/rest/services/Public_Access_Layers/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Lac qui Parle",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Lake",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://services4.arcgis.com/z5QlFXK0gOIvsPsP/arcgis/rest/services/shp_plan_tax_parcels_MW/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Lake of the Woods",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Lincoln",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Lyon",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Mahnomen",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Marshall",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Martin",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "McLeod",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://services8.arcgis.com/AgCkxHOg7dxK30Pb/arcgis/rest/services/McLeod_Potential_Solar_Sites/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Meeker",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Morrison",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://services1.arcgis.com/lQjrBHFnTgKBR9zX/arcgis/rest/services/Parcels/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Mower",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/Austin__MN_WFL1/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Murray",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Nobles",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Norman",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Otter Tail",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Pennington",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Pine",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Pipestone",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Pope",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Red Lake",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Redwood",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Renville",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Rice",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://asr-arcgis01.ricecountymn.gov/arcgis/rest/services/Maps/TaxParcels/MapServer/1",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Roseau",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Sibley",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Steele",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Stevens",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://services2.arcgis.com/7iPhaYyq6PkRoVhV/arcgis/rest/services/Feb_2026_Parcels/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Swift",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Todd",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://services.arcgis.com/qWbGMYB49y8mLbRt/arcgis/rest/services/MnDOT_EV_Site_Parcels_Viewer/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Traverse",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Wadena",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Waseca",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://gis.wasecacounty.gov/arcgis/rest/services/Public/Cadastral/FeatureServer/0",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Watonwan",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Wilkin",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Winona",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://services.arcgis.com/n4v88Dv33V9Mhi0b/arcgis/rest/services/Public_Access_Layers/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  },
+  {
+    "county": "Yellow Medicine",
+    "county_seat": null,
+    "gis_portal_url": null,
+    "gis_parcels_service_url": "https://services.arcgis.com/n4v88Dv33V9Mhi0b/arcgis/rest/services/Public_Access_Layers/FeatureServer",
+    "zoning_ordinance_url": null,
+    "city_code_url": null,
+    "status": "needs_review",
+    "needs_review": [
+      "county seat + city code URL not yet researched",
+      "county zoning ordinance URL not yet found",
+      "no verified ArcGIS Hub GIS portal"
+    ]
+  }
+]

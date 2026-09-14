@@ -4,47 +4,34 @@ Rural communities and exurbs like Buffalo, Minnesota face distinct structural te
 
 Large language models with massive context windows ("enough tokens" to ingest entire town codebases, decades of equipment logs, or farm data histories) can act as an asynchronous, zero-headcount force multiplier across several critical areas:
 
----
-
-### 1. Municipal Administration & Regulatory Burden
-
-Small local governments operate with lean staff where city administrators, zoning officials, and clerks wear multiple hats.
-
-* **Massive Municipal Archive & Code Retrieval:** Towns maintain decades of disjointed PDF records—city council minutes, zoning ordinances, easements, and state compliance statutes (e.g., Minnesota Pollution Control Agency or DNR guidelines). An LLM with an expansive context window can digest the entire 40-year town ledger and municipal code to answer complex resident queries instantly (e.g., *"Can I build an accessory dwelling unit or pole barn on parcel X given wetland buffer rules passed in 1998 and amended in 2017?"*).
-* **State & Federal Grant Discovery and Drafting:** Small towns frequently miss out on state infrastructure programs (such as Minnesota Border-to-Border broadband or clean water grants) simply because they lack dedicated grant writers. An LLM can ingest 200-page federal Notice of Funding Opportunities (NOFOs), evaluate town master plan documents against the rubric, and generate draft applications.
+> Sorted best-to-least by what one person can build solo with just an LLM, easiest first. Ideas that are impossible solo (they require institutional access, e.g. hospital EHRs or payer contracts) have been removed.
 
 ---
 
-### 2. Agriculture & Equipment Fleet Telemetry
+### 1. Agriculture & Equipment Fleet Telemetry
 
 While modern agriculture in Wright County and Greater Minnesota uses high-tech telemetry (RTK GPS, variable-rate planters, yield monitors), small and mid-sized operators face significant data bottlenecks.
 
-* **Long-Horizon Multi-Season Field Analysis:** Precision ag generates vast amounts of unstructured and semi-structured data: multi-year soil sample lab results, yield maps, rainfall logs, and fertilizer application sheets. An LLM with million-token capacity can ingest a decade of unstructured field logs alongside agronomic literature to synthesize why specific plots consistently underperform or draft custom soil amendment schedules.
 * **Legacy Machinery Diagnostics & "Right to Repair":** When equipment breaks in the field, waiting days for a certified technician from a distant dealership is costly. Operators can dump entire 1,500-page legacy service manuals, schematics, and sensor error code dumps into a model to obtain step-by-step diagnostic paths without needing an expensive proprietary portal.
+* **Long-Horizon Multi-Season Field Analysis:** Precision ag generates vast amounts of unstructured and semi-structured data: multi-year soil sample lab results, yield maps, rainfall logs, and fertilizer application sheets. An LLM with million-token capacity can ingest a decade of unstructured field logs alongside agronomic literature to synthesize why specific plots consistently underperform or draft custom soil amendment schedules.
 
 ---
 
-### 3. Rural Healthcare & Clinical Staffing
-
-Regional clinics and independent hospitals struggle with clinician recruitment, resulting in high physician burnout and reliance on locum tenens (temporary doctors) who lack historical patient context.
-
-* **Unstructured EHR Synthesis:** When an elderly patient with a 25-year chart is admitted or seen at a regional emergency department, clinicians do not have time to read through hundreds of pages of unindexed faxed records, lab results, and discharge summaries. Long-context LLMs can summarize complete patient longitudinal histories, highlighting cross-system medication contraindications and historical baseline vitals.
-* **Prior Authorization & Billing Overhead:** Rural clinics carry an enormous administrative cost per patient to manage insurance claims and prior authorizations. LLMs can ingest an entire patient encounter transcript alongside specific private and Medicaid payer policy manuals to generate airtight prior authorization justification letters.
-
----
-
-### 4. Small Business & Regional IT Scarcity
+### 2. Small Business & Regional IT Scarcity
 
 Local businesses—from independent grain elevators and manufacturing job shops to regional trades—rarely have dedicated software engineering or IT staff.
 
-* **Ad-Hoc Systems Integration:** Small rural companies often run on bespoke access databases, legacy ERPs, or paper invoices that don't speak to modern logistics systems. An LLM capable of holding massive codebases and data schemas can generate reliable migration scripts, build automated middleware, or parse non-standard supplier PDFs into structured inventory feeds without requiring custom vendor software.
 * **On-Demand Domain Triage:** For local accounting, legal, and environmental compliance (e.g., runoff compliance, feedlot permits, local tax incentives), long-token LLMs serve as a tier-1 sanity check, digesting convoluted state statutes and helping business owners prepare specific, high-efficiency questions for paid professionals.
+* **Ad-Hoc Systems Integration:** Small rural companies often run on bespoke access databases, legacy ERPs, or paper invoices that don't speak to modern logistics systems. An LLM capable of holding massive codebases and data schemas can generate reliable migration scripts, build automated middleware, or parse non-standard supplier PDFs into structured inventory feeds without requiring custom vendor software.
 
 ---
 
-### The Infrastructure Catch
+### 3. Municipal Administration & Regulatory Burden
 
-For an LLM to meaningfully bridge these gaps in rural settings, it must solve the **connectivity constraint**. Because broadband and cellular backhaul can still be uneven outside the town center, the most impactful architecture often pairs large-token reasoning models in the cloud with lightweight local retrieval pipelines, or runs high-context models on local workstation hardware inside town halls and farm management offices.
+Small local governments operate with lean staff where city administrators, zoning officials, and clerks wear multiple hats. Solo-buildable as tools, but deploying them needs a town willing to adopt them.
+
+* **Massive Municipal Archive & Code Retrieval:** Towns maintain decades of disjointed PDF records—city council minutes, zoning ordinances, easements, and state compliance statutes (e.g., Minnesota Pollution Control Agency or DNR guidelines). An LLM with an expansive context window can digest the entire 40-year town ledger and municipal code to answer complex resident queries instantly (e.g., *"Can I build an accessory dwelling unit or pole barn on parcel X given wetland buffer rules passed in 1998 and amended in 2017?"*).
+* **State & Federal Grant Discovery and Drafting:** Small towns frequently miss out on state infrastructure programs (such as Minnesota Border-to-Border broadband or clean water grants) simply because they lack dedicated grant writers. An LLM can ingest 200-page federal Notice of Funding Opportunities (NOFOs), evaluate town master plan documents against the rubric, and generate draft applications.
 
 ---
 

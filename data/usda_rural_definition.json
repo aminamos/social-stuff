@@ -1,0 +1,33 @@
+{
+  "source_pdf": "data/ERS_MN_rural.pdf",
+  "pages": 15,
+  "county_definition": {
+    "page": 3,
+    "rural": "Nonmetro county",
+    "urban": "OMB metro county"
+  },
+  "map_label_audit_count": 160,
+  "map_labels_sample": [
+    "St",
+    "Louis",
+    "Itasca",
+    "Cass",
+    "Lake",
+    "Polk",
+    "Beltrami",
+    "Aitkin",
+    "Pine",
+    "Cook",
+    "Koochiching",
+    "Price",
+    "Otter Tail",
+    "Clay",
+    "Clark",
+    "Roseau",
+    "Marshall",
+    "Iron",
+    "Becker",
+    "Todd"
+  ],
+  "note": "Map labels span MN + neighboring states and carry no metro/nonmetro values; they are an audit trail only. The county list below derives from the OMB file."
+}
