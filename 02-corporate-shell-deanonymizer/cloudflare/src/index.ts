@@ -93,7 +93,7 @@ export default {
             r.units, r.tier, r.status,
             (SELECT COUNT(*) FROM rental_licenses r2 WHERE r2.applicant_email = r.applicant_email AND r.applicant_email != '') as sister_properties_count,
             (SELECT SUM(units) FROM rental_licenses r3 WHERE r3.applicant_email = r.applicant_email AND r.applicant_email != '') as total_syndicate_units,
-            (SELECT case_id || '::' || violation_type || '::' || back_wages_recovered || '::' || workers_affected 
+            (SELECT case_id || '::' || violation_type || '::' || back_wages_recovered || '::' || workers_affected || '::' || COALESCE(provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA')
              FROM wage_theft_records w 
              WHERE (w.trade_name != '' AND (
                  instr(lower(r.owner_name), lower(w.trade_name)) > 0 

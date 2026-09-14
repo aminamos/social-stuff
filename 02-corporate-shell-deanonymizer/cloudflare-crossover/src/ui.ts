@@ -791,16 +791,20 @@ export function renderCrossoverUI(): string {
       if (!s) return;
 
       const totalRecovered = parseFloat(s.total_wage_theft_recovered || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+      const isLaborVerified = (s.labor_provenance || '').includes('VERIFIED');
 
       const md = [
-        '### Crossover Investigation: ' + (s.entity_name || 'Corporate Entity') + ' (' + (s.trade_name || 'N/A') + ')',
-        '- **Dual Exploitation Risk**: **' + (s.risk_tier || 'HIGH RISK') + '** (Composite Score: ' + (s.composite_score || 0) + '/100)',
-        '- **Jurisdiction**: ' + (s.city || 'Twin Cities') + ', MN (Contact: ' + (s.applicant_email || 'Multiple') + ')',
+        '### Dual Housing & Labor Exploitation Dossier: ' + (s.entity_name || 'Syndicate Entity'),
+        '- **Operating Trade Name**: ' + (s.trade_name || 'N/A'),
+        '- **Dual Exploitation Risk Assessment**: **' + (s.risk_tier || 'HIGH RISK') + '** (Composite Score: ' + (s.composite_score || 0) + '/100)',
+        '- **Geographic Jurisdiction**: ' + (s.city || 'Twin Cities Metro Area') + ', MN',
         '- **Housing Exploitation Profile**:',
+        '  - Data Provenance: ' + (s.housing_provenance || '🟢 VERIFIED MUNICIPAL GIS RECORD (Minneapolis Open Data / Hennepin County Assessor)'),
         '  - Unmasked Residential Portfolio: ' + (s.total_units || 0) + ' units across ' + (s.properties_count || 1) + ' shell properties',
         '  - Habitability Status: ' + (s.has_tier3 ? '⚠️ TIER 3 CHRONIC SLUMLORD' : 'Tier 1/2 Active'),
         '  - Habitability Record: ' + (s.housing_narrative || 'Documented habitability violations.'),
         '- **Labor Exploitation & Wage Theft Profile**:',
+        '  - Data Provenance: ' + (s.labor_provenance || '🟡 PROTOTYPE SEED / PENDING FOIA SYNC (Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync)'),
         '  - Legal Docket / Case ID: \`' + (s.case_id || 'N/A') + '\` (' + (s.source_agency || 'Labor Standards') + ')',
         '  - Violation Classification: ' + (s.violation_type || 'Wage Theft & Overtime Fraud'),
         '  - Financial Restitution & Penalties: $' + totalRecovered,
@@ -809,6 +813,7 @@ export function renderCrossoverUI(): string {
         '- **Recommended Joint Organizing Strategy**:',
         '  - ' + (s.organizing_playbook || 'Escrow rent; enforce joint employer liability.'),
         '- **Official Source Records & Legal Dockets**:',
+        s.source_docket_url ? '  - Primary Source Docket / Legal Report: ' + s.source_docket_url : '',
         '  - County Property Tax / Parcel PDF: https://www.hennepin.us/residents/property/property-information-search',
         '  - Municipal Active Rental License Registry: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0',
         '  - US DOL Enforcement Database: https://enforcement.dol.gov',
@@ -816,7 +821,7 @@ export function renderCrossoverUI(): string {
         '  - Minneapolis Civil Rights Labor Standards: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards',
         '  - Landlord De-anonymizer File: https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=' + encodeURIComponent(s.search_slug || ''),
         '  - Wage Theft Registry File: https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(s.search_slug || '')
-      ].join('\\n');
+      ].filter(Boolean).join('\\n');
 
       navigator.clipboard.writeText(md).then(() => {
         const btn = document.getElementById('copy-btn-' + idx);
@@ -846,22 +851,37 @@ export function renderCrossoverUI(): string {
         '**Generated**: ' + new Date().toISOString(),
         '**Source**: https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev',
         '',
+        '> **Dual Data Provenance Notice**:',
+        '> - **Housing Data Provenance**: 🟢 VERIFIED MUNICIPAL GIS RECORD (Direct parcel and licensing data from Minneapolis Open Data & Hennepin County Assessor).',
+        '> - **Labor Data Provenance**:',
+        '>   - 🟢 **VERIFIED PUBLIC ENFORCEMENT ACTION**: Formal civil court judgment / consent decree or AG enforcement finding.',
+        '>   - 🟡 **PROTOTYPE SEED / PENDING FOIA SYNC**: Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.',
+        '',
         '---',
         ''
       ];
 
       currentMatrixResults.forEach((s, idx) => {
         const totalRecovered = parseFloat(s.total_wage_theft_recovered || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+        const isLaborVerified = (s.labor_provenance || '').includes('VERIFIED');
         lines.push('## ' + (idx + 1) + '. ' + (s.entity_name || 'Entity') + ' (' + (s.trade_name || 'N/A') + ')');
         lines.push('- **Dual Exploitation Risk**: **' + (s.risk_tier || 'HIGH RISK') + '** (Score: ' + (s.composite_score || 0) + '/100)');
         lines.push('- **Metro Geography**: ' + (s.city || 'Twin Cities') + ', MN');
+        lines.push('- **Housing Data Provenance**: ' + (s.housing_provenance || '🟢 VERIFIED MUNICIPAL GIS RECORD'));
         lines.push('- **Housing Footprint**: ' + (s.total_units || 0) + ' units across ' + (s.properties_count || 1) + ' shell properties' + (s.has_tier3 ? ' [TIER 3 SLUMLORD]' : ''));
         lines.push('  - ' + (s.housing_narrative || ''));
+        lines.push('- **Labor Data Provenance**: ' + (s.labor_provenance || '🟡 PROTOTYPE SEED / PENDING FOIA SYNC'));
+        if (!isLaborVerified) {
+          lines.push('  - *Note*: Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.');
+        }
         lines.push('- **Labor Violation**: Case \`' + (s.case_id || 'N/A') + '\` (' + (s.source_agency || '') + ' - ' + (s.violation_type || '') + ')');
         lines.push('  - Financial Recovery: $' + totalRecovered + ' across ' + (s.workers_affected || 0) + ' workers');
         lines.push('  - ' + (s.labor_narrative || ''));
         lines.push('- **Joint Organizing Playbook**: ' + (s.organizing_playbook || ''));
         lines.push('- **Primary Document & Docket Links**:');
+        if (s.source_docket_url) {
+          lines.push('  - Primary Source Docket / Legal Report: ' + s.source_docket_url);
+        }
         lines.push('  - County Parcel PDF: https://www.hennepin.us/residents/property/property-information-search');
         lines.push('  - Rental License Feature Docket: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0');
         lines.push('  - US DOL Enforcement: https://enforcement.dol.gov');
@@ -1045,6 +1065,11 @@ export function renderCrossoverUI(): string {
                   <div class="pillar-header housing">
                     <span>🏢 Housing Exploitation Profile</span>
                   </div>
+                  <div style="margin-bottom: 8px;">
+                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 9999px; font-size: 0.68rem; font-weight: 700; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);">
+                      \${s.housing_provenance || '🟢 VERIFIED MUNICIPAL GIS RECORD'}
+                    </span>
+                  </div>
                   <div class="stat-row">
                     <span class="stat-row-key">Total Units Monitored:</span>
                     <span class="stat-row-val" style="color: #38bdf8;">\${(s.total_units || 0).toLocaleString()} Units</span>
@@ -1073,6 +1098,22 @@ export function renderCrossoverUI(): string {
                 <div>
                   <div class="pillar-header labor">
                     <span>⚖️ Labor Exploitation Profile</span>
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    \${(s.labor_provenance || '').includes('VERIFIED') ? \`
+                      <span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 9999px; font-size: 0.68rem; font-weight: 700; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);">
+                        🟢 VERIFIED PUBLIC ENFORCEMENT ACTION
+                      </span>
+                    \` : \`
+                      <div>
+                        <span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 9999px; font-size: 0.68rem; font-weight: 700; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);" title="Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.">
+                          🟡 PROTOTYPE SEED / PENDING FOIA SYNC
+                        </span>
+                        <div style="font-size: 0.65rem; color: #94a3b8; margin-top: 2px; font-style: italic;">
+                          Demonstration fixture modeled on industry practices under Minn. Stat. § 177.24
+                        </div>
+                      </div>
+                    \`}
                   </div>
                   <div class="stat-row">
                     <span class="stat-row-key">Enforcement Action:</span>
@@ -1107,6 +1148,12 @@ export function renderCrossoverUI(): string {
                   📄 Source Documents & Legal Dockets:
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                  \${s.source_docket_url ? \`
+                    <a href="\${s.source_docket_url}" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
+                      Official Docket Document / Report PDF ↗
+                    </a>
+                    <span style="color: var(--card-border);">•</span>
+                  \` : ''}
                   <a href="https://www.hennepin.us/residents/property/property-information-search" target="_blank" style="color: #38bdf8; text-decoration: underline;">
                     County Property Assessment PDF ↗
                   </a>

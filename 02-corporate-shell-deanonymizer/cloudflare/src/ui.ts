@@ -907,17 +907,23 @@ export function renderUI(): string {
           let wageTheftHTML = '';
           if (item.wage_theft_match) {
             const parts = item.wage_theft_match.split('::');
-            const searchTarget = encodeURIComponent(item.applicant_name || item.owner_name || '');
+            const isVerifiedWage = parts[4] === 'VERIFIED_PUBLIC_ACTION';
+            const wageBadge = isVerifiedWage 
+              ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9999px;font-size:0.68rem;font-weight:700;background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.35);">🟢 VERIFIED PUBLIC ENFORCEMENT ACTION</span>'
+              : '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9999px;font-size:0.68rem;font-weight:700;background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.35);" title="Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.">🟡 PROTOTYPE SEED MATCH (Pending FOIA Sync)</span>';
+
             wageTheftHTML = \`
               <div class="wage-theft-banner">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
                   <span class="wage-theft-title">⚠️ LABOR VIOLATION CITATION ON RECORD</span>
-                  <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev" target="_blank" style="color: #fca5a5; font-size: 0.72rem; font-weight: 700; text-decoration: underline;">
-                    View Labor Registry ↗
+                  \${wageBadge}
+                  <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=\${encodeURIComponent(parts[0])}" target="_blank" style="color: #fca5a5; font-size: 0.72rem; font-weight: 700; text-decoration: underline;">
+                    View Labor Docket ↗
                   </a>
                 </div>
                 <div class="wage-theft-desc">
                   Case \${parts[0]} (\${parts[1]}): $\${parseFloat(parts[2] || 0).toLocaleString()} recovered for \${parts[3]} affected caretakers/workers.
+                  \${!isVerifiedWage ? '<div style="font-size:0.68rem;color:#fca5a5;margin-top:2px;font-style:italic;">Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24.</div>' : ''}
                 </div>
               </div>
             \`;
@@ -929,6 +935,12 @@ export function renderUI(): string {
                 <div class="card-header-tags">
                   <span class="city-badge">\${item.city || 'Twin Cities'}, \${item.county || 'MN'}</span>
                   <span class="units-tag">\${item.units || 1} \${(item.units || 1) === 1 ? 'Unit' : 'Units'}</span>
+                </div>
+
+                <div style="margin: 6px 0;">
+                  <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; font-size: 0.68rem; font-weight: 700; background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+                    🟢 VERIFIED MUNICIPAL GIS RECORD
+                  </span>
                 </div>
 
                 <div class="property-address">\${item.address || 'Unknown Address'}</div>
@@ -1097,11 +1109,14 @@ export function renderUI(): string {
       let wageTheftText = 'None on record';
       if (item.wage_theft_match) {
         const parts = item.wage_theft_match.split('::');
-        wageTheftText = 'Case ' + parts[0] + ' (' + parts[1] + '): $' + parseFloat(parts[2] || 0).toLocaleString() + ' recovered for ' + parts[3] + ' workers (US DOL / State Enforcement)';
+        const isVerifiedWage = parts[4] === 'VERIFIED_PUBLIC_ACTION';
+        const provTag = isVerifiedWage ? '🟢 VERIFIED PUBLIC ENFORCEMENT ACTION' : '🟡 PROTOTYPE SEED MATCH (Pending FOIA Sync)';
+        wageTheftText = 'Case ' + parts[0] + ' (' + parts[1] + '): $' + parseFloat(parts[2] || 0).toLocaleString() + ' recovered for ' + parts[3] + ' workers [' + provTag + ']';
       }
 
       const md = [
         '### Property Dossier: ' + (item.address || 'Unknown Address') + ', ' + (item.city || 'Twin Cities') + ', ' + (item.county || 'MN'),
+        '- **Housing Data Provenance**: 🟢 VERIFIED MUNICIPAL GIS RECORD (Minneapolis Open Data / Hennepin County Assessor)',
         '- **APN / Parcel ID**: \`' + (item.apn || 'N/A') + '\`',
         '- **Units**: ' + (item.units || 1),
         '- **Habitability Tier**: ' + (item.tier || 'Tier 1') + ' (' + (item.status || 'Active') + ')' + (isTier3 ? ' ⚠️ CHRONIC SLUMLORD LIST' : ''),
@@ -1146,6 +1161,10 @@ export function renderUI(): string {
         '**Generated**: ' + new Date().toISOString(),
         '**Source**: https://mpls-rental-sync-worker.a-8c6.workers.dev',
         '',
+        '> **Data Provenance Notice**:',
+        '> - **Housing Records**: 🟢 VERIFIED MUNICIPAL GIS RECORD (Direct from Minneapolis Open Data ArcGIS Feature Service & Hennepin County Assessor).',
+        '> - **Labor Records**: Official US DOL, MN DLI, and Court records badged as 🟢 VERIFIED PUBLIC ENFORCEMENT ACTION or 🟡 PROTOTYPE SEED MATCH (Pending FOIA Sync).',
+        '',
         '---',
         ''
       ];
@@ -1156,10 +1175,13 @@ export function renderUI(): string {
         let wageTheftText = 'None on record';
         if (item.wage_theft_match) {
           const parts = item.wage_theft_match.split('::');
-          wageTheftText = 'Case ' + parts[0] + ' (' + parts[1] + '): $' + parseFloat(parts[2] || 0).toLocaleString() + ' recovered for ' + parts[3] + ' workers';
+          const isVerifiedWage = parts[4] === 'VERIFIED_PUBLIC_ACTION';
+          const provTag = isVerifiedWage ? '🟢 VERIFIED PUBLIC ENFORCEMENT ACTION' : '🟡 PROTOTYPE SEED MATCH (Pending FOIA Sync)';
+          wageTheftText = 'Case ' + parts[0] + ' (' + parts[1] + '): $' + parseFloat(parts[2] || 0).toLocaleString() + ' recovered for ' + parts[3] + ' workers [' + provTag + ']';
         }
 
         lines.push('## ' + (idx + 1) + '. ' + (item.address || 'Unknown Address') + ', ' + (item.city || 'Twin Cities') + ', ' + (item.county || 'MN'));
+        lines.push('- **Housing Data Provenance**: 🟢 VERIFIED MUNICIPAL GIS RECORD');
         lines.push('- **APN / PIN**: \`' + (item.apn || 'N/A') + '\`');
         lines.push('- **Units**: ' + (item.units || 1));
         lines.push('- **Habitability Tier**: ' + (item.tier || 'Tier 1') + ' (' + (item.status || 'Active') + ')' + (isTier3 ? ' [TIER 3 SLUMLORD]' : ''));

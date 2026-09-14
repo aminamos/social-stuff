@@ -142,7 +142,9 @@ export default {
           SELECT 
             case_id, source_agency, respondent_legal_name, trade_name, address, city, state, zip_code,
             industry_description, violation_type, back_wages_recovered, civil_penalties_assessed,
-            settlement_amount, workers_affected, repeat_violator, status, findings_date, description
+            settlement_amount, workers_affected, repeat_violator, status, findings_date, description,
+            COALESCE(provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA') as provenance_type,
+            COALESCE(source_docket_url, '') as source_docket_url
           FROM wage_theft_records
           ORDER BY (back_wages_recovered + civil_penalties_assessed) DESC
         `).all();
@@ -150,7 +152,7 @@ export default {
         const headers = [
           "Case ID", "Agency", "Employer Legal Name", "Trade Name", "Address", "City", "State", "Zip",
           "Industry", "Violation Type", "Back Wages ($)", "Civil Penalties ($)", "Settlement Amount ($)",
-          "Workers Affected", "Repeat Violator", "Status", "Findings Date", "Description"
+          "Workers Affected", "Repeat Violator", "Status", "Findings Date", "Description", "Data Provenance", "Docket URL"
         ];
 
         let csv = headers.join(",") + "\n";
@@ -173,7 +175,9 @@ export default {
             row.repeat_violator ? "YES" : "NO",
             row.status,
             row.findings_date,
-            `"${(row.description || "").replace(/"/g, '""')}"`
+            `"${(row.description || "").replace(/"/g, '""')}"`,
+            row.provenance_type === 'VERIFIED_PUBLIC_ACTION' ? "VERIFIED_PUBLIC_ACTION" : "PROTOTYPE_SEED_PENDING_FOIA",
+            `"${(row.source_docket_url || "").replace(/"/g, '""')}"`
           ];
           csv += vals.join(",") + "\n";
         }
@@ -196,7 +200,9 @@ export default {
           SELECT 
             case_id, source_agency, respondent_legal_name, trade_name, address, city, state, zip_code,
             industry_description, violation_type, back_wages_recovered, civil_penalties_assessed,
-            settlement_amount, workers_affected, repeat_violator, status, findings_date, description
+            settlement_amount, workers_affected, repeat_violator, status, findings_date, description,
+            COALESCE(provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA') as provenance_type,
+            COALESCE(source_docket_url, '') as source_docket_url
           FROM wage_theft_records
           ORDER BY (back_wages_recovered + civil_penalties_assessed) DESC
         `).all();
@@ -207,13 +213,22 @@ export default {
           "Source: https://twin-cities-wage-theft-worker.a-8c6.workers.dev",
           `Total Cases: ${allCases.results.length}`,
           "",
+          "> **Data Provenance Notice**:",
+          "> - 🟢 **VERIFIED PUBLIC ENFORCEMENT ACTION**: Confirmed civil court consent decree or official state AG/DLI enforcement filing.",
+          "> - 🟡 **PROTOTYPE SEED / PENDING FOIA SYNC**: Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.",
+          "",
           "---",
           ""
         ];
 
         for (const [idx, row] of (allCases.results as any[]).entries()) {
           const total = (parseFloat(row.back_wages_recovered || 0) + parseFloat(row.civil_penalties_assessed || 0)).toLocaleString(undefined, {minimumFractionDigits: 2});
+          const isVerified = row.provenance_type === 'VERIFIED_PUBLIC_ACTION';
           md.push(`## ${idx + 1}. ${row.respondent_legal_name || 'Unknown Entity'} (d/b/a ${row.trade_name || 'N/A'})`);
+          md.push(`- **Data Provenance**: ${isVerified ? '🟢 VERIFIED PUBLIC ENFORCEMENT ACTION' : '🟡 PROTOTYPE SEED / PENDING FOIA SYNC'}`);
+          if (!isVerified) {
+            md.push(`  - *Note*: Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.`);
+          }
           md.push(`- **Case ID / Docket**: \`${row.case_id || 'N/A'}\``);
           md.push(`- **Enforcement Agency**: ${row.source_agency || 'N/A'}`);
           md.push(`- **Location**: ${row.address || ''}, ${row.city || 'Twin Cities'}, ${row.state || 'MN'} ${row.zip_code || ''}`);
@@ -226,6 +241,9 @@ export default {
           md.push(`- **Affected Workforce**: ${row.workers_affected || 0} workers`);
           md.push(`- **Official Findings Summary**: ${row.description || 'Confirmed civil/administrative wage theft findings.'}`);
           md.push(`- **Primary Records & Legal Dockets**:`);
+          if (row.source_docket_url) {
+            md.push(`  - Primary Source Docket Document: ${row.source_docket_url}`);
+          }
           md.push(`  - US DOL Enforcement Database: https://enforcement.dol.gov`);
           md.push(`  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us`);
           md.push(`  - Minneapolis Civil Rights Labor Standards: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards`);
@@ -306,8 +324,8 @@ export default {
                 case_id, source_agency, respondent_legal_name, trade_name, address,
                 city, state, zip_code, naics_code, industry_description, violation_type,
                 back_wages_recovered, civil_penalties_assessed, workers_affected, repeat_violator,
-                status, findings_date, settlement_amount, description, synced_at
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                status, findings_date, settlement_amount, description, provenance_type, source_docket_url, synced_at
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
               ON CONFLICT(case_id) DO UPDATE SET
                 source_agency=excluded.source_agency,
                 respondent_legal_name=excluded.respondent_legal_name,
@@ -327,6 +345,8 @@ export default {
                 findings_date=excluded.findings_date,
                 settlement_amount=excluded.settlement_amount,
                 description=excluded.description,
+                provenance_type=excluded.provenance_type,
+                source_docket_url=excluded.source_docket_url,
                 synced_at=CURRENT_TIMESTAMP
             `).bind(
               c.case_id,
@@ -347,7 +367,9 @@ export default {
               c.status,
               c.findings_date,
               c.settlement_amount,
-              c.description
+              c.description,
+              c.provenance_type,
+              c.source_docket_url
             )
           );
         }

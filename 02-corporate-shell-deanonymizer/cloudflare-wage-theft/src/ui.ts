@@ -932,9 +932,11 @@ export function renderWageTheftUI(): string {
       const total = (parseFloat(c.back_wages_recovered || 0) + parseFloat(c.civil_penalties_assessed || 0)).toLocaleString(undefined, {minimumFractionDigits: 2});
       const backWages = parseFloat(c.back_wages_recovered || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
       const penalties = parseFloat(c.civil_penalties_assessed || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+      const isVerified = c.provenance_type === 'VERIFIED_PUBLIC_ACTION';
 
       const md = [
         '### Wage Theft Case Dossier: ' + (c.respondent_legal_name || 'Unknown Entity'),
+        '- **Data Provenance**: ' + (isVerified ? '🟢 VERIFIED PUBLIC ENFORCEMENT ACTION (Official MN AG / District Court Record)' : '🟡 PROTOTYPE SEED / PENDING FOIA SYNC (Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync)'),
         '- **Case ID / Docket**: \`' + (c.case_id || 'N/A') + '\`',
         '- **Enforcement Agency**: ' + (c.source_agency || 'US DOL / State / City'),
         '- **Operating Trade Name (d/b/a)**: ' + (c.trade_name || 'N/A'),
@@ -948,6 +950,7 @@ export function renderWageTheftUI(): string {
         '- **Affected Workforce**: ' + (c.workers_affected || 0) + ' workers',
         '- **Investigative Findings / Narrative**: ' + (c.description || 'Confirmed civil/administrative wage theft findings.'),
         '- **Primary Legal Dockets & Source Documents**:',
+        c.source_docket_url ? '  - Primary Source Docket URL: ' + c.source_docket_url : '  - US DOL Wage & Hour Division Public Enforcement Database: https://enforcement.dol.gov',
         '  - US DOL Wage & Hour Division Public Enforcement Database: https://enforcement.dol.gov',
         '  - Minnesota Judicial Branch Public Access (MCRO Case Search): https://publicaccess.courts.state.mn.us',
         '  - Minneapolis Civil Rights Labor Standards Findings: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards',
@@ -982,13 +985,22 @@ export function renderWageTheftUI(): string {
         '**Generated**: ' + new Date().toISOString(),
         '**Source**: https://twin-cities-wage-theft-worker.a-8c6.workers.dev',
         '',
+        '> **Data Provenance Notice**:',
+        '> - 🟢 **VERIFIED PUBLIC ENFORCEMENT ACTION**: Confirmed civil court consent decree or official state AG/DLI enforcement filing.',
+        '> - 🟡 **PROTOTYPE SEED / PENDING FOIA SYNC**: Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.',
+        '',
         '---',
         ''
       ];
 
       currentCasesResults.forEach((c, idx) => {
         const total = (parseFloat(c.back_wages_recovered || 0) + parseFloat(c.civil_penalties_assessed || 0)).toLocaleString(undefined, {minimumFractionDigits: 2});
+        const isVerified = c.provenance_type === 'VERIFIED_PUBLIC_ACTION';
         lines.push('## ' + (idx + 1) + '. ' + (c.respondent_legal_name || 'Unknown Entity') + ' (d/b/a ' + (c.trade_name || 'N/A') + ')');
+        lines.push('- **Data Provenance**: ' + (isVerified ? '🟢 VERIFIED PUBLIC ENFORCEMENT ACTION' : '🟡 PROTOTYPE SEED / PENDING FOIA SYNC'));
+        if (!isVerified) {
+          lines.push('  - *Note*: Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.');
+        }
         lines.push('- **Case ID**: \`' + (c.case_id || 'N/A') + '\`');
         lines.push('- **Enforcement Agency**: ' + (c.source_agency || 'N/A'));
         lines.push('- **Location**: ' + (c.city || 'Twin Cities') + ', ' + (c.state || 'MN'));
@@ -1000,6 +1012,9 @@ export function renderWageTheftUI(): string {
         lines.push('- **Status**: ' + (c.status || 'Active') + (c.repeat_violator ? ' [REPEAT OFFENDER]' : ''));
         lines.push('- **Case Summary**: ' + (c.description || ''));
         lines.push('- **Source Records**:');
+        if (c.source_docket_url) {
+          lines.push('  - Direct Docket URL: ' + c.source_docket_url);
+        }
         lines.push('  - US DOL WHD Enforcement Database: https://enforcement.dol.gov');
         lines.push('  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us');
         lines.push('  - Minneapolis Labor Standards Enforcement: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards');
@@ -1158,10 +1173,37 @@ export function renderWageTheftUI(): string {
           const totalRecovered = (parseFloat(c.back_wages_recovered || 0) + parseFloat(c.civil_penalties_assessed || 0)).toLocaleString(undefined, {minimumFractionDigits: 2});
           const backWages = parseFloat(c.back_wages_recovered || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
           const penalties = parseFloat(c.civil_penalties_assessed || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+          const isVerified = c.provenance_type === 'VERIFIED_PUBLIC_ACTION';
+
+          const provenanceBadgeHTML = isVerified ? \`
+            <div style="margin-bottom: 10px;">
+              <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">
+                🟢 VERIFIED PUBLIC ENFORCEMENT ACTION
+              </span>
+            </div>
+          \` : \`
+            <div style="margin-bottom: 10px;">
+              <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);" title="Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.">
+                🟡 PROTOTYPE SEED / PENDING FOIA SYNC
+              </span>
+              <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 3px; font-style: italic;">
+                Demonstration case fixture modeled on industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.
+              </div>
+            </div>
+          \`;
+
+          const primaryDocLink = c.source_docket_url ? \`
+            <a href="\${c.source_docket_url}" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
+              Official Docket Document / Report PDF ↗
+            </a>
+            <span>•</span>
+          \` : '';
 
           return \`
             <div class="case-card">
               <div>
+                \${provenanceBadgeHTML}
+
                 <div class="case-header-tags">
                   <span class="agency-tag">\${c.source_agency}</span>
                   <span class="violation-tag">\${c.violation_type}</span>
@@ -1199,6 +1241,7 @@ export function renderWageTheftUI(): string {
                     📄 Source Documents & Official Dockets:
                   </div>
                   <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    \${primaryDocLink}
                     <a href="https://enforcement.dol.gov" target="_blank" style="color: #38bdf8; text-decoration: underline;">
                       US DOL WHD Docket ↗
                     </a>
