@@ -1,0 +1,52 @@
+[
+  {
+    "county": "Crow Wing",
+    "assessor_url": "https://www.crowwing.gov/251/Assessing",
+    "notes": "Official county assessor office page; verified HTTP 200."
+  },
+  {
+    "county": "Douglas",
+    "assessor_url": "https://www.douglascountymn.gov/assessor",
+    "notes": "Official county assessor page; verified HTTP 200."
+  },
+  {
+    "county": "Faribault",
+    "assessor_url": "https://faribault.minnesotaassessors.com/",
+    "notes": "Official county assessor site linked from faribaultcountymn.gov; Beacon parcel search exists but returns 403 to curl (bot wall). Verified HTTP 200."
+  },
+  {
+    "county": "Freeborn",
+    "assessor_url": "https://www.freeborncountymn.gov/126/Assessor",
+    "notes": "Official county assessor page (co.freeborn.mn.us now redirects here); verified HTTP 200."
+  },
+  {
+    "county": "Goodhue",
+    "assessor_url": "https://goodhuecountymn.gov/finance/assessor/",
+    "notes": "Official county assessor page; verified HTTP 200."
+  },
+  {
+    "county": "Grant",
+    "assessor_url": "https://www.grantcountymn.gov/162/Assessor",
+    "notes": "Official county assessor page (co.grant.mn.us now redirects here); verified HTTP 200."
+  },
+  {
+    "county": "Hubbard",
+    "assessor_url": "https://www.hubbardcounty.gov/property_records",
+    "notes": "Official county property-records page (new hubbardcounty.gov domain); verified HTTP 200."
+  },
+  {
+    "county": "Itasca",
+    "assessor_url": "https://www.itascacountymn.gov/151/Assessor",
+    "notes": "Official county assessor page (co.itasca.mn.us now redirects here); verified HTTP 200."
+  },
+  {
+    "county": "Jackson",
+    "assessor_url": "https://jacksoncountymn.gov/assessor",
+    "notes": "Official county assessor page (co.jackson.mn.us redirects here); Beacon parcel search exists but returns 403 to curl. Verified HTTP 200."
+  },
+  {
+    "county": "Kanabec",
+    "assessor_url": "https://www.kanabeccounty.org/departments/assessor.php",
+    "notes": "Official county assessor office page; verified HTTP 200."
+  }
+]

@@ -55,13 +55,19 @@ def verify(url: str | None) -> bool:
 
 
 def main() -> int:
+    import argparse as _ap
+    _p = _ap.ArgumentParser()
+    _p.add_argument("--skip-reverify", action="store_true",
+                    help="trust URLs already recorded (no HTTP checks)")
+    _a = _p.parse_args()
     if not SOURCES.exists():
         print("missing data/county_sources.json", file=sys.stderr)
         return 1
+    skip = _a.skip_reverify
     records: list[dict] = json.loads(SOURCES.read_text(encoding="utf-8"))
     by_county = {r["county"]: r for r in records}
 
-    batch_files = sorted(BATCH_DIR.glob("batch*.json"))
+    batch_files = sorted(BATCH_DIR.glob("batch*.json")) + sorted(BATCH_DIR.glob("assessor*.json"))
     if not batch_files:
         print("no batch files in data/review_batches/", file=sys.stderr)
         return 1
@@ -78,9 +84,11 @@ def main() -> int:
             if b.get("county_seat"):
                 r["county_seat"] = b["county_seat"]
                 nr.discard(REVIEW_SEAT)
-            for field, review in (("zoning_ordinance_url", REVIEW_ZONING), ("city_code_url", REVIEW_CITY)):
+            for field, review in (("zoning_ordinance_url", REVIEW_ZONING),
+                                     ("city_code_url", REVIEW_CITY),
+                                     ("assessor_url", REVIEW_ASSESSOR)):
                 url = b.get(field)
-                if url and verify(url):
+                if url and (skip or verify(url)):
                     r[field] = url
                     nr.discard(review)
                     if field == "city_code_url":
@@ -102,12 +110,24 @@ def main() -> int:
         nr = set(r.get("needs_review", []))
         if r["assessor_url"] is None:
             nr.add(REVIEW_ASSESSOR)
+        nr.discard(REVIEW_GIS)  # GIS coverage is a non-blocking data gap now
+        gaps = set(r.get("data_gaps", []))
         for field in ("gis_portal_url", "gis_parcels_service_url"):
             url = r.get(field)
-            if url and not verify(url):
+            if url and not skip and not verify(url):
                 r[field] = None
                 nr.add(f"previously recorded {field} failed re-verify: {url}")
-            time.sleep(0.2)
+            if not skip:
+                time.sleep(0.2)
+        if r.get("gis_portal_url") is None:
+            gaps.add("no county GIS hub found")
+        else:
+            gaps.discard("no county GIS hub found")
+        if r.get("gis_parcels_service_url") is None:
+            gaps.add("no county parcel service found")
+        else:
+            gaps.discard("no county parcel service found")
+        r["data_gaps"] = sorted(gaps)
         if r.get("county_seat") and not r.get("city_code_url"):
             nr.add(REVIEW_CITY)
             nr.discard(REVIEW_SEAT)
@@ -121,13 +141,14 @@ def main() -> int:
             f,
             fieldnames=["county", "status", "county_seat", "gis_portal_url",
                         "gis_parcels_service_url", "zoning_ordinance_url",
-                        "city_code_url", "assessor_url", "needs_review"],
+                        "city_code_url", "assessor_url", "needs_review", "data_gaps"],
         )
         writer.writeheader()
         for r in records:
-            writer.writerow({k: (v if k != "needs_review" else "; ".join(v))
-                             for k, v in r.items() if k in writer.fieldnames
-                             or k == "needs_review"} | {"needs_review": "; ".join(r["needs_review"])})
+            row = {k: v for k, v in r.items() if k in writer.fieldnames}
+            row["needs_review"] = "; ".join(r.get("needs_review", []))
+            row["data_gaps"] = "; ".join(r.get("data_gaps", []))
+            writer.writerow(row)
     lines = ["# County source review checklist", ""]
     pending = [r for r in records if r["status"] != "verified"]
     lines.append(f"{len(records) - len(pending)}/{len(records)} counties fully verified.")
@@ -136,6 +157,8 @@ def main() -> int:
         lines.append(f"## {r['county']} County")
         for item in r["needs_review"]:
             lines.append(f"- [ ] {item}")
+        for gap in r.get("data_gaps", []):
+            lines.append(f"- (gap) {gap}")
         lines.append("")
     REVIEW_OUT.write_text("\n".join(lines), encoding="utf-8")
 

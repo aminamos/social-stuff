@@ -1,0 +1,52 @@
+[
+  {
+    "county": "Aitkin",
+    "assessor_url": "https://gisweb.aitkincountymn.gov/link/wab/index.html",
+    "notes": "County's official interactive parcel web mapping (ArcGIS); main aitkincountymn.gov pages block automated checks (403), and Aitkin does not use Beacon."
+  },
+  {
+    "county": "Becker",
+    "assessor_url": "https://gis-server.co.becker.mn.us/www/parcel_info.aspx",
+    "notes": "County's official parcel information lookup endpoint (accepts PARCEL parameter); co.becker.mn.us main site bot-walls automated checks, and no Becker Beacon site found."
+  },
+  {
+    "county": "Beltrami",
+    "assessor_url": "https://propertyportal.co.beltrami.mn.us/Search/Disclaimer.aspx",
+    "notes": "County's official property tax records portal (search by name, address, parcel, account)."
+  },
+  {
+    "county": "Big Stone",
+    "assessor_url": "https://www.bigstonecounty.gov/government/assessor/index.php",
+    "notes": "County Assessor office page."
+  },
+  {
+    "county": "Brown",
+    "assessor_url": "https://browncountymn.gov/163/Assessor",
+    "notes": "County Assessor office page; county's Beacon parcel search exists but Beacon blocks automated checks (403)."
+  },
+  {
+    "county": "Cass",
+    "assessor_url": "https://www.casscountymn.gov/1299/Parcel-Information",
+    "notes": "County Parcel Information & Tax Inquiry page."
+  },
+  {
+    "county": "Chippewa",
+    "assessor_url": "https://gis.chippewa.mn/",
+    "notes": "County GIS/tax portal (also hosts tax statements)."
+  },
+  {
+    "county": "Clearwater",
+    "assessor_url": "https://map.co.clearwater.mn.us/",
+    "notes": "County online mapping/parcel search portal (Search by PIN)."
+  },
+  {
+    "county": "Cook",
+    "assessor_url": "https://cookcountymn.gov/government/departments/assessor/index.php",
+    "notes": "County Assessor office page; live Property Info & Pay Taxes search is Beacon, which blocks automated checks (403)."
+  },
+  {
+    "county": "Cottonwood",
+    "assessor_url": "https://www.cottonwoodcountymn.gov/departments/administrative/assessor/",
+    "notes": "County Assessor office page (canonical county domain)."
+  }
+]

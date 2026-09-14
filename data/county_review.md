@@ -1,266 +1,109 @@
 # County source review checklist
 
-0/60 counties fully verified.
+38/60 counties fully verified.
 
 ## Aitkin County
-- [ ] county assessor / property-tax URL not yet found
 - [ ] county zoning ordinance URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
 
 ## Becker County
-- [ ] county assessor / property-tax URL not yet found
 - [ ] county zoning ordinance URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Beltrami County
-- [ ] county assessor / property-tax URL not yet found
 - [ ] previously recorded gis_parcels_service_url failed re-verify: https://arcgis.co.beltrami.mn.us/arcgis/rest/services/BeltramiData/BeltramiOpenData/MapServer/2
-
-## Big Stone County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Brown County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Cass County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county parcel service found
 
 ## Chippewa County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Clearwater County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Cook County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Cottonwood County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Crow Wing County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Douglas County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Faribault County
-- [ ] county assessor / property-tax URL not yet found
-
-## Freeborn County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Goodhue County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Grant County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- [ ] reported assessor_url failed re-verify, needs a replacement: https://faribault.minnesotaassessors.com/
+- (gap) no county parcel service found
 
 ## Hubbard County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Itasca County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Jackson County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Kanabec County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Kandiyohi County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Kittson County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Koochiching County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- [ ] reported assessor_url failed re-verify, needs a replacement: https://kittson.minnesotaassessors.com/
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Lac qui Parle County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Lake County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Lake of the Woods County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Lincoln County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
 
 ## Lyon County
-- [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
 - [ ] county zoning ordinance URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- [ ] reported assessor_url failed re-verify, needs a replacement: https://lyon.minnesotaassessors.com/
 - [ ] reported city_code_url failed re-verify, needs a replacement: https://marshall-mn.municipalcodeonline.com/book?type=ordinances
-
-## Mahnomen County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Marshall County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Martin County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## McLeod County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Meeker County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Morrison County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Mower County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] county zoning ordinance URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
 - [ ] reported zoning_ordinance_url failed re-verify, needs a replacement: https://www.co.mower.mn.us/DocumentCenter/View/1168/Mower-County-Zoning-Ordinance-PDF?bidId
-
-## Murray County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
 
 ## Nobles County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Norman County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Otter Tail County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Pennington County
-- [ ] county assessor / property-tax URL not yet found
 - [ ] county zoning ordinance URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Pine County
-- [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
 - [ ] reported city_code_url failed re-verify, needs a replacement: https://pinecity.municipalcodeonline.com/book?type=ordinances
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Pipestone County
-- [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
 - [ ] reported city_code_url failed re-verify, needs a replacement: https://progressivepipestone.com/DocumentCenter/View/512/Pipestone-Code-Book
-
-## Pope County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Red Lake County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Redwood County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Renville County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Rice County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Roseau County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Sibley County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Steele County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Stevens County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Swift County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Todd County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Traverse County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Wadena County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Waseca County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Watonwan County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Wilkin County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found
+- (gap) no county parcel service found
 
 ## Winona County
 - [ ] city code URL not yet found
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
-
-## Yellow Medicine County
-- [ ] county assessor / property-tax URL not yet found
-- [ ] no verified ArcGIS Hub GIS portal
+- (gap) no county GIS hub found

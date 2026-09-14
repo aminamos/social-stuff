@@ -1,0 +1,52 @@
+[
+  {
+    "county": "Kandiyohi",
+    "assessor_url": "https://www.kcmn.us/departments/assessor/index.php",
+    "notes": "HTTP 200. Official county Assessor office page (kcmn.us)."
+  },
+  {
+    "county": "Kittson",
+    "assessor_url": "https://kittson.minnesotaassessors.com/",
+    "notes": "HTTP 200. County's official parcel/property lookup (Vanguard system), linked as 'Property Lookup' from the county assessor page at co.kittson.mn.us. Direct Kittson Beacon URL returns 403 to curl."
+  },
+  {
+    "county": "Koochiching",
+    "assessor_url": "https://www.koochiching.gov/156/Assessor",
+    "notes": "HTTP 200. Official county Assessor page; county migrated from co.koochiching.mn.us to koochiching.gov (old URLs 301-redirect)."
+  },
+  {
+    "county": "Lac qui Parle",
+    "assessor_url": "https://www.lqpcomn.gov/225/Property-Tax",
+    "notes": "HTTP 200. Official county Property Tax page; county migrated from lqpco.com to lqpcomn.gov (old assessor.php now 404s)."
+  },
+  {
+    "county": "Lake",
+    "assessor_url": "https://www.co.lake.mn.us/assessor/",
+    "notes": "HTTP 200. Official county Assessor office page."
+  },
+  {
+    "county": "Lake of the Woods",
+    "assessor_url": "https://www.co.lake-of-the-woods.mn.us/assessor/",
+    "notes": "HTTP 200. Official county Assessor office page (references Beacon parcel map)."
+  },
+  {
+    "county": "Lincoln",
+    "assessor_url": "https://tax.cptmn.us/PTaxPortal/#/parcelSearch/Lincoln",
+    "notes": "HTTP 200. CPT (Counties Providing Technology) official parcel/property-tax portal; Lincoln confirmed live via portal getCounties API. County's own site (lincolncounty-mn.us/revize) returns 403 to curl."
+  },
+  {
+    "county": "Lyon",
+    "assessor_url": "https://lyon.minnesotaassessors.com/",
+    "notes": "HTTP 200, title 'home | Lyon County Assessor'. County's official assessor parcel lookup. lyonco.org and GeoMoose viewer block/fail curl (403/connection failure)."
+  },
+  {
+    "county": "Mahnomen",
+    "assessor_url": "https://www.mahnomencounty.gov/department/departments_a_h/assessor/index.php",
+    "notes": "HTTP 200. Official county Assessor page; county migrated from co.mahnomen.mn.us to mahnomencounty.gov. County ArcGIS parcel viewer also returns 200."
+  },
+  {
+    "county": "Marshall",
+    "assessor_url": "https://www.marshallcountymn.gov/departments/assessor/index.php",
+    "notes": "HTTP 200. Official county Assessor page; county migrated from co.marshall.mn.us to marshallcountymn.gov. CPT portal parcel search also live for Marshall."
+  }
+]

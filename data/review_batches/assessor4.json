@@ -1,0 +1,52 @@
+[
+  {
+    "county": "Martin",
+    "assessor_url": "https://www.co.martin.mn.us/your_government/departments/assessor/index.php",
+    "notes": "County Assessor office page, HTTP 200"
+  },
+  {
+    "county": "McLeod",
+    "assessor_url": "https://www.mcleodcountymn.gov/departments/assessor/property_tax_information.php",
+    "notes": "County Assessor property tax info page, HTTP 200"
+  },
+  {
+    "county": "Meeker",
+    "assessor_url": "https://www.co.meeker.mn.us/182/Property-Tax-Information",
+    "notes": "County Property Tax Information page, HTTP 200"
+  },
+  {
+    "county": "Morrison",
+    "assessor_url": "https://morrisoncountymn.gov/190/Assessor",
+    "notes": "County Assessor office page on current morrisoncountymn.gov domain (old co.morrison.mn.us links to Beacon), HTTP 200"
+  },
+  {
+    "county": "Mower",
+    "assessor_url": "https://www.co.mower.mn.us/163/Assessor",
+    "notes": "County Assessor office page, HTTP 200"
+  },
+  {
+    "county": "Murray",
+    "assessor_url": "https://www.murraycountymn.gov/county_departments/county_assessor.php",
+    "notes": "County Assessor office page, HTTP 200"
+  },
+  {
+    "county": "Nobles",
+    "assessor_url": "https://www.co.nobles.mn.us/departments/assessor/",
+    "notes": "County Assessor office page, HTTP 200"
+  },
+  {
+    "county": "Norman",
+    "assessor_url": "https://www.co.norman.mn.us/departments/assessor/index.php",
+    "notes": "County Assessor office page, HTTP 200"
+  },
+  {
+    "county": "Otter Tail",
+    "assessor_url": "https://ottertailcounty.gov/property-home/property-taxes-and-values/contact-my-assessor/",
+    "notes": "County Contact My Assessor page, HTTP 200"
+  },
+  {
+    "county": "Pennington",
+    "assessor_url": "https://co.pennington.mn.us/index.php/component/content/category/32-pennington-county/33-assessor-s-office?Itemid=165",
+    "notes": "County Assessor's Office page, HTTP 200"
+  }
+]

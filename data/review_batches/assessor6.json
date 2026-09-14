@@ -1,0 +1,52 @@
+[
+  {
+    "county": "Stevens",
+    "assessor_url": "https://www.stevenscountymn.gov/888/Assessor",
+    "notes": "County Assessor office page; old co.stevens.mn.us URL 301-redirects to this .gov address, verified 200."
+  },
+  {
+    "county": "Swift",
+    "assessor_url": "https://swiftcounty.gov/assessor",
+    "notes": "County Assessor office page on official swiftcounty.gov domain, verified 200."
+  },
+  {
+    "county": "Todd",
+    "assessor_url": "https://www.toddcountymn.gov/government/departments/assessor/index.php",
+    "notes": "County Assessor dept page; co.todd.mn.us is the county mail server (Outlook login), official site is toddcountymn.gov, verified 200."
+  },
+  {
+    "county": "Traverse",
+    "assessor_url": "https://traversecountymn.gov/departments/departments/assessor/",
+    "notes": "County Assessor page linked from co.traverse.mn.us homepage, verified 200."
+  },
+  {
+    "county": "Wadena",
+    "assessor_url": "https://www.wadenacounty.gov/228/Assessor",
+    "notes": "County Assessor office page; old co.wadena.mn.us URL 301-redirects to this .gov address, verified 200."
+  },
+  {
+    "county": "Waseca",
+    "assessor_url": "https://www.wasecacounty.gov/103/Assessors-Office",
+    "notes": "County Assessor's Office page with Beacon GIS links, verified 200."
+  },
+  {
+    "county": "Watonwan",
+    "assessor_url": "https://watonwancountymn.gov/221/County-Parcel-Information",
+    "notes": "Official County Parcel Information page linking BEACON parcel search and assessor office contact, verified 200."
+  },
+  {
+    "county": "Wilkin",
+    "assessor_url": "https://wilkincounty.gov/assessor",
+    "notes": "County Assessor's Office page on official wilkincounty.gov domain, verified 200."
+  },
+  {
+    "county": "Winona",
+    "assessor_url": "https://www.winonacounty.gov/162/Assessor",
+    "notes": "County Assessor office page; old co.winona.mn.us URL 301-redirects to this .gov address, verified 200."
+  },
+  {
+    "county": "Yellow Medicine",
+    "assessor_url": "https://www.co.ym.mn.gov/index.asp?Type=B_BASIC&SEC={5B1C3107-AC4A-4783-A571-4B2A56B301D3}",
+    "notes": "County Assessor page on official co.ym.mn.gov site, verified 200."
+  }
+]

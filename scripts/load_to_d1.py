@@ -58,7 +58,8 @@ def main() -> int:
                     sql_str(r.get("city_code_url")),
                     sql_str(r.get("assessor_url")),
                     sql_str(r.get("status", "pending")),
-                    sql_str("; ".join(r.get("needs_review", [])) or None),
+                    sql_str("; ".join([*(r.get("needs_review", [])),
+                                       *(r.get("data_gaps", []))]) or None),
                 ]
             )
             + ");"

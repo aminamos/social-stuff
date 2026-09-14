@@ -1,0 +1,52 @@
+[
+  {
+    "county": "Pine",
+    "assessor_url": "https://www.pinecountymn.gov/departments/assessor/index.php",
+    "notes": "County Assessor office page (HTTP 200); county also links its Beacon parcel search from this page."
+  },
+  {
+    "county": "Pipestone",
+    "assessor_url": "https://www.pipestone-county.com/government/departments/assessor/index.php",
+    "notes": "County Assessor office page (HTTP 200); old /board/departments_offices/assessor.php URL now 404."
+  },
+  {
+    "county": "Pope",
+    "assessor_url": "https://popecountymn.gov/assessor/",
+    "notes": "County Assessor office page (HTTP 200) with parcel/tax lookup guidance."
+  },
+  {
+    "county": "Red Lake",
+    "assessor_url": "https://redlakecounty.gov/departments/assessor.php",
+    "notes": "County Assessor office page (HTTP 200) on official redlakecounty.gov domain."
+  },
+  {
+    "county": "Redwood",
+    "assessor_url": "https://redwoodcounty-mn.us/departments/assessor/",
+    "notes": "County Assessor office page (HTTP 200); links Beacon/qPublic parcel search."
+  },
+  {
+    "county": "Renville",
+    "assessor_url": "https://www.renvillecountymn.gov/departments/assessor/index.php",
+    "notes": "County Assessor office page (HTTP 200) with parcel search link."
+  },
+  {
+    "county": "Rice",
+    "assessor_url": "https://www.ricecountymn.gov/149/Assessors-Office",
+    "notes": "Assessor's Office page (HTTP 200) linking Beacon property-tax records search."
+  },
+  {
+    "county": "Roseau",
+    "assessor_url": "https://www.roseaucountymn.gov/offices/assessor/index.php",
+    "notes": "County Assessor page (HTTP 200) on new roseaucountymn.gov domain; old co.roseau.mn.us serves bot-check captcha to HTTP clients. GIS parcel atlas also verified 200."
+  },
+  {
+    "county": "Sibley",
+    "assessor_url": "https://www.sibleycounty.gov/244/Property-Assessing-Zoning",
+    "notes": "Property Assessing & Zoning office page (HTTP 200) with property-information links."
+  },
+  {
+    "county": "Steele",
+    "assessor_url": "https://www.steelecountymn.gov/departments/assessor/index.php",
+    "notes": "County Assessor office page (HTTP 200); parcel/tax lookup via linked CPT portal."
+  }
+]

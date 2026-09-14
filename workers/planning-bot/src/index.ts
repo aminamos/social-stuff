@@ -1,6 +1,8 @@
 /* Rural Planning Bot ("Can I Build / Do This?") frontend worker.
  * One worker covers all 60 nonmetro MN counties. Reads county source
- * records from D1 (rural-planning-bot) and serves archived PDFs from R2.
+ * records from D1 (rural-planning-bot), serves archived code documents
+ * from R2, and re-checks tracked code URLs on a schedule so changes to
+ * city codes / zoning ordinances get detected and reported.
  */
 
 interface Env {
@@ -20,6 +22,18 @@ interface County {
   notes: string | null;
 }
 
+interface Doc {
+  county: string;
+  kind: string;
+  source_url: string;
+  r2_key: string | null;
+  content_sha256: string | null;
+  fetched_at: string;
+}
+
+const UA = { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" };
+const DOC_KEY = /^(city-code|zoning)\/[A-Za-z0-9 .'\-\/]+\.(html|pdf)$/;
+
 function link(label: string, url: string | null): string {
   return url ? `<a href="${url}" rel="noopener">${label}</a>` : `<span class="missing">${label}: not yet found</span>`;
 }
@@ -34,6 +48,62 @@ table{border-collapse:collapse;width:100%}td,th{border:1px solid #ddd;padding:.4
 </head><body>${body}</body></html>`;
 }
 
+async function sha256Hex(bytes: ArrayBuffer): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function extFor(url: string, contentType: string): string {
+  if (contentType.includes("pdf") || url.toLowerCase().endsWith(".pdf")) return "pdf";
+  return "html";
+}
+
+/** Re-fetch one tracked source; archive + log when the bytes changed. */
+async function recheckSource(
+  env: Env, county: string, kind: "city_code" | "zoning", sourceUrl: string, prefix: string
+): Promise<{ changed: boolean; detail: string }> {
+  const latest = await env.DB.prepare(
+    "SELECT r2_key, content_sha256 FROM documents WHERE county = ? AND kind = ? AND r2_key IS NOT NULL ORDER BY fetched_at DESC LIMIT 1"
+  ).bind(county, kind).first<{ r2_key: string; content_sha256: string | null }>();
+  let resp: Response;
+  try {
+    resp = await fetch(sourceUrl, { headers: UA });
+  } catch (e) {
+    return { changed: false, detail: `fetch failed: ${String(e)}` };
+  }
+  if (!resp.ok) return { changed: false, detail: `HTTP ${resp.status}` };
+  const bytes = await resp.arrayBuffer();
+  const hash = await sha256Hex(bytes);
+  if (latest && latest.content_sha256 === hash) {
+    await env.DB.prepare("UPDATE documents SET checked_at = datetime('now') WHERE county = ? AND kind = ? AND r2_key = ?")
+      .bind(county, kind, latest.r2_key).run();
+    return { changed: false, detail: "unchanged" };
+  }
+  const stamp = new Date().toISOString().slice(0, 10);
+  const ext = extFor(sourceUrl, resp.headers.get("content-type") ?? "");
+  const newKey = `${prefix}/${county}/${stamp}.${ext}`;
+  await env.R2_DATA.put(newKey, bytes);
+  await env.DB.prepare(
+    "INSERT INTO documents (county, kind, source_url, r2_key, content_sha256, checked_at) VALUES (?, ?, ?, ?, ?, datetime('now'))"
+  ).bind(county, kind, sourceUrl, newKey, hash).run();
+  if (latest) {
+    await env.DB.prepare(
+      "INSERT INTO change_log (county, kind, old_r2_key, new_r2_key, old_sha256, new_sha256) VALUES (?, ?, ?, ?, ?, ?)"
+    ).bind(county, kind, latest.r2_key, newKey, latest.content_sha256, hash).run();
+    return { changed: true, detail: `changed: ${latest.r2_key} -> ${newKey}` };
+  }
+  return { changed: true, detail: `first archive: ${newKey}` };
+}
+
+async function recheckCounty(env: Env, county: string): Promise<object> {
+  const row = await env.DB.prepare("SELECT * FROM counties WHERE county = ?").bind(county).first<County>();
+  if (!row) return { county, error: "unknown county" };
+  const out: Record<string, object> = {};
+  if (row.city_code_url) out.city_code = await recheckSource(env, county, "city_code", row.city_code_url, "city-code");
+  if (row.zoning_ordinance_url) out.zoning = await recheckSource(env, county, "zoning", row.zoning_ordinance_url, "zoning");
+  return { county, ...out };
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -43,34 +113,68 @@ export default {
       return Response.json(results);
     }
 
-    const apiMatch = url.pathname.match(/^\/api\/counties\/([A-Za-z .']+)$/);
+    const recheck = url.pathname === "/api/recheck" ? url.searchParams.get("county") : null;
+    if (recheck) {
+      return Response.json(await recheckCounty(env, recheck));
+    }
+
+    if (url.pathname === "/changes") {
+      const { results } = await env.DB.prepare(
+        "SELECT county, kind, old_r2_key, new_r2_key, detected_at FROM change_log ORDER BY detected_at DESC LIMIT 100"
+      ).all();
+      const rows = results
+        .map((c: Record<string, string>) =>
+          `<tr><td>${c.detected_at.slice(0, 10)}</td><td><a href="/county/${encodeURIComponent(c.county)}">${c.county}</a></td>` +
+          `<td>${c.kind}</td><td><a href="/docs/${c.old_r2_key}">before</a> → <a href="/docs/${c.new_r2_key}">after</a></td></tr>`)
+        .join("");
+      return new Response(
+        page("Code changes detected", `<p><a href="/">← all counties</a></p><h1>Detected code changes</h1>
+${rows ? `<table><tr><th>Date</th><th>County</th><th>Kind</th><th>Diff</th></tr>${rows}</table>` : "<p>No changes detected yet. Tracked city codes and zoning pages are re-checked on schedule.</p>"}`),
+        { headers: { "content-type": "text/html;charset=utf-8" } }
+      );
+    }
+
+    if (url.pathname.startsWith("/docs/")) {
+      const key = decodeURIComponent(url.pathname.slice("/docs/".length));
+      if (!DOC_KEY.test(key) || key.includes("..")) return new Response("Not found", { status: 404 });
+      const obj = await env.R2_DATA.get(key);
+      if (!obj) return new Response("Not found", { status: 404 });
+      const headers: Record<string, string> = {};
+      if (key.endsWith(".pdf")) headers["content-type"] = "application/pdf";
+      else headers["content-type"] = "text/html;charset=utf-8";
+      return new Response(obj.body, { headers });
+    }
+
+    const apiMatch = url.pathname.match(/^\/api\/counties\/(.+)$/);
     if (apiMatch) {
+      let name = "";
+      try { name = decodeURIComponent(apiMatch[1]); } catch { /* fall through to 404 */ }
+      if (!/^[A-Za-z .']+$/.test(name)) return Response.json({ error: "unknown county" }, { status: 404 });
       const county = await env.DB.prepare("SELECT * FROM counties WHERE county = ?")
-        .bind(apiMatch[1])
-        .first<County>();
+        .bind(name).first<County>();
       if (!county) return Response.json({ error: "unknown county" }, { status: 404 });
       const docs = await env.DB.prepare("SELECT kind, source_url, r2_key, fetched_at FROM documents WHERE county = ?")
-        .bind(apiMatch[1])
-        .all();
+        .bind(name).all();
       return Response.json({ ...county, documents: docs.results });
     }
 
-    const pageMatch = url.pathname.match(/^\/county\/([A-Za-z .']+)$/);
+    const pageMatch = url.pathname.match(/^\/county\/(.+)$/);
     if (pageMatch) {
+      let name = "";
+      try { name = decodeURIComponent(pageMatch[1]); } catch { /* fall through to 404 */ }
+      if (!/^[A-Za-z .']+$/.test(name)) return new Response("Unknown county", { status: 404 });
       const county = await env.DB.prepare("SELECT * FROM counties WHERE county = ?")
-        .bind(pageMatch[1])
-        .first<County>();
+        .bind(name).first<County>();
       if (!county) return new Response("Unknown county", { status: 404 });
       const docs = await env.DB.prepare("SELECT kind, source_url, r2_key, fetched_at FROM documents WHERE county = ?")
-        .bind(pageMatch[1])
-        .all<{ kind: string; source_url: string; r2_key: string | null; fetched_at: string }>();
+        .bind(name).all<{ kind: string; source_url: string; r2_key: string | null; fetched_at: string }>();
       const docRows = docs.results
-        .map((d) => `<tr><td>${d.kind}</td><td><a href="${d.source_url}" rel="noopener">source</a></td><td>${d.r2_key ?? "—"}</td></tr>`)
+        .map((d) => `<tr><td>${d.kind}</td><td><a href="${d.source_url}" rel="noopener">source</a></td><td>${d.r2_key ? `<a href="/docs/${d.r2_key}">archived</a>` : "—"}</td></tr>`)
         .join("");
       return new Response(
         page(
           `${county.county} County, MN — Can I Build?`,
-          `<p><a href="/">← all counties</a></p>
+          `<p><a href="/">← all counties</a> · <a href="/changes">code changes</a></p>
 <h1>${county.county} County, MN <span class="badge">${county.status}</span></h1>
 <ul>
 <li>County seat: ${county.county_seat ?? "not yet researched"}</li>
@@ -82,7 +186,7 @@ export default {
 </ul>
 ${county.notes ? `<p><strong>Review notes:</strong> ${county.notes}</p>` : ""}
 <h2>Archived documents</h2>
-${docRows ? `<table><tr><th>Kind</th><th>Source</th><th>R2 key</th></tr>${docRows}</table>` : "<p>None archived yet.</p>"}`
+${docRows ? `<table><tr><th>Kind</th><th>Source</th><th>Archive</th></tr>${docRows}</table>` : "<p>None archived yet.</p>"}`
         ),
         { headers: { "content-type": "text/html;charset=utf-8" } }
       );
@@ -93,17 +197,15 @@ ${docRows ? `<table><tr><th>Kind</th><th>Source</th><th>R2 key</th></tr>${docRow
         "SELECT county, status, gis_portal_url IS NOT NULL AS has_gis, gis_parcels_service_url IS NOT NULL AS has_parcels FROM counties ORDER BY county"
       ).all<{ county: string; status: string; has_gis: number; has_parcels: number }>();
       const rows = results
-        .map(
-          (r) =>
-            `<tr><td><a href="/county/${encodeURIComponent(r.county)}">${r.county}</a></td>` +
-            `<td>${r.status}</td><td>${r.has_gis ? "yes" : "no"}</td><td>${r.has_parcels ? "yes" : "no"}</td></tr>`
-        )
+        .map((r) =>
+          `<tr><td><a href="/county/${encodeURIComponent(r.county)}">${r.county}</a></td>` +
+          `<td>${r.status}</td><td>${r.has_gis ? "yes" : "no"}</td><td>${r.has_parcels ? "yes" : "no"}</td></tr>`)
         .join("");
       return new Response(
         page(
           "Rural MN Planning Bot — Can I Build / Do This?",
           `<h1>Can I Build / Do This?</h1>
-<p>Planning-bot source coverage for Minnesota's 60 nonmetro (rural) counties, per the USDA ERS rural definition (nonmetro county). Pick a county to see its GIS parcel service, zoning ordinance, and city code sources.</p>
+<p>Planning-bot source coverage for Minnesota's 60 nonmetro (rural) counties, per the USDA ERS rural definition (nonmetro county). Pick a county to see its GIS parcel service, zoning ordinance, and city code sources. See <a href="/changes">detected code changes</a>.</p>
 <table><tr><th>County</th><th>Status</th><th>GIS portal</th><th>Parcels</th></tr>${rows}</table>`
         ),
         { headers: { "content-type": "text/html;charset=utf-8" } }
@@ -111,5 +213,16 @@ ${docRows ? `<table><tr><th>Kind</th><th>Source</th><th>R2 key</th></tr>${docRow
     }
 
     return new Response("Not found", { status: 404 });
+  },
+
+  async scheduled(_event: ScheduledEvent, env: Env): Promise<void> {
+    const { results } = await env.DB.prepare("SELECT county FROM counties ORDER BY county").all<{ county: string }>();
+    for (const { county } of results) {
+      try {
+        await recheckCounty(env, county);
+      } catch {
+        // one county failing must not stop the sweep
+      }
+    }
   },
 };
