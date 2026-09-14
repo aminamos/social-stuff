@@ -42,7 +42,6 @@ def generate_d1_seed_sql(store: LocalRentalStore, output_path: Path) -> Path:
 
     lines = [
         "-- Cloudflare D1 Seed Script generated from Minneapolis Rental Housing Registry",
-        "BEGIN TRANSACTION;",
     ]
 
     for r in rows:
@@ -65,8 +64,6 @@ def generate_d1_seed_sql(store: LocalRentalStore, output_path: Path) -> Path:
             f");"
         )
         lines.append(stmt)
-
-    lines.append("COMMIT;")
     output_path.write_text("\n".join(lines), encoding="utf-8")
     return output_path
 
