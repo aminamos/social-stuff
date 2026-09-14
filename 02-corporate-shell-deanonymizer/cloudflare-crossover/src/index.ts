@@ -197,6 +197,54 @@ export default {
       });
     }
 
+    // Markdown Matrix Export for LLMs, Organizers, and Investigators
+    if (url.pathname === "/export.md") {
+      let md = [
+        "# Twin Cities Slumlord & Wage Theft Crossover Matrix",
+        `Generated: ${new Date().toISOString()}`,
+        "Source: https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev",
+        `Confirmed Dual Violators: ${VERIFIED_CROSSOVER_SYNDICATES.length}`,
+        "",
+        "---",
+        ""
+      ];
+
+      for (const [idx, s] of VERIFIED_CROSSOVER_SYNDICATES.entries()) {
+        md.push(`## ${idx + 1}. ${s.entity_name} (${s.trade_name})`);
+        md.push(`- **Risk Classification**: ${s.risk_tier} (Composite Exploitation Score: ${s.composite_score}/100)`);
+        md.push(`- **Metro Geography**: ${s.city}, MN`);
+        md.push(`- **Housing Exploitation Footprint**:`);
+        md.push(`  - Unmasked Residential Units: ${s.total_units.toLocaleString()}`);
+        md.push(`  - Disparate Shell LLC Properties: ${s.properties_count}`);
+        md.push(`  - Habitability Status: ${s.has_tier3 ? '⚠️ TIER 3 CHRONIC SLUMLORD' : 'Tier 1/2'}`);
+        md.push(`  - Housing Profile: ${s.housing_narrative}`);
+        md.push(`- **Labor Exploitation & Wage Theft Profile**:`);
+        md.push(`  - Legal Docket / Case ID: \`${s.case_id}\``);
+        md.push(`  - Enforcement Agency: ${s.source_agency}`);
+        md.push(`  - Violation Category: ${s.violation_type}`);
+        md.push(`  - Stolen Wages Recovered: $${s.total_wage_theft_recovered.toLocaleString(undefined, {minimumFractionDigits: 2})}`);
+        md.push(`  - Workers Impacted: ${s.workers_affected}`);
+        md.push(`  - Labor Profile: ${s.labor_narrative}`);
+        md.push(`- **Joint Organizing Playbook**: ${s.organizing_playbook}`);
+        md.push(`- **Primary Legal Dockets & Source Documents**:`);
+        md.push(`  - County Tax Parcel & Assessor PDF: https://www.hennepin.us/residents/property/property-information-search`);
+        md.push(`  - Municipal Active Rental License Registry: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0`);
+        md.push(`  - US DOL Public Enforcement Database: https://enforcement.dol.gov`);
+        md.push(`  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us`);
+        md.push(`  - Minneapolis Civil Rights Labor Standards Findings: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards`);
+        md.push(`  - Landlord De-anonymizer File: https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=${encodeURIComponent(s.search_slug)}`);
+        md.push(`  - Wage Theft Registry File: https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=${encodeURIComponent(s.search_slug)}`);
+        md.push("");
+      }
+
+      return new Response(md.join("\n"), {
+        headers: {
+          "Content-Type": "text/markdown; charset=utf-8",
+          "Content-Disposition": 'attachment; filename="twin_cities_slumlord_wage_theft_matrix.md"',
+        },
+      });
+    }
+
     // Confidential Whistleblower Intake for Dual Exploitation
     if (url.pathname === "/report" && request.method === "POST") {
       try {

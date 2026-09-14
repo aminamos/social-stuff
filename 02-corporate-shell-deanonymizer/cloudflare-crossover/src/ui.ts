@@ -389,7 +389,157 @@ export function renderCrossoverUI(): string {
       margin-bottom: 8px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Source Docs & Markdown Action Styling */
+    .source-docs-box {
+      grid-column: 1 / -1;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+    }
+    .copy-md-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #e2e8f0;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .copy-md-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: #38bdf8;
+      color: #fff;
+    }
+
+    /* In-Browser AI Assistant */
+    .ai-assistant-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 16px;
+    }
+    .ai-eco-banner {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .ai-eco-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 0.83rem;
+      color: #cbd5e1;
+    }
+    .ai-eco-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .ai-chat-box {
+      background: #070a11;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      height: 420px;
+      overflow-y: auto;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .chat-msg {
+      max-width: 82%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: linear-gradient(90deg, #ef4444, #c084fc);
+      color: #fff;
+      border-bottom-right-radius: 2px;
+    }
+    .chat-msg.assistant {
+      align-self: flex-start;
+      background: #1e293b;
+      color: #f1f5f9;
+      border: 1px solid var(--card-border);
+      border-bottom-left-radius: 2px;
+    }
+    .chat-msg.system {
+      align-self: center;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      border-radius: 9999px;
+      padding: 6px 14px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .ai-controls-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .ai-model-select {
+      background: #070a11;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .ai-input-row {
+      display: flex;
+      gap: 10px;
+    }
+    .ai-input {
+      flex: 1;
+      background: #070a11;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: 10px;
+      outline: none;
+      font-size: 0.95rem;
+    }
+    .ai-input:focus { border-color: #c084fc; }
+    .progress-track {
+      background: #1e293b;
+      height: 8px;
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(90deg, #10b981, #c084fc);
+      height: 100%;
+      width: 0%;
+      transition: width 0.2s ease;
+    }
   </style>
+  <script type="module">
+    import * as webllm from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm";
+    window.webllm = webllm;
+  </script>
 </head>
 <body>
 
@@ -430,6 +580,10 @@ export function renderCrossoverUI(): string {
       <button class="tab-btn active" onclick="switchTab('matrix')">🎯 Dual Violators Matrix</button>
       <button class="tab-btn" onclick="switchTab('report')">📢 Report Dual Exploitation</button>
       <button class="tab-btn" onclick="switchTab('api')">⚡ Crossover API</button>
+      <button class="tab-btn" onclick="switchTab('ai')" style="color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4);">🤖 In-Browser AI Assistant</button>
+      <a href="/export.md" class="tab-btn" style="color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3);">
+        📥 Export Matrix (.MD)
+      </a>
       
       <a href="https://mpls-rental-sync-worker.a-8c6.workers.dev" target="_blank" class="tab-btn" style="margin-left: auto; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">
         🏢 Landlord De-anonymizer ↗
@@ -445,6 +599,7 @@ export function renderCrossoverUI(): string {
         <div class="search-row">
           <input type="text" id="searchInput" class="search-input" placeholder="Search crossover matrix by landlord, management email, or address (e.g. Fitterer, Dominium, Kleinman)..." value="">
           <button class="search-btn" onclick="executeSearch()">Filter Matrix</button>
+          <button class="search-btn" onclick="exportMatrixAsMarkdown()" style="background: #10b981;">📥 Export as .MD</button>
         </div>
       </div>
 
@@ -458,6 +613,33 @@ export function renderCrossoverUI(): string {
         <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 24px;">
           Does your landlord refuse to fix heat/mold while also stiffing the building caretaker or turnover cleaners? Submit an incident report to assist tenant union and labor organizers.
         </p>
+
+        <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 18px; margin-bottom: 24px;">
+          <div style="font-weight: 800; color: #38bdf8; font-size: 0.95rem; margin-bottom: 6px;">
+            ⚖️ Official Government Enforcement Portals vs. Community Coalition Intake
+          </div>
+          <p style="font-size: 0.83rem; color: #cbd5e1; margin-bottom: 12px; line-height: 1.5;">
+            <strong>Notice:</strong> This intake portal is maintained for collective tenant-worker organizing (protected under NLRA § 7, Minn. Stat. § 181.932, and Minnesota Tenant Remedy Act). To initiate statutory civil investigations, rent escrow proceedings, or compulsory wage restitution, you can also file directly with official public authorities:
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 0.8rem;">
+            <a href="https://www.dli.mn.gov/business/employment-practices/making-wage-claim" target="_blank" style="background: #070a11; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); color: #38bdf8; text-decoration: none; display: block;">
+              <strong>MN Dept of Labor (DLI)</strong><br>
+              <span style="color: var(--text-dim); font-size: 0.72rem;">State wage theft & joint liability claims ↗</span>
+            </a>
+            <a href="https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards/labor-standards-complaint-form/" target="_blank" style="background: #070a11; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); color: #38bdf8; text-decoration: none; display: block;">
+              <strong>Minneapolis Civil Rights</strong><br>
+              <span style="color: var(--text-dim); font-size: 0.72rem;">City labor standards enforcement ↗</span>
+            </a>
+            <a href="https://www.minneapolismn.gov/resident-services/property-housing/housing-code/report-problem/" target="_blank" style="background: #070a11; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); color: #38bdf8; text-decoration: none; display: block;">
+              <strong>Mpls Housing Inspections (311)</strong><br>
+              <span style="color: var(--text-dim); font-size: 0.72rem;">Report Tier 3 habitability & heat violations ↗</span>
+            </a>
+            <a href="https://homelinemn.org" target="_blank" style="background: #070a11; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); color: #38bdf8; text-decoration: none; display: block;">
+              <strong>HOME Line Tenant Hotline</strong><br>
+              <span style="color: var(--text-dim); font-size: 0.72rem;">Free legal advice line: (612) 728-5767 ↗</span>
+            </a>
+          </div>
+        </div>
 
         <form id="dualReportForm" onsubmit="submitDualReport(event)">
           <div class="form-group">
@@ -516,14 +698,302 @@ export function renderCrossoverUI(): string {
         </div>
       </div>
     </div>
+
+    <!-- TAB 4: In-Browser AI Assistant -->
+    <div id="aiTab" class="tab-pane">
+      <div style="margin-bottom: 16px;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: #fff;">Private In-Browser Crossover Exploitation Assistant</h2>
+        <p style="color: var(--text-dim); font-size: 0.9rem;">
+          Cross-examine housing habitability violations and wage theft citations using client-side AI executed directly on your device.
+        </p>
+      </div>
+
+      <div class="ai-eco-banner">
+        <div class="ai-eco-item">
+          <div class="ai-eco-icon">🔒</div>
+          <div>
+            <strong>100% Client-Side Privacy</strong><br>
+            Runs entirely inside your browser memory via WebGPU. Zero questions or investigation notes ever touch external cloud servers.
+          </div>
+        </div>
+        <div class="ai-eco-item">
+          <div class="ai-eco-icon">⚡</div>
+          <div>
+            <strong>Zero Excess Cloud Electricity</strong><br>
+            Executes on your local device GPU/NPU. Eliminates massive megawatts and continuous cooling water consumption in hyperscale datacenters.
+          </div>
+        </div>
+        <div class="ai-eco-item">
+          <div class="ai-eco-icon">🌐</div>
+          <div>
+            <strong>Broad Modern Browser Support</strong><br>
+            Optimized for Chrome, Brave, Edge, Safari (18+), Orion, and Firefox with WebGPU enabled.
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-assistant-card">
+        <div class="ai-controls-row">
+          <label style="font-size: 0.85rem; font-weight: 700; color: #cbd5e1;">In-Browser Model:</label>
+          <select id="aiModelSelect" class="ai-model-select">
+            <option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC" selected>Qwen2.5-0.5B (~350 MB - Fast & Responsive)</option>
+            <option value="SmolLM2-360M-Instruct-q0f16-MLC">SmolLM2-360M (~360 MB - Ultra Low Memory)</option>
+            <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama-3.2-1B (~880 MB - Deep Reasoning)</option>
+          </select>
+          <label style="font-size: 0.8rem; color: #94a3b8; display: flex; align-items: center; gap: 6px; cursor: pointer; margin-left: auto;">
+            <input type="checkbox" id="aiGroundingCheck" checked>
+            Ground answers in crossover matrix syndicates
+          </label>
+        </div>
+
+        <div id="aiProgressContainer" style="display: none; margin-bottom: 16px; background: #070a11; padding: 12px; border-radius: 8px; border: 1px solid var(--card-border);">
+          <div id="aiStatusText" style="font-size: 0.82rem; color: #c084fc; font-weight: 600;">Initializing WebLLM engine...</div>
+          <div class="progress-track">
+            <div id="aiProgressBar" class="progress-bar-fill"></div>
+          </div>
+        </div>
+
+        <div id="aiChatBox" class="ai-chat-box">
+          <div class="chat-msg system">
+            💬 Welcome to the Crossover Matrix AI. Ask questions about syndicates operating both slum housing and wage theft schemes. Model executes locally on your hardware.
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
+          <span style="font-size: 0.75rem; color: var(--text-dim); align-self: center;">Suggested:</span>
+          <button class="chip" onclick="askSuggestedQuestion('Which landlords have both Tier 3 habitability citations and active wage theft dockets?')">Top Dual Violators</button>
+          <button class="chip" onclick="askSuggestedQuestion('Explain the joint organizing strategy for tenants and caretakers at Brian Fitterer / IPG properties.')">Fitterer Playbook</button>
+          <button class="chip" onclick="askSuggestedQuestion('How does Minnesota Joint Liability law (Minn. Stat. 181.165) hold property owners liable for cleaner wages?')">Joint Liability</button>
+          <button class="chip" onclick="askSuggestedQuestion('What legal steps allow tenants to escrow rent while filing wage claims?')">Rent Escrow + Wage Liens</button>
+        </div>
+
+        <div class="ai-input-row">
+          <input type="text" id="aiPromptInput" class="ai-input" placeholder="Ask about dual housing-labor crossover, joint organizing playbooks, or syndicate records..." onkeypress="if(event.key==='Enter') sendAiMessage()">
+          <button class="search-btn" id="aiSendBtn" onclick="sendAiMessage()">Ask AI</button>
+          <button class="copy-md-btn" onclick="clearAiChat()">Clear</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script>
+    let currentMatrixResults = [];
+
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
       event.target.classList.add('active');
       document.getElementById(tabId + 'Tab').classList.add('active');
+    }
+
+    function copyDualCardAsMarkdown(idx) {
+      const s = currentMatrixResults[idx];
+      if (!s) return;
+
+      const totalRecovered = parseFloat(s.total_wage_theft_recovered || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+
+      const md = [
+        '### Crossover Investigation: ' + (s.entity_name || 'Corporate Entity') + ' (' + (s.trade_name || 'N/A') + ')',
+        '- **Dual Exploitation Risk**: **' + (s.risk_tier || 'HIGH RISK') + '** (Composite Score: ' + (s.composite_score || 0) + '/100)',
+        '- **Jurisdiction**: ' + (s.city || 'Twin Cities') + ', MN (Contact: ' + (s.applicant_email || 'Multiple') + ')',
+        '- **Housing Exploitation Profile**:',
+        '  - Unmasked Residential Portfolio: ' + (s.total_units || 0) + ' units across ' + (s.properties_count || 1) + ' shell properties',
+        '  - Habitability Status: ' + (s.has_tier3 ? '⚠️ TIER 3 CHRONIC SLUMLORD' : 'Tier 1/2 Active'),
+        '  - Habitability Record: ' + (s.housing_narrative || 'Documented habitability violations.'),
+        '- **Labor Exploitation & Wage Theft Profile**:',
+        '  - Legal Docket / Case ID: \`' + (s.case_id || 'N/A') + '\` (' + (s.source_agency || 'Labor Standards') + ')',
+        '  - Violation Classification: ' + (s.violation_type || 'Wage Theft & Overtime Fraud'),
+        '  - Financial Restitution & Penalties: $' + totalRecovered,
+        '  - Affected Workers: ' + (s.workers_affected || 0) + ' caretakers / cleaners / maintenance staff',
+        '  - Enforcement Findings: ' + (s.labor_narrative || 'Confirmed labor standards violations.'),
+        '- **Recommended Joint Organizing Strategy**:',
+        '  - ' + (s.organizing_playbook || 'Escrow rent; enforce joint employer liability.'),
+        '- **Official Source Records & Legal Dockets**:',
+        '  - County Property Tax / Parcel PDF: https://www.hennepin.us/residents/property/property-information-search',
+        '  - Municipal Active Rental License Registry: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0',
+        '  - US DOL Enforcement Database: https://enforcement.dol.gov',
+        '  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us',
+        '  - Minneapolis Civil Rights Labor Standards: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards',
+        '  - Landlord De-anonymizer File: https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=' + encodeURIComponent(s.search_slug || ''),
+        '  - Wage Theft Registry File: https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(s.search_slug || '')
+      ].join('\\n');
+
+      navigator.clipboard.writeText(md).then(() => {
+        const btn = document.getElementById('copy-btn-' + idx);
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML = '✓ Copied Markdown!';
+          btn.style.borderColor = '#10b981';
+          btn.style.color = '#34d399';
+          setTimeout(() => {
+            btn.innerHTML = orig;
+            btn.style.borderColor = '';
+            btn.style.color = '';
+          }, 2000);
+        }
+      });
+    }
+
+    function exportMatrixAsMarkdown() {
+      if (!currentMatrixResults || currentMatrixResults.length === 0) {
+        alert('No crossover records loaded to export.');
+        return;
+      }
+      const q = document.getElementById('searchInput').value.trim() || 'all';
+      let lines = [
+        '# Twin Cities Slumlord & Wage Theft Crossover Matrix',
+        '**Search Query**: ' + q,
+        '**Generated**: ' + new Date().toISOString(),
+        '**Source**: https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev',
+        '',
+        '---',
+        ''
+      ];
+
+      currentMatrixResults.forEach((s, idx) => {
+        const totalRecovered = parseFloat(s.total_wage_theft_recovered || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+        lines.push('## ' + (idx + 1) + '. ' + (s.entity_name || 'Entity') + ' (' + (s.trade_name || 'N/A') + ')');
+        lines.push('- **Dual Exploitation Risk**: **' + (s.risk_tier || 'HIGH RISK') + '** (Score: ' + (s.composite_score || 0) + '/100)');
+        lines.push('- **Metro Geography**: ' + (s.city || 'Twin Cities') + ', MN');
+        lines.push('- **Housing Footprint**: ' + (s.total_units || 0) + ' units across ' + (s.properties_count || 1) + ' shell properties' + (s.has_tier3 ? ' [TIER 3 SLUMLORD]' : ''));
+        lines.push('  - ' + (s.housing_narrative || ''));
+        lines.push('- **Labor Violation**: Case \`' + (s.case_id || 'N/A') + '\` (' + (s.source_agency || '') + ' - ' + (s.violation_type || '') + ')');
+        lines.push('  - Financial Recovery: $' + totalRecovered + ' across ' + (s.workers_affected || 0) + ' workers');
+        lines.push('  - ' + (s.labor_narrative || ''));
+        lines.push('- **Joint Organizing Playbook**: ' + (s.organizing_playbook || ''));
+        lines.push('- **Primary Document & Docket Links**:');
+        lines.push('  - County Parcel PDF: https://www.hennepin.us/residents/property/property-information-search');
+        lines.push('  - Rental License Feature Docket: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0');
+        lines.push('  - US DOL Enforcement: https://enforcement.dol.gov');
+        lines.push('  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us');
+        lines.push('  - Minneapolis Civil Rights Labor Standards: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards');
+        lines.push('  - Landlord De-anonymizer: https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=' + encodeURIComponent(s.search_slug || ''));
+        lines.push('  - Wage Theft Registry: https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(s.search_slug || ''));
+        lines.push('');
+      });
+
+      const blob = new Blob([lines.join('\\n')], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'slumlord_wage_theft_matrix_' + q.replace(/[^a-zA-Z0-9_-]/g, '_') + '.md';
+      a.click();
+    }
+
+    function getGroundedContext() {
+      const check = document.getElementById('aiGroundingCheck');
+      if (!check || !check.checked) return '';
+
+      let text = 'CURRENT VERIFIED CROSSOVER SYNDICATES (HOUSING & LABOR DUAL VIOLATIONS):\n';
+      const items = (currentMatrixResults || []).slice(0, 10);
+      items.forEach((s, idx) => {
+        text += (idx + 1) + '. Entity: ' + s.entity_name + ' (' + s.trade_name + ') | Risk: ' + s.risk_tier + ' (' + s.composite_score + '/100) | Location: ' + s.city + ', MN | Units: ' + s.total_units + ' across ' + s.properties_count + ' properties | Tier 3 Slumlord: ' + (s.has_tier3 ? 'YES' : 'NO') + ' | Housing Profile: ' + s.housing_narrative + ' | Labor Case: ' + s.case_id + ' (' + s.source_agency + ' - ' + s.violation_type + ') | Stolen Wages Recovered: $' + parseFloat(s.total_wage_theft_recovered || 0).toLocaleString() + ' | Workers: ' + s.workers_affected + ' | Labor Summary: ' + s.labor_narrative + ' | Recommended Action Playbook: ' + s.organizing_playbook + '\n';
+      });
+      return text;
+    }
+
+    let aiEngine = null;
+    let isAiLoading = false;
+
+    async function sendAiMessage() {
+      const inputEl = document.getElementById('aiPromptInput');
+      const userText = inputEl.value.trim();
+      if (!userText) return;
+
+      inputEl.value = '';
+      appendChatMessage('user', userText);
+
+      const modelSelect = document.getElementById('aiModelSelect');
+      const selectedModel = modelSelect.value;
+      const statusEl = document.getElementById('aiStatusText');
+      const progressBar = document.getElementById('aiProgressBar');
+      const progressContainer = document.getElementById('aiProgressContainer');
+      const sendBtn = document.getElementById('aiSendBtn');
+
+      if (!navigator.gpu) {
+        appendChatMessage('system', '⚠️ WebGPU is not detected in your browser. To use In-Browser AI without cloud data servers: in Chrome/Brave/Edge ensure "Hardware Acceleration" is enabled in settings; in Safari ensure Safari 18+ (macOS Sequoia / iOS 18); in Firefox enable "dom.webgpu.enabled" in about:config.');
+        return;
+      }
+
+      sendBtn.disabled = true;
+
+      if (!aiEngine) {
+        if (isAiLoading) return;
+        isAiLoading = true;
+        progressContainer.style.display = 'block';
+        statusEl.innerText = 'Initializing local WebGPU engine & loading weights (' + selectedModel + ')...';
+
+        try {
+          if (!window.webllm) {
+            throw new Error('WebLLM library is loading from CDN. Please wait a moment and try again.');
+          }
+          aiEngine = await window.webllm.CreateMLCEngine(selectedModel, {
+            initProgressCallback: (report) => {
+              statusEl.innerText = report.text;
+              if (typeof report.progress === 'number') {
+                progressBar.style.width = Math.round(report.progress * 100) + '%';
+              }
+            }
+          });
+          statusEl.innerText = '✓ Model cached & loaded in local browser memory via WebGPU.';
+          progressBar.style.width = '100%';
+          setTimeout(() => { progressContainer.style.display = 'none'; }, 2000);
+        } catch (err) {
+          statusEl.innerText = 'Initialization error: ' + err.message;
+          appendChatMessage('system', '❌ Local model initialization error: ' + err.message);
+          isAiLoading = false;
+          sendBtn.disabled = false;
+          return;
+        } finally {
+          isAiLoading = false;
+        }
+      }
+
+      const contextData = getGroundedContext();
+      const systemPrompt = "You are a specialized civic housing and labor rights intelligence assistant for the Twin Cities Crossover Matrix. You run 100% locally and privately in the user's browser via WebGPU with ZERO server-side data collection and ZERO cloud datacenter electricity consumption. Answer questions using the verified dual-violation syndicate profiles provided in the context. Emphasize joint organizing strategies, such as tenant rent escrow actions synchronized with building caretaker wage claims under Minnesota's 2023 Joint Contractor Liability Law (Minn. Stat. § 181.165), retaliation protections under Minn. Stat. § 181.932, and municipal Tier 3 habitability enforcement. Keep answers concise, factual, and empowering.\n\n" + contextData;
+
+      const assistantMsgEl = appendChatMessage('assistant', 'Thinking...');
+
+      try {
+        const chunks = await aiEngine.chat.completions.create({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userText }
+          ],
+          stream: true
+        });
+
+        assistantMsgEl.textContent = '';
+        for await (const chunk of chunks) {
+          const delta = chunk.choices[0]?.delta?.content || '';
+          assistantMsgEl.textContent += delta;
+          const box = document.getElementById('aiChatBox');
+          box.scrollTop = box.scrollHeight;
+        }
+      } catch (genErr) {
+        assistantMsgEl.textContent = 'Generation error: ' + genErr.message;
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    function appendChatMessage(role, text) {
+      const box = document.getElementById('aiChatBox');
+      const msg = document.createElement('div');
+      msg.className = 'chat-msg ' + role;
+      msg.textContent = text;
+      box.appendChild(msg);
+      box.scrollTop = box.scrollHeight;
+      return msg;
+    }
+
+    function askSuggestedQuestion(q) {
+      document.getElementById('aiPromptInput').value = q;
+      sendAiMessage();
+    }
+
+    function clearAiChat() {
+      const box = document.getElementById('aiChatBox');
+      box.innerHTML = '<div class="chat-msg system">💬 Chat cleared. Model remains cached in your local browser memory.</div>';
     }
 
     async function executeSearch() {
@@ -535,13 +1005,14 @@ export function renderCrossoverUI(): string {
         const resp = await fetch('/matrix?q=' + encodeURIComponent(q));
         const data = await resp.json();
         const records = data.matrix || [];
+        currentMatrixResults = records;
 
         if (records.length === 0) {
           container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">No crossover syndicates found matching query.</div>';
           return;
         }
 
-        container.innerHTML = records.map(s => {
+        container.innerHTML = records.map((s, idx) => {
           return \`
             <div class="dual-card">
               <!-- Pillar 1: Syndicate Overview & Score -->
@@ -630,15 +1101,48 @@ export function renderCrossoverUI(): string {
                 </div>
               </div>
 
+              <!-- Source Documents Box -->
+              <div class="source-docs-box">
+                <div style="font-weight: 700; color: #94a3b8; margin-bottom: 4px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">
+                  📄 Source Documents & Legal Dockets:
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                  <a href="https://www.hennepin.us/residents/property/property-information-search" target="_blank" style="color: #38bdf8; text-decoration: underline;">
+                    County Property Assessment PDF ↗
+                  </a>
+                  <span style="color: var(--card-border);">•</span>
+                  <a href="https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0" target="_blank" style="color: #38bdf8; text-decoration: underline;">
+                    Active Rental Licensing Docket ↗
+                  </a>
+                  <span style="color: var(--card-border);">•</span>
+                  <a href="https://enforcement.dol.gov" target="_blank" style="color: #f87171; text-decoration: underline;">
+                    US DOL WHD Case Docket ↗
+                  </a>
+                  <span style="color: var(--card-border);">•</span>
+                  <a href="https://publicaccess.courts.state.mn.us" target="_blank" style="color: #f87171; text-decoration: underline;">
+                    District Court MCRO Docket ↗
+                  </a>
+                  <span style="color: var(--card-border);">•</span>
+                  <a href="https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards" target="_blank" style="color: #f87171; text-decoration: underline;">
+                    Mpls Civil Rights Findings ↗
+                  </a>
+                </div>
+              </div>
+
               <!-- Action Strategy Footer -->
               <div class="action-plan-box">
-                <div>
+                <div style="flex: 1;">
                   <div class="action-title">✊ Recommended Joint Organizing Action</div>
                   <div class="action-desc">\${s.organizing_playbook}</div>
                 </div>
-                <button onclick="window.open('https://twin-cities-wage-theft-worker.a-8c6.workers.dev', '_blank')" class="cta-btn" style="background: #c084fc; color: #070a11;">
-                  Join Worker-Tenant Coalition ↗
-                </button>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                  <button class="copy-md-btn" id="copy-btn-\${idx}" onclick="copyDualCardAsMarkdown(\${idx})">
+                    📋 Copy as Markdown (LLM)
+                  </button>
+                  <button onclick="window.open('https://twin-cities-wage-theft-worker.a-8c6.workers.dev', '_blank')" class="cta-btn" style="background: #c084fc; color: #070a11;">
+                    Join Coalition ↗
+                  </button>
+                </div>
               </div>
             </div>
           \`;

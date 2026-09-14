@@ -189,6 +189,61 @@ export default {
       }
     }
 
+    // Markdown dataset export for LLMs, researchers, and journalists
+    if (url.pathname === "/export.md") {
+      try {
+        const allCases = await env.DB.prepare(`
+          SELECT 
+            case_id, source_agency, respondent_legal_name, trade_name, address, city, state, zip_code,
+            industry_description, violation_type, back_wages_recovered, civil_penalties_assessed,
+            settlement_amount, workers_affected, repeat_violator, status, findings_date, description
+          FROM wage_theft_records
+          ORDER BY (back_wages_recovered + civil_penalties_assessed) DESC
+        `).all();
+
+        let md = [
+          "# Twin Cities Wage Theft & Labor Standards Enforcement Dossier",
+          `Generated: ${new Date().toISOString()}`,
+          "Source: https://twin-cities-wage-theft-worker.a-8c6.workers.dev",
+          `Total Cases: ${allCases.results.length}`,
+          "",
+          "---",
+          ""
+        ];
+
+        for (const [idx, row] of (allCases.results as any[]).entries()) {
+          const total = (parseFloat(row.back_wages_recovered || 0) + parseFloat(row.civil_penalties_assessed || 0)).toLocaleString(undefined, {minimumFractionDigits: 2});
+          md.push(`## ${idx + 1}. ${row.respondent_legal_name || 'Unknown Entity'} (d/b/a ${row.trade_name || 'N/A'})`);
+          md.push(`- **Case ID / Docket**: \`${row.case_id || 'N/A'}\``);
+          md.push(`- **Enforcement Agency**: ${row.source_agency || 'N/A'}`);
+          md.push(`- **Location**: ${row.address || ''}, ${row.city || 'Twin Cities'}, ${row.state || 'MN'} ${row.zip_code || ''}`);
+          md.push(`- **Industry Sector**: ${row.industry_description || 'Building / Property Services'}`);
+          md.push(`- **Violation Category**: ${row.violation_type || 'Wage Theft'}`);
+          md.push(`- **Status**: ${row.status || 'Active'}${row.repeat_violator ? ' ⚠️ [REPEAT OFFENDER]' : ''}`);
+          md.push(`- **Total Financial Restitution & Penalties**: $${total}`);
+          md.push(`  - Back Wages Recovered: $${parseFloat(row.back_wages_recovered || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`);
+          md.push(`  - Civil Money Penalties: $${parseFloat(row.civil_penalties_assessed || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`);
+          md.push(`- **Affected Workforce**: ${row.workers_affected || 0} workers`);
+          md.push(`- **Official Findings Summary**: ${row.description || 'Confirmed civil/administrative wage theft findings.'}`);
+          md.push(`- **Primary Records & Legal Dockets**:`);
+          md.push(`  - US DOL Enforcement Database: https://enforcement.dol.gov`);
+          md.push(`  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us`);
+          md.push(`  - Minneapolis Civil Rights Labor Standards: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards`);
+          md.push(`  - Cross-Reference Landlord Shell: https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=${encodeURIComponent(row.trade_name || row.respondent_legal_name || '')}`);
+          md.push("");
+        }
+
+        return new Response(md.join("\n"), {
+          headers: {
+            "Content-Type": "text/markdown; charset=utf-8",
+            "Content-Disposition": 'attachment; filename="twin_cities_wage_theft_dossier.md"',
+          },
+        });
+      } catch (err: any) {
+        return new Response(`Error generating Markdown: ${err.message}`, { status: 500 });
+      }
+    }
+
     // Confidential whistleblower / worker incident report submission
     if (url.pathname === "/report" && request.method === "POST") {
       try {

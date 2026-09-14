@@ -325,6 +325,26 @@ export function renderWageTheftUI(): string {
     }
     .link-btn:hover { text-decoration: underline; }
 
+    .copy-md-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: #94a3b8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .copy-md-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-color: #64748b;
+    }
+
     /* Tables */
     .data-table {
       width: 100%;
@@ -438,7 +458,128 @@ export function renderWageTheftUI(): string {
       margin-bottom: 8px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* In-Browser AI Assistant */
+    .ai-assistant-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 16px;
+    }
+    .ai-eco-banner {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .ai-eco-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 0.83rem;
+      color: #cbd5e1;
+    }
+    .ai-eco-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .ai-chat-box {
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      height: 420px;
+      overflow-y: auto;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .chat-msg {
+      max-width: 82%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: #ef4444;
+      color: #fff;
+      border-bottom-right-radius: 2px;
+    }
+    .chat-msg.assistant {
+      align-self: flex-start;
+      background: #1e293b;
+      color: #f1f5f9;
+      border: 1px solid var(--card-border);
+      border-bottom-left-radius: 2px;
+    }
+    .chat-msg.system {
+      align-self: center;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      border-radius: 9999px;
+      padding: 6px 14px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .ai-controls-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .ai-model-select {
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .ai-input-row {
+      display: flex;
+      gap: 10px;
+    }
+    .ai-input {
+      flex: 1;
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: 10px;
+      outline: none;
+      font-size: 0.95rem;
+    }
+    .ai-input:focus { border-color: #ef4444; }
+    .progress-track {
+      background: #1e293b;
+      height: 8px;
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(90deg, #10b981, #ef4444);
+      height: 100%;
+      width: 0%;
+      transition: width 0.2s ease;
+    }
   </style>
+  <script type="module">
+    import * as webllm from "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm/+esm";
+    window.webllm = webllm;
+  </script>
 </head>
 <body>
 
@@ -479,6 +620,7 @@ export function renderWageTheftUI(): string {
       <button class="tab-btn" onclick="switchTab('offenders')">🏆 Top Corporate Violators</button>
       <button class="tab-btn" onclick="switchTab('report')">📢 Report Wage Theft (Confidential)</button>
       <button class="tab-btn" onclick="switchTab('api')">⚡ REST API & CSV</button>
+      <button class="tab-btn" onclick="switchTab('ai')" style="color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4);">🤖 In-Browser AI Assistant</button>
       <a href="https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev" target="_blank" class="tab-btn" style="margin-left: auto; color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.4);">
         🎯 Dual Violators Matrix ↗
       </a>
@@ -488,6 +630,9 @@ export function renderWageTheftUI(): string {
       <a href="/export.csv" class="tab-btn" style="color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
         📥 Export CSV
       </a>
+      <button onclick="exportWageTheftAsMarkdown()" class="tab-btn" style="color: #a7f3d0; border: 1px solid rgba(52, 211, 153, 0.4);">
+        📥 Export .MD
+      </button>
     </div>
 
     <!-- TAB 1: CASES -->
@@ -496,6 +641,7 @@ export function renderWageTheftUI(): string {
         <div class="search-row">
           <input type="text" id="searchInput" class="search-input" placeholder="Search by employer name, trade name, case ID, or violation description..." value="">
           <button class="search-btn" onclick="executeSearch()">Search</button>
+          <button class="search-btn" onclick="exportWageTheftAsMarkdown()" style="background: #10b981;">📥 Export as .MD</button>
         </div>
         <div class="chips-row">
           <span style="font-size: 0.8rem; color: var(--text-dim); margin-right: 4px;">Quick Filters:</span>
@@ -546,6 +692,33 @@ export function renderWageTheftUI(): string {
 
         <div class="notice-box">
           🛡️ <strong>Worker Privacy Guarantee:</strong> Submissions are stored directly in encrypted database storage. We never sell or share worker contact details with employers or immigration authorities.
+        </div>
+
+        <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 18px; margin-bottom: 24px;">
+          <div style="font-weight: 800; color: #38bdf8; font-size: 0.95rem; margin-bottom: 6px;">
+            ⚖️ Official Government Enforcement Portals vs. Community Union Intake
+          </div>
+          <p style="font-size: 0.83rem; color: #cbd5e1; margin-bottom: 12px; line-height: 1.5;">
+            <strong>Notice:</strong> This intake form is maintained for collective labor organizing, research, and legal aid coordination (protected under NLRA § 7 and Minn. Stat. § 181.932). To initiate formal statutory enforcement with the authority to compel back pay, issue civil penalties, or seek court injunctions, you can also file directly with official public agencies:
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 0.8rem;">
+            <a href="https://www.dli.mn.gov/business/employment-practices/making-wage-claim" target="_blank" style="background: #090d16; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); color: #38bdf8; text-decoration: none; display: block;">
+              <strong>MN Dept of Labor & Industry (DLI)</strong><br>
+              <span style="color: var(--text-dim); font-size: 0.72rem;">State wage claim investigation portal ↗</span>
+            </a>
+            <a href="https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards/labor-standards-complaint-form/" target="_blank" style="background: #090d16; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); color: #38bdf8; text-decoration: none; display: block;">
+              <strong>Minneapolis Civil Rights</strong><br>
+              <span style="color: var(--text-dim); font-size: 0.72rem;">City wage theft & sick leave complaint form ↗</span>
+            </a>
+            <a href="https://www.ag.state.mn.us/Office/Complaint.asp" target="_blank" style="background: #090d16; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); color: #38bdf8; text-decoration: none; display: block;">
+              <strong>Minnesota Attorney General</strong><br>
+              <span style="color: var(--text-dim); font-size: 0.72rem;">Worker protection & wage fraud unit ↗</span>
+            </a>
+            <a href="https://homelinemn.org" target="_blank" style="background: #090d16; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); color: #38bdf8; text-decoration: none; display: block;">
+              <strong>HOME Line Tenant & Caretaker Hotline</strong><br>
+              <span style="color: var(--text-dim); font-size: 0.72rem;">Free legal advice line: (612) 728-5767 ↗</span>
+            </a>
+          </div>
         </div>
 
         <form id="wageTheftForm" onsubmit="submitReport(event)">
@@ -657,9 +830,87 @@ export function renderWageTheftUI(): string {
         </div>
       </div>
     </div>
+
+    <!-- TAB 5: In-Browser AI Assistant -->
+    <div id="aiTab" class="tab-pane">
+      <div style="margin-bottom: 16px;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: #fff;">Private In-Browser Labor & Wage Theft Intelligence Assistant</h2>
+        <p style="color: var(--text-dim); font-size: 0.9rem;">
+          Query labor standards enforcement cases, calculate overtime violations, and research employer citations directly inside your browser.
+        </p>
+      </div>
+
+      <div class="ai-eco-banner">
+        <div class="ai-eco-item">
+          <div class="ai-eco-icon">🔒</div>
+          <div>
+            <strong>100% Client-Side Privacy</strong><br>
+            Runs entirely inside your browser memory via WebGPU. Zero questions, employer names, or worker queries are ever sent to remote servers.
+          </div>
+        </div>
+        <div class="ai-eco-item">
+          <div class="ai-eco-icon">⚡</div>
+          <div>
+            <strong>Zero Excess Cloud Electricity</strong><br>
+            Executes on your local device GPU/NPU. Eliminates massive megawatts and continuous cooling water consumption in hyperscale datacenters.
+          </div>
+        </div>
+        <div class="ai-eco-item">
+          <div class="ai-eco-icon">🌐</div>
+          <div>
+            <strong>Broad Modern Browser Support</strong><br>
+            Optimized for Chrome, Brave, Edge, Safari (18+), Orion, and Firefox with WebGPU enabled.
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-assistant-card">
+        <div class="ai-controls-row">
+          <label style="font-size: 0.85rem; font-weight: 700; color: #cbd5e1;">In-Browser Model:</label>
+          <select id="aiModelSelect" class="ai-model-select">
+            <option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC" selected>Qwen2.5-0.5B (~350 MB - Fast & Responsive)</option>
+            <option value="SmolLM2-360M-Instruct-q0f16-MLC">SmolLM2-360M (~360 MB - Ultra Low Memory)</option>
+            <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama-3.2-1B (~880 MB - Deep Reasoning)</option>
+          </select>
+          <label style="font-size: 0.8rem; color: #94a3b8; display: flex; align-items: center; gap: 6px; cursor: pointer; margin-left: auto;">
+            <input type="checkbox" id="aiGroundingCheck" checked>
+            Ground answers in loaded enforcement records
+          </label>
+        </div>
+
+        <div id="aiProgressContainer" style="display: none; margin-bottom: 16px; background: #090d16; padding: 12px; border-radius: 8px; border: 1px solid var(--card-border);">
+          <div id="aiStatusText" style="font-size: 0.82rem; color: #38bdf8; font-weight: 600;">Initializing WebLLM engine...</div>
+          <div class="progress-track">
+            <div id="aiProgressBar" class="progress-bar-fill"></div>
+          </div>
+        </div>
+
+        <div id="aiChatBox" class="ai-chat-box">
+          <div class="chat-msg system">
+            💬 Welcome to the Twin Cities Wage Theft Intelligence AI. Ask anything about labor standards, employer citations, overtime law, or worker rights. Model executes locally on your hardware.
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
+          <span style="font-size: 0.75rem; color: var(--text-dim); align-self: center;">Suggested:</span>
+          <button class="chip" onclick="askSuggestedQuestion('How does Minnesota 2023 Contractor Joint Liability Law protect workers?')">Joint Liability Law</button>
+          <button class="chip" onclick="askSuggestedQuestion('Can an apartment landlord legally deduct rent from caretaker wages below minimum wage?')">Caretaker Rent Deductions</button>
+          <button class="chip" onclick="askSuggestedQuestion('Which employers have the highest wage theft recovery amounts on record?')">Top Violators</button>
+          <button class="chip" onclick="askSuggestedQuestion('Where do I file an official state wage theft complaint with MN DLI?')">Filing Wage Claims</button>
+        </div>
+
+        <div class="ai-input-row">
+          <input type="text" id="aiPromptInput" class="ai-input" placeholder="Ask a question about Twin Cities wage theft cases, caretaker rights, or labor law..." onkeypress="if(event.key==='Enter') sendAiMessage()">
+          <button class="search-btn" id="aiSendBtn" onclick="sendAiMessage()">Ask AI</button>
+          <button class="copy-md-btn" onclick="clearAiChat()">Clear</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script>
+    let currentCasesResults = [];
+
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
@@ -674,6 +925,215 @@ export function renderWageTheftUI(): string {
       executeSearch();
     }
 
+    function copyCaseAsMarkdown(idx) {
+      const c = currentCasesResults[idx];
+      if (!c) return;
+
+      const total = (parseFloat(c.back_wages_recovered || 0) + parseFloat(c.civil_penalties_assessed || 0)).toLocaleString(undefined, {minimumFractionDigits: 2});
+      const backWages = parseFloat(c.back_wages_recovered || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+      const penalties = parseFloat(c.civil_penalties_assessed || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+
+      const md = [
+        '### Wage Theft Case Dossier: ' + (c.respondent_legal_name || 'Unknown Entity'),
+        '- **Case ID / Docket**: \`' + (c.case_id || 'N/A') + '\`',
+        '- **Enforcement Agency**: ' + (c.source_agency || 'US DOL / State / City'),
+        '- **Operating Trade Name (d/b/a)**: ' + (c.trade_name || 'N/A'),
+        '- **Jurisdiction / Worksite**: ' + (c.address || 'Twin Cities Metro Area') + ', ' + (c.city || 'Twin Cities') + ', ' + (c.state || 'MN') + ' ' + (c.zip_code || ''),
+        '- **Industry Sector**: ' + (c.industry_description || 'Property Management & Building Services'),
+        '- **Violation Classification**: ' + (c.violation_type || 'Unlawful Withholding / Overtime Violation'),
+        '- **Enforcement Status**: ' + (c.status || 'Resolved / Judged') + (c.repeat_violator ? ' ⚠️ [REPEAT VIOLATOR]' : ''),
+        '- **Total Financial Assessment**: $' + total,
+        '  - Back Wages Recovered: $' + backWages,
+        '  - Civil Money Penalties: $' + penalties,
+        '- **Affected Workforce**: ' + (c.workers_affected || 0) + ' workers',
+        '- **Investigative Findings / Narrative**: ' + (c.description || 'Confirmed civil/administrative wage theft findings.'),
+        '- **Primary Legal Dockets & Source Documents**:',
+        '  - US DOL Wage & Hour Division Public Enforcement Database: https://enforcement.dol.gov',
+        '  - Minnesota Judicial Branch Public Access (MCRO Case Search): https://publicaccess.courts.state.mn.us',
+        '  - Minneapolis Civil Rights Labor Standards Findings: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards',
+        '  - Cross-Reference Landlord Shell Entity: https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=' + encodeURIComponent(c.trade_name || c.respondent_legal_name || '')
+      ].join('\\n');
+
+      navigator.clipboard.writeText(md).then(() => {
+        const btn = document.getElementById('copy-btn-' + idx);
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML = '✓ Copied Markdown!';
+          btn.style.borderColor = '#10b981';
+          btn.style.color = '#34d399';
+          setTimeout(() => {
+            btn.innerHTML = orig;
+            btn.style.borderColor = '';
+            btn.style.color = '';
+          }, 2000);
+        }
+      });
+    }
+
+    function exportWageTheftAsMarkdown() {
+      if (!currentCasesResults || currentCasesResults.length === 0) {
+        alert('No cases loaded to export.');
+        return;
+      }
+      const q = document.getElementById('searchInput').value.trim() || 'all';
+      let lines = [
+        '# Twin Cities Wage Theft & Labor Standards Enforcement Dossier',
+        '**Search Query**: ' + q,
+        '**Generated**: ' + new Date().toISOString(),
+        '**Source**: https://twin-cities-wage-theft-worker.a-8c6.workers.dev',
+        '',
+        '---',
+        ''
+      ];
+
+      currentCasesResults.forEach((c, idx) => {
+        const total = (parseFloat(c.back_wages_recovered || 0) + parseFloat(c.civil_penalties_assessed || 0)).toLocaleString(undefined, {minimumFractionDigits: 2});
+        lines.push('## ' + (idx + 1) + '. ' + (c.respondent_legal_name || 'Unknown Entity') + ' (d/b/a ' + (c.trade_name || 'N/A') + ')');
+        lines.push('- **Case ID**: \`' + (c.case_id || 'N/A') + '\`');
+        lines.push('- **Enforcement Agency**: ' + (c.source_agency || 'N/A'));
+        lines.push('- **Location**: ' + (c.city || 'Twin Cities') + ', ' + (c.state || 'MN'));
+        lines.push('- **Violation Type**: ' + (c.violation_type || 'Wage Theft'));
+        lines.push('- **Total Financial Restitution & Penalties**: $' + total);
+        lines.push('  - Back Wages: $' + parseFloat(c.back_wages_recovered || 0).toLocaleString(undefined, {minimumFractionDigits: 2}));
+        lines.push('  - Civil Penalties: $' + parseFloat(c.civil_penalties_assessed || 0).toLocaleString(undefined, {minimumFractionDigits: 2}));
+        lines.push('- **Workers Impacted**: ' + (c.workers_affected || 0));
+        lines.push('- **Status**: ' + (c.status || 'Active') + (c.repeat_violator ? ' [REPEAT OFFENDER]' : ''));
+        lines.push('- **Case Summary**: ' + (c.description || ''));
+        lines.push('- **Source Records**:');
+        lines.push('  - US DOL WHD Enforcement Database: https://enforcement.dol.gov');
+        lines.push('  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us');
+        lines.push('  - Minneapolis Labor Standards Enforcement: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards');
+        lines.push('');
+      });
+
+      const blob = new Blob([lines.join('\\n')], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'wage_theft_cases_' + q.replace(/[^a-zA-Z0-9_-]/g, '_') + '.md';
+      a.click();
+    }
+
+    function getGroundedContext() {
+      const check = document.getElementById('aiGroundingCheck');
+      if (!check || !check.checked) return '';
+
+      let text = 'CURRENT VERIFIED LABOR STANDARDS & WAGE THEFT ENFORCEMENT ACTIONS:\n';
+      const items = (currentCasesResults || []).slice(0, 15);
+      if (items.length === 0) {
+        text += '- Note: Registry tracks federal US DOL, Minnesota DLI, and Minneapolis Civil Rights wage theft judgments across property managers and subcontractors.\n';
+      } else {
+        items.forEach((c, idx) => {
+          text += (idx + 1) + '. Employer: ' + (c.respondent_legal_name || 'N/A') + ' (d/b/a ' + (c.trade_name || 'N/A') + ') | Case ID: ' + (c.case_id || 'N/A') + ' | Agency: ' + (c.source_agency || 'N/A') + ' | Violation: ' + (c.violation_type || 'N/A') + ' | Back Wages: $' + parseFloat(c.back_wages_recovered || 0).toLocaleString() + ' | Penalties: $' + parseFloat(c.civil_penalties_assessed || 0).toLocaleString() + ' | Workers: ' + (c.workers_affected || 0) + ' | Status: ' + (c.status || 'N/A') + (c.repeat_violator ? ' [REPEAT]' : '') + ' | Summary: ' + (c.description || 'N/A') + '\n';
+        });
+      }
+      return text;
+    }
+
+    let aiEngine = null;
+    let isAiLoading = false;
+
+    async function sendAiMessage() {
+      const inputEl = document.getElementById('aiPromptInput');
+      const userText = inputEl.value.trim();
+      if (!userText) return;
+
+      inputEl.value = '';
+      appendChatMessage('user', userText);
+
+      const modelSelect = document.getElementById('aiModelSelect');
+      const selectedModel = modelSelect.value;
+      const statusEl = document.getElementById('aiStatusText');
+      const progressBar = document.getElementById('aiProgressBar');
+      const progressContainer = document.getElementById('aiProgressContainer');
+      const sendBtn = document.getElementById('aiSendBtn');
+
+      if (!navigator.gpu) {
+        appendChatMessage('system', '⚠️ WebGPU is not detected in your browser. To use In-Browser AI without cloud data servers: in Chrome/Brave/Edge ensure "Hardware Acceleration" is enabled in settings; in Safari ensure Safari 18+ (macOS Sequoia / iOS 18); in Firefox enable "dom.webgpu.enabled" in about:config.');
+        return;
+      }
+
+      sendBtn.disabled = true;
+
+      if (!aiEngine) {
+        if (isAiLoading) return;
+        isAiLoading = true;
+        progressContainer.style.display = 'block';
+        statusEl.innerText = 'Initializing local WebGPU engine & loading weights (' + selectedModel + ')...';
+
+        try {
+          if (!window.webllm) {
+            throw new Error('WebLLM library is loading from CDN. Please wait a moment and try again.');
+          }
+          aiEngine = await window.webllm.CreateMLCEngine(selectedModel, {
+            initProgressCallback: (report) => {
+              statusEl.innerText = report.text;
+              if (typeof report.progress === 'number') {
+                progressBar.style.width = Math.round(report.progress * 100) + '%';
+              }
+            }
+          });
+          statusEl.innerText = '✓ Model cached & loaded in local browser memory via WebGPU.';
+          progressBar.style.width = '100%';
+          setTimeout(() => { progressContainer.style.display = 'none'; }, 2000);
+        } catch (err) {
+          statusEl.innerText = 'Initialization error: ' + err.message;
+          appendChatMessage('system', '❌ Local model initialization error: ' + err.message);
+          isAiLoading = false;
+          sendBtn.disabled = false;
+          return;
+        } finally {
+          isAiLoading = false;
+        }
+      }
+
+      const contextData = getGroundedContext();
+      const systemPrompt = "You are a specialized civic worker rights and labor standards intelligence assistant for the Twin Cities (Minnesota). You run 100% locally and privately in the user's browser via WebGPU with ZERO server-side data tracking and ZERO cloud datacenter electricity consumption. Answer questions using the verified enforcement dockets provided in the context. Emphasize Minnesota labor protections such as Minn. Stat. § 181.165 (joint contractor liability holding property owners liable for subcontractor wage theft), § 177.24 (minimum wage and caretaker rent deduction limits), § 181.932 (whistleblower protection against retaliation), and City of Minneapolis Labor Standards ordinances. Keep answers concise, factual, and empowering.\n\n" + contextData;
+
+      const assistantMsgEl = appendChatMessage('assistant', 'Thinking...');
+
+      try {
+        const chunks = await aiEngine.chat.completions.create({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userText }
+          ],
+          stream: true
+        });
+
+        assistantMsgEl.textContent = '';
+        for await (const chunk of chunks) {
+          const delta = chunk.choices[0]?.delta?.content || '';
+          assistantMsgEl.textContent += delta;
+          const box = document.getElementById('aiChatBox');
+          box.scrollTop = box.scrollHeight;
+        }
+      } catch (genErr) {
+        assistantMsgEl.textContent = 'Generation error: ' + genErr.message;
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    function appendChatMessage(role, text) {
+      const box = document.getElementById('aiChatBox');
+      const msg = document.createElement('div');
+      msg.className = 'chat-msg ' + role;
+      msg.textContent = text;
+      box.appendChild(msg);
+      box.scrollTop = box.scrollHeight;
+      return msg;
+    }
+
+    function askSuggestedQuestion(q) {
+      document.getElementById('aiPromptInput').value = q;
+      sendAiMessage();
+    }
+
+    function clearAiChat() {
+      const box = document.getElementById('aiChatBox');
+      box.innerHTML = '<div class="chat-msg system">💬 Chat cleared. Model remains cached in your local browser memory.</div>';
+    }
+
     async function executeSearch() {
       const q = document.getElementById('searchInput').value.trim();
       const grid = document.getElementById('casesGrid');
@@ -685,6 +1145,7 @@ export function renderWageTheftUI(): string {
         const resp = await fetch('/cases?q=' + encodeURIComponent(q));
         const data = await resp.json();
         const cases = data.cases || [];
+        currentCasesResults = cases;
 
         countEl.innerHTML = \`Found <strong>\${cases.length}</strong> wage theft enforcement actions\`;
 
@@ -693,7 +1154,7 @@ export function renderWageTheftUI(): string {
           return;
         }
 
-        grid.innerHTML = cases.map(c => {
+        grid.innerHTML = cases.map((c, idx) => {
           const totalRecovered = (parseFloat(c.back_wages_recovered || 0) + parseFloat(c.civil_penalties_assessed || 0)).toLocaleString(undefined, {minimumFractionDigits: 2});
           const backWages = parseFloat(c.back_wages_recovered || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
           const penalties = parseFloat(c.civil_penalties_assessed || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
@@ -732,10 +1193,31 @@ export function renderWageTheftUI(): string {
                     <div class="fin-item-lbl">Status</div>
                   </div>
                 </div>
+
+                <div style="margin-top: 10px; padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; font-size: 0.75rem; border: 1px solid var(--card-border);">
+                  <div style="font-weight: 700; color: #94a3b8; margin-bottom: 4px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">
+                    📄 Source Documents & Official Dockets:
+                  </div>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="https://enforcement.dol.gov" target="_blank" style="color: #38bdf8; text-decoration: underline;">
+                      US DOL WHD Docket ↗
+                    </a>
+                    <span>•</span>
+                    <a href="https://publicaccess.courts.state.mn.us" target="_blank" style="color: #38bdf8; text-decoration: underline;">
+                      District Court Filings (MCRO) ↗
+                    </a>
+                    <span>•</span>
+                    <a href="https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards" target="_blank" style="color: #38bdf8; text-decoration: underline;">
+                      Mpls Civil Rights Findings PDF ↗
+                    </a>
+                  </div>
+                </div>
               </div>
 
-              <div class="card-footer">
-                <span>Case: \${c.case_id}</span>
+              <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--card-border); padding-top: 12px; margin-top: 14px;">
+                <button class="copy-md-btn" id="copy-btn-\${idx}" onclick="copyCaseAsMarkdown(\${idx})">
+                  📋 Copy as Markdown (LLM)
+                </button>
                 <a href="https://mpls-rental-sync-worker.a-8c6.workers.dev/search?q=\${encodeURIComponent(c.trade_name || c.respondent_legal_name)}" target="_blank" class="link-btn">
                   Inspect Landlord Links 🔍
                 </a>
