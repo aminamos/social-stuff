@@ -1,840 +1,925 @@
 [
   {
     "county": "Aitkin",
-    "county_seat": null,
+    "county_seat": "Aitkin",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/8501_Parcels_Merged_Classified/FeatureServer",
     "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "city_code_url": "https://www.ci.aitkin.mn.us/ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
+      "county assessor / property-tax URL not yet found",
       "county zoning ordinance URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County ordinances page https://www.co.aitkin.mn.us/ordinances/ returns 403 to plain curl (bot protection; 200 with browser UA), so reported null per 200-only rule. City ordinances page links its amlegal code.",
+    "assessor_url": null
   },
   {
     "county": "Becker",
-    "county_seat": null,
+    "county_seat": "Detroit Lakes",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
     "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "city_code_url": "https://detroitlakesmn.govoffice3.com/vertical/Sites/%7BF991A069-E23D-412C-8132-49318B273050%7D/uploads/Code_Book_Updated_2026-04-10.pdf",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
+      "county assessor / property-tax URL not yet found",
       "county zoning ordinance URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Planning page https://www.beckercountymn.gov/142/Planning-Zoning 302-redirects to a Radware bot check for curl, so reported null; county homepage https://www.beckercountymn.gov/ returns 200. City code is the official City Code Book PDF.",
+    "assessor_url": null
   },
   {
     "county": "Beltrami",
-    "county_seat": null,
+    "county_seat": "Bemidji",
     "gis_portal_url": "https://gishub-beltramicounty.hub.arcgis.com/",
-    "gis_parcels_service_url": "https://arcgis.co.beltrami.mn.us/arcgis/rest/services/BeltramiData/BeltramiOpenData/MapServer/2",
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "gis_parcels_service_url": null,
+    "zoning_ordinance_url": "https://www.beltramicountymn.gov/business-development/ordinances/",
+    "city_code_url": "https://library.municode.com/mn/bemidji/codes/code_of_ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found"
-    ]
+      "county assessor / property-tax URL not yet found",
+      "previously recorded gis_parcels_service_url failed re-verify: https://arcgis.co.beltrami.mn.us/arcgis/rest/services/BeltramiData/BeltramiOpenData/MapServer/2"
+    ],
+    "reviewer_notes": "Municode URL verified 200 and is linked from the official city site (ci.bemidji.mn.us/citycode, also 200).",
+    "assessor_url": null
   },
   {
     "county": "Big Stone",
-    "county_seat": null,
+    "county_seat": "Ortonville",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://bigstonecounty.gov/departments/environmental/planning-zoning/",
+    "city_code_url": "https://mnortonville.com/government/ordinances-city-code/",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Both on official county/city domains.",
+    "assessor_url": null
   },
   {
     "county": "Brown",
-    "county_seat": null,
+    "county_seat": "New Ulm",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://gis.co.brown.mn.us/server/rest/services/BrownCountyMaster/Parcel_Tax_Vendor/FeatureServer",
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://browncountymn.gov/228/Planning-Zoning",
+    "city_code_url": "https://www.newulmmn.gov/258/City-Code---Planning-Zoning-Charter",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Canonical URLs after redirects; document-center PDF links 404, so used landing pages.",
+    "assessor_url": null
   },
   {
     "county": "Cass",
-    "county_seat": null,
+    "county_seat": "Walker",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.casscountymn.gov/1263/Land-Use-Regulation-Zoning",
+    "city_code_url": "https://library.municode.com/mn/walker/codes/code_of_ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Municode URL verified 200 and is linked from the official city site (ci.walker.mn.us).",
+    "assessor_url": null
   },
   {
     "county": "Chippewa",
-    "county_seat": null,
+    "county_seat": "Montevideo",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://www.chippewacountymn.gov/177/Zoning-Ordinance",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City code on amlegal (curl 403, linked from official city site); no city-hosted code page found.",
+    "assessor_url": null
   },
   {
     "county": "Clearwater",
-    "county_seat": null,
+    "county_seat": "Bagley",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.clearwatercounty.org/departments/building_plan/index.php",
+    "city_code_url": "https://www.bagleymn.us/ordinance",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County page hosts Land Use Ordinance 51 documents; city page titled City Ordinance.",
+    "assessor_url": null
   },
   {
     "county": "Cook",
-    "county_seat": null,
+    "county_seat": "Grand Marais",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://cookcountymn.gov/government/ordinances.php",
+    "city_code_url": "https://www.ci.grand-marais.mn.us/ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City ordinances page links the full Code of Ordinances document.",
+    "assessor_url": null
   },
   {
     "county": "Cottonwood",
-    "county_seat": null,
+    "county_seat": "Windom",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.cottonwoodcountymn.gov/departments/services/environmental_office/planning_and_zoning/index.php",
+    "city_code_url": "https://www.windommn.gov/government/code_of_ordinances.php",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Canonical https URLs after redirects from http/old domains.",
+    "assessor_url": null
   },
   {
     "county": "Crow Wing",
-    "county_seat": null,
+    "county_seat": "Brainerd",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.crowwing.gov/214/Ordinance-Policy",
+    "city_code_url": "https://www.ci.brainerd.mn.us/153/City-Code",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County ordinance/policy landing page (curl 200). City hosts its own code on official city domain (curl 200).",
+    "assessor_url": null
   },
   {
     "county": "Douglas",
-    "county_seat": null,
+    "county_seat": "Alexandria",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.douglascountymn.gov/land-use-zoning",
+    "city_code_url": "https://alexandriamn.city/alexandria-city-code/",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County Land Use & Zoning landing page (curl 200). City code page on official city domain, titled 'Alexandria City Code' (curl 200).",
+    "assessor_url": null
   },
   {
     "county": "Faribault",
-    "county_seat": null,
+    "county_seat": "Blue Earth",
     "gis_portal_url": "https://faribault-county-hub-FCSWCD.hub.arcgis.com",
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.faribaultcountymn.gov/1298/Zoning-Ordinances",
+    "city_code_url": "https://becity.org/index.php/government/city-code",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found"
-    ]
+      "county assessor / property-tax URL not yet found"
+    ],
+    "reviewer_notes": "County moved to faribaultcountymn.gov; zoning ordinances page (curl 200). Older co.faribault.mn.us ordinance PDFs now 404. City hosts code docs on official becity.org page (curl 200).",
+    "assessor_url": null
   },
   {
     "county": "Freeborn",
-    "county_seat": null,
+    "county_seat": "Albert Lea",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.freeborncountymn.gov/180/Ordinances",
+    "city_code_url": "https://www.cityofalbertlea.org/city-code/",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County moved to freeborncountymn.gov; ordinances landing page (curl 200). City code page on official city domain embeds/links Municode Library (curl 200).",
+    "assessor_url": null
   },
   {
     "county": "Goodhue",
-    "county_seat": null,
+    "county_seat": "Red Wing",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://services8.arcgis.com/81iGvYZfKpMfrgYJ/arcgis/rest/services/Soft_Parcels_City_of_RedWing_WFL1/FeatureServer",
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://goodhuecountymn.gov/land_use_management/planning_zoning/",
+    "city_code_url": "https://redwingmn.gov/227/City-Charter-and-Code",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County Planning/Zoning landing page (curl 200); full zoning ordinance PDF also at co.goodhue.mn.us/DocumentCenter/View/2428 (curl 200). City Charter and Code page links city Laserfiche WebLink code docs (curl 200).",
+    "assessor_url": null
   },
   {
     "county": "Grant",
-    "county_seat": null,
+    "county_seat": "Elbow Lake",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.grantcountymn.gov/355/Ordinances",
+    "city_code_url": "https://www.thecityofelbowlake.com/city-ordinances/",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County moved to grantcountymn.gov; ordinances page (curl 200); current shoreland ordinance PDF verified (curl 200). City ordinances page on official city domain (curl 200); full code also on American Legal (curl-blocked, 403).",
+    "assessor_url": null
   },
   {
     "county": "Hubbard",
-    "county_seat": null,
+    "county_seat": "Park Rapids",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://www.hubbardcounty.gov/environmental_services",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Planning/zoning administered via Environmental Services page, the county's only sitemap-listed page for it (curl 200). City code exists on American Legal (codelibrary.amlegal.com/codes/parkrapids, linked from city site) but returns 403 to curl, so null per verification rule.",
+    "assessor_url": null
   },
   {
     "county": "Itasca",
-    "county_seat": null,
+    "county_seat": "Grand Rapids",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://itascacountymn.gov/235/Land-Management-Planning",
+    "city_code_url": "https://library.municode.com/mn/grand_rapids/codes/code_of_ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County Land Management/Planning landing page (curl 200); zoning ordinance PDF also verified (curl 200). City code on Municode (curl 200), corroborated by third-party citation of library.municode.com/mn/grand_rapids code and Municode-printed ordinance headers; note Municode returns 200 even for invalid slugs, so hosting confirmed via search evidence, not curl alone.",
+    "assessor_url": null
   },
   {
     "county": "Jackson",
-    "county_seat": null,
+    "county_seat": "Jackson",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://jacksoncountymn.gov/ordinances",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County ordinances page (curl 200); full Development Code/Zoning Ordinance PDF verified (curl 200). City code exists on American Legal (codelibrary.amlegal.com/codes/jacksonmn, linked from city site) but returns 403 to curl, so null per verification rule.",
+    "assessor_url": null
   },
   {
     "county": "Kanabec",
-    "county_seat": null,
+    "county_seat": "Mora",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://www.kanabeccounty.org/community/zoning.php",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County has no county-wide zoning (townships/cities administer their own); zoning info page plus Shoreland Ordinance No. 5 PDF both curl 200. City code exists on American Legal (codelibrary.amlegal.com/codes/mora) but returns 403 to curl, and no code page found on city site static HTML, so null per verification rule.",
+    "assessor_url": null
   },
   {
     "county": "Kandiyohi",
-    "county_seat": null,
+    "county_seat": "Willmar",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.kcmn.us/departments/environmental_services/",
+    "city_code_url": "https://library.municode.com/mn/willmar/codes/code_of_ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City code URL verified HTTP 200 and is linked directly from the City of Willmar official site (willmarmn.gov).",
+    "assessor_url": null
   },
   {
     "county": "Kittson",
-    "county_seat": null,
+    "county_seat": "Hallock",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.co.kittson.mn.us/government/departments/zoning.php",
+    "city_code_url": "https://library.municode.com/mn/hallock/codes/code_of_ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County seat corroborated via county site address (Hallock, MN 56728). Municode hosts the /mn/hallock municipality library.",
+    "assessor_url": null
   },
   {
     "county": "Koochiching",
-    "county_seat": null,
+    "county_seat": "International Falls",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://services.arcgis.com/n4v88Dv33V9Mhi0b/arcgis/rest/services/Public_Access_Layers/FeatureServer",
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.koochiching.gov/393/Planning-and-Zoning-Applications",
+    "city_code_url": "https://library.municode.com/mn/international_falls/codes/code_of_ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Old co.koochiching.mn.us URLs 301-redirect to koochiching.gov; final URL verified 200. City code confirmed on municode via link from the official city site.",
+    "assessor_url": null
   },
   {
     "county": "Lac qui Parle",
-    "county_seat": null,
+    "county_seat": "Madison",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://www.lqpcomn.gov/236/Planning-Zoning",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Madison's official code is on codelibrary.amlegal.com (linked from cityofmadisonmn.gov) but amlegal returns HTTP 403 to curl, so reported null per verification rule.",
+    "assessor_url": null
   },
   {
     "county": "Lake",
-    "county_seat": null,
+    "county_seat": "Two Harbors",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://services4.arcgis.com/z5QlFXK0gOIvsPsP/arcgis/rest/services/shp_plan_tax_parcels_MW/FeatureServer",
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://www.co.lake.mn.us/environmental-services/planning-and-zoning/",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Two Harbors' official code is on codelibrary.amlegal.com (linked from twoharborsmn.gov) but amlegal returns HTTP 403 to curl, so reported null per verification rule.",
+    "assessor_url": null
   },
   {
     "county": "Lake of the Woods",
-    "county_seat": null,
+    "county_seat": "Baudette",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://lotwcounty.gov/land-water/boa-planning-commission/",
+    "city_code_url": "https://www.ci.baudette.mn.us/ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Old co.lake-of-the-woods.mn.us domain is deprecated; current county domain is lotwcounty.gov. City ordinances page is the official City of Baudette site.",
+    "assessor_url": null
   },
   {
     "county": "Lincoln",
-    "county_seat": null,
+    "county_seat": "Ivanhoe",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.co.lincoln.mn.us/zoning.html",
+    "city_code_url": "https://city-ivanhoe-mn.com/ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County seat corroborated via county zoning office address (Ivanhoe, MN 56142). Ivanhoe's official site hosts its adopted MN Basic Code documents under /ordinances.",
+    "assessor_url": null
   },
   {
     "county": "Lyon",
-    "county_seat": null,
+    "county_seat": "Marshall",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
     "zoning_ordinance_url": null,
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "county zoning ordinance URL not yet found",
-      "no verified ArcGIS Hub GIS portal"
-    ]
+      "no verified ArcGIS Hub GIS portal",
+      "reported city_code_url failed re-verify, needs a replacement: https://marshall-mn.municipalcodeonline.com/book?type=ordinances"
+    ],
+    "reviewer_notes": "Lyon County's official site (lyoncountymn.gov, incl. Planning-Zoning pages) blocks curl with 403/Access-Denied, so zoning URL reported null; the Planning-Zoning page exists but fails the HTTP 200 rule. City code is Marshall's official Municipal Code Online book, linked from ci.marshall.mn.us.",
+    "assessor_url": null
   },
   {
     "county": "Mahnomen",
-    "county_seat": null,
+    "county_seat": "Mahnomen",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.mahnomencounty.gov/department/departments_i_z/zoning_sanitation/index.php",
+    "city_code_url": "https://www.mahnomenmn.org/city-code",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County uses mahnomencounty.gov (co.mahnomen.mn.us 301-redirects there). City-code page is the official City of Mahnomen site (full code text itself is on amlegal, which blocks curl).",
+    "assessor_url": null
   },
   {
     "county": "Marshall",
-    "county_seat": null,
+    "county_seat": "Warren",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.marshallcountymn.gov/zoning/",
+    "city_code_url": "https://warrenminnesota.com/government-page/ordinances/",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Old co.marshall.mn.us URLs 301-redirect to marshallcountymn.gov; final URL verified 200. Warren city code site hosts the full code titles/documents.",
+    "assessor_url": null
   },
   {
     "county": "Martin",
-    "county_seat": null,
+    "county_seat": "Fairmont",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://www.co.martin.mn.us/your_government/departments/planning___zoning/land_use.php",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Full city code lives on American Legal (codelibrary.amlegal.com/codes/fairmontmn, linked as Codes & Ordinances from fairmont.org) but returns 403 to automated checks, so null per verification rule.",
+    "assessor_url": null
   },
   {
     "county": "McLeod",
-    "county_seat": null,
+    "county_seat": "Glencoe",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://services8.arcgis.com/AgCkxHOg7dxK30Pb/arcgis/rest/services/McLeod_Potential_Solar_Sites/FeatureServer",
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.mcleodcountymn.gov/departments/environmental_services/planning___zoning/ordinances.php",
+    "city_code_url": "https://www.glencoemn.org/city-government/city-ordinances-zoning-map/",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City hosts code chapters as PDFs on its official site; city's other domain links a wrong-state Municode page (Alabama), not reported.",
+    "assessor_url": null
   },
   {
     "county": "Meeker",
-    "county_seat": null,
+    "county_seat": "Litchfield",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.meekercountymn.gov/263/County-Ordinances",
+    "city_code_url": "https://www.ci.litchfield.mn.us/DocumentCenter",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County canonical domain is meekercountymn.gov (co.meeker.mn.us redirects). City code (codified ordinances incl. Title XV zoning) is hosted in the city's Document Center hub.",
+    "assessor_url": null
   },
   {
     "county": "Morrison",
-    "county_seat": null,
+    "county_seat": "Little Falls",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://services1.arcgis.com/lQjrBHFnTgKBR9zX/arcgis/rest/services/Parcels/FeatureServer",
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://morrisoncountymn.gov/382/Ordinances-and-Plans",
+    "city_code_url": "https://mn-littlefalls.civicplus.com/172/City-Code",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City-Code hub links the full code on American Legal (codelibrary.amlegal.com/codes/littlefallsmn), which blocks automated checks (403).",
+    "assessor_url": null
   },
   {
     "county": "Mower",
-    "county_seat": null,
+    "county_seat": "Austin",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/Austin__MN_WFL1/FeatureServer",
     "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "city_code_url": "https://www.ci.austin.mn.us/city-code",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
+      "county assessor / property-tax URL not yet found",
       "county zoning ordinance URL not yet found",
-      "no verified ArcGIS Hub GIS portal"
-    ]
+      "no verified ArcGIS Hub GIS portal",
+      "reported zoning_ordinance_url failed re-verify, needs a replacement: https://www.co.mower.mn.us/DocumentCenter/View/1168/Mower-County-Zoning-Ordinance-PDF?bidId"
+    ],
+    "reviewer_notes": "City-Code page links the full code on American Legal (codelibrary.amlegal.com/codes/austinmn), which blocks automated checks (403).",
+    "assessor_url": null
   },
   {
     "county": "Murray",
-    "county_seat": null,
+    "county_seat": "Slayton",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://murraycountymn.gov/government/ordinances.php",
+    "city_code_url": "https://slayton.govoffice.com/ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City ordinances page links the full code on American Legal (codelibrary.amlegal.com/codes/slayton), which blocks automated checks (403).",
+    "assessor_url": null
   },
   {
     "county": "Nobles",
-    "county_seat": null,
+    "county_seat": "Worthington",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://www.co.nobles.mn.us/wp-content/uploads/2024/01/Full-2016-Ordinance.pdf",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City code is on American Legal (codelibrary.amlegal.com/codes/worthingtonmn) and the city page worthingtonmn.gov/Our-City/City-Code, but both return 403 to automated checks, so null per verification rule.",
+    "assessor_url": null
   },
   {
     "county": "Norman",
-    "county_seat": null,
+    "county_seat": "Ada",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.normanmn.gov/departments/environmental_services/planning___zoning_.php",
+    "city_code_url": "https://www.adamn.gov/p/getconnected/ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County canonical domain is normanmn.gov (co.norman.mn.us redirects). No hosted online code publisher found for Ada; city ordinances page used.",
+    "assessor_url": null
   },
   {
     "county": "Otter Tail",
-    "county_seat": null,
+    "county_seat": "Fergus Falls",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://ottertailcounty.gov/department/land-and-resource-management/",
+    "city_code_url": "https://www.fergusfallsmn.gov/citycode",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City-Code page links the full code on American Legal (codelibrary.amlegal.com/codes/fergusfallsmn), which blocks automated checks (403).",
+    "assessor_url": null
   },
   {
     "county": "Pennington",
-    "county_seat": null,
+    "county_seat": "Thief River Falls",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
     "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "city_code_url": "https://library.municode.com/mn/thief_river_falls/codes/code_of_ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
+      "county assessor / property-tax URL not yet found",
       "county zoning ordinance URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "No county planning/zoning ordinance page exists on co.pennington.mn.us (no P&Z department; only floodplain rules in board docs). Note: docs.pennco.org zoning results are Pennington County SD, not MN. Municode returns 200 for any slug, but this URL is the exact link labeled Code of Ordinances on the city's official site (trfmn.gov).",
+    "assessor_url": null
   },
   {
     "county": "Pine",
-    "county_seat": null,
+    "county_seat": "Pine City",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://www.pinecountymn.gov/government/ordinances.php",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
-      "no verified ArcGIS Hub GIS portal"
-    ]
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
+      "no verified ArcGIS Hub GIS portal",
+      "reported city_code_url failed re-verify, needs a replacement: https://pinecity.municipalcodeonline.com/book?type=ordinances"
+    ],
+    "reviewer_notes": "County ordinances index includes Planning & Zoning ordinances; Pine City code on Municipal Code Online, both curl 200.",
+    "assessor_url": null
   },
   {
     "county": "Pipestone",
-    "county_seat": null,
+    "county_seat": "Pipestone",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://pipestonecounty.gov/government/departments/environmental_services/index.php",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
-      "no verified ArcGIS Hub GIS portal"
-    ]
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
+      "no verified ArcGIS Hub GIS portal",
+      "reported city_code_url failed re-verify, needs a replacement: https://progressivepipestone.com/DocumentCenter/View/512/Pipestone-Code-Book"
+    ],
+    "reviewer_notes": "County environmental services page (handles zoning); city code book PDF on official city site, both curl 200. pipestonecounty.com is a parked domain; pipestonecounty.gov is official.",
+    "assessor_url": null
   },
   {
     "county": "Pope",
-    "county_seat": null,
+    "county_seat": "Glenwood",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.popecountymn.gov/land-resource-management/",
+    "city_code_url": "https://www.ci.glenwood.mn.us/forms-permits-ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County Land & Resource Management page; Glenwood code lives on amlegal (curl 403) so city official ordinances page reported, both curl 200.",
+    "assessor_url": null
   },
   {
     "county": "Red Lake",
-    "county_seat": null,
+    "county_seat": "Red Lake Falls",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://redlakecounty.gov/government/board_of_commissioners/county_ordinances.php",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County ordinances page curl 200. City code hosted only on codelibrary.amlegal.com (linked from redlakefalls.com) which returns 403 to curl, so null per verification rule.",
+    "assessor_url": null
   },
   {
     "county": "Redwood",
-    "county_seat": null,
+    "county_seat": "Redwood Falls",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://redwoodcounty-mn.gov/departments/environmental-office/",
+    "city_code_url": "https://ci.redwood-falls.mn.us/city-code-of-ordinances/",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County moved from redwoodcounty-mn.us to redwoodcounty-mn.gov; environmental office page covers planning/zoning. City code index on official city site, both curl 200.",
+    "assessor_url": null
   },
   {
     "county": "Renville",
-    "county_seat": null,
+    "county_seat": "Olivia",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.renvillecountymn.gov/government/ordinances/",
+    "city_code_url": "https://olivia.mn.us/government/city_code.php",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County ordinances hub (land-use ordinance chapters); Olivia city code page on official city site, both curl 200.",
+    "assessor_url": null
   },
   {
     "county": "Rice",
-    "county_seat": null,
+    "county_seat": "Faribault",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://asr-arcgis01.ricecountymn.gov/arcgis/rest/services/Maps/TaxParcels/MapServer/1",
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.ricecountymn.gov/186/Rice-County-Zoning-Ordinances",
+    "city_code_url": "https://library.municode.com/mn/faribault/codes/code_of_ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County zoning ordinances index; Faribault code on municode, both curl 200.",
+    "assessor_url": null
   },
   {
     "county": "Roseau",
-    "county_seat": null,
+    "county_seat": "Roseau",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://cms1files.revize.com/roseaucounty/document_center/Ordinances/Ordinance%20No.%204%20-%20Shoreland%20Management%20Ordinance.pdf",
+    "city_code_url": "https://www.city.roseau.mn.us/citycode",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Main county site (co.roseau.mn.us) bot-blocks curl (302 to captcha validation), so a county shoreland-management ordinance PDF on its revize document host is reported (curl 200). City code page on official city site curl 200.",
+    "assessor_url": null
   },
   {
     "county": "Sibley",
-    "county_seat": null,
+    "county_seat": "Gaylord",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://www.sibleycounty.gov/279/Zoning",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County zoning page curl 200. City code hosted only on codelibrary.amlegal.com (curl 403); the city's own site link (exploregaylord.org/businesses/city-codes/) redirects to a dead amlegal client URL (404), so null per verification rule.",
+    "assessor_url": null
   },
   {
     "county": "Steele",
-    "county_seat": null,
+    "county_seat": "Owatonna",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.steelecountymn.gov/departments/planning_zoning/ordinances_land_use_plans_mn_rules.php",
+    "city_code_url": "https://library.municode.com/mn/owatonna/codes/code_of_ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "County planning & zoning ordinances page; Owatonna code on municode, both curl 200. Legacy co.steele.mn.us host has TLS/redirect issues; steelecountymn.gov is current.",
+    "assessor_url": null
   },
   {
     "county": "Stevens",
-    "county_seat": null,
+    "county_seat": "Morris",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://services2.arcgis.com/7iPhaYyq6PkRoVhV/arcgis/rest/services/Feb_2026_Parcels/FeatureServer",
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.stevenscountymn.gov/1116/Planning-Zoning",
+    "city_code_url": "https://www.ci.morris.mn.us/wp-content/uploads/2020/10/City-Code-Updated-2018-compressed.pdf",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City code is a PDF on the official city site.",
+    "assessor_url": null
   },
   {
     "county": "Swift",
-    "county_seat": null,
+    "county_seat": "Benson",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://swiftcounty.gov/ordinances",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "Benson City Code is hosted on codelibrary.amlegal.com (codes/benson), but amlegal returns HTTP 403 to plain curl, so per verification rule reported as null.",
+    "assessor_url": null
   },
   {
     "county": "Todd",
-    "county_seat": null,
+    "county_seat": "Long Prairie",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://services.arcgis.com/qWbGMYB49y8mLbRt/arcgis/rest/services/MnDOT_EV_Site_Parcels_Viewer/FeatureServer",
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://toddcountymn.gov/government/departments/planning_zoning/index.php",
+    "city_code_url": "https://www.longprairie.net/our-city/ordinances/",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City ordinances landing page on the official city site.",
+    "assessor_url": null
   },
   {
     "county": "Traverse",
-    "county_seat": null,
+    "county_seat": "Wheaton",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://traversecountymn.gov/departments/departments/departments-planning-zoning/",
+    "city_code_url": "https://cityofwheaton.com/city-ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City ordinances page on the official city site.",
+    "assessor_url": null
   },
   {
     "county": "Wadena",
-    "county_seat": null,
+    "county_seat": "Wadena",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.wadenacounty.gov/213/Planning-Zoning",
+    "city_code_url": "https://www.wadena.org/documents/city-government/resources/zoning-code/535030",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City link is the official zoning-code document page; full city code is on codelibrary.amlegal.com (403 to curl).",
+    "assessor_url": null
   },
   {
     "county": "Waseca",
-    "county_seat": null,
+    "county_seat": "Waseca",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://gis.wasecacounty.gov/arcgis/rest/services/Public/Cadastral/FeatureServer/0",
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.wasecacounty.gov/129/Planning-Zoning",
+    "city_code_url": "https://ci.waseca.mn.us/1496/City-Ordinance-Code",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City ordinance code page on the official city site; full text also on amlegal (403 to curl).",
+    "assessor_url": null
   },
   {
     "county": "Watonwan",
-    "county_seat": null,
+    "county_seat": "St. James",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.watonwancountymn.gov/151/Land-Management-Zoning",
+    "city_code_url": "https://www.ci.stjames.mn.us/97/City-Ordinances",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City ordinances page on the official city site; full text also on amlegal (403 to curl).",
+    "assessor_url": null
   },
   {
     "county": "Wilkin",
-    "county_seat": null,
+    "county_seat": "Breckenridge",
     "gis_portal_url": null,
     "gis_parcels_service_url": null,
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://wilkincounty.gov/zoningpermits",
+    "city_code_url": "https://www.breckenridgemn.net/ordinance",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City ordinance page on the official city site.",
+    "assessor_url": null
   },
   {
     "county": "Winona",
-    "county_seat": null,
+    "county_seat": "Winona",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://services.arcgis.com/n4v88Dv33V9Mhi0b/arcgis/rest/services/Public_Access_Layers/FeatureServer",
-    "zoning_ordinance_url": null,
+    "zoning_ordinance_url": "https://www.winonacounty.gov/275/Planning-Environmental-Services",
     "city_code_url": null,
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "city code URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City's official 'City Code' quick-link points to a Laserfiche repository (lf.winonamn.gov/WebLink/Browse.aspx) that returns HTTP 302 to plain curl, so reported as null.",
+    "assessor_url": null
   },
   {
     "county": "Yellow Medicine",
-    "county_seat": null,
+    "county_seat": "Granite Falls",
     "gis_portal_url": null,
     "gis_parcels_service_url": "https://services.arcgis.com/n4v88Dv33V9Mhi0b/arcgis/rest/services/Public_Access_Layers/FeatureServer",
-    "zoning_ordinance_url": null,
-    "city_code_url": null,
+    "zoning_ordinance_url": "https://www.co.ym.mn.gov/land-resource-management",
+    "city_code_url": "https://granitefalls.com/government/ordinances/index.php",
     "status": "needs_review",
     "needs_review": [
-      "county seat + city code URL not yet researched",
-      "county zoning ordinance URL not yet found",
+      "county assessor / property-tax URL not yet found",
       "no verified ArcGIS Hub GIS portal"
-    ]
+    ],
+    "reviewer_notes": "City ordinances page on the official city site.",
+    "assessor_url": null
   }
 ]

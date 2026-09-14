@@ -1,0 +1,72 @@
+[
+  {
+    "county": "Pine",
+    "county_seat": "Pine City",
+    "zoning_ordinance_url": "https://www.pinecountymn.gov/government/ordinances.php",
+    "city_code_url": "https://pinecity.municipalcodeonline.com/book?type=ordinances",
+    "notes": "County ordinances index includes Planning & Zoning ordinances; Pine City code on Municipal Code Online, both curl 200."
+  },
+  {
+    "county": "Pipestone",
+    "county_seat": "Pipestone",
+    "zoning_ordinance_url": "https://pipestonecounty.gov/government/departments/environmental_services/index.php",
+    "city_code_url": "https://progressivepipestone.com/DocumentCenter/View/512/Pipestone-Code-Book",
+    "notes": "County environmental services page (handles zoning); city code book PDF on official city site, both curl 200. pipestonecounty.com is a parked domain; pipestonecounty.gov is official."
+  },
+  {
+    "county": "Pope",
+    "county_seat": "Glenwood",
+    "zoning_ordinance_url": "https://www.popecountymn.gov/land-resource-management/",
+    "city_code_url": "https://www.ci.glenwood.mn.us/forms-permits-ordinances",
+    "notes": "County Land & Resource Management page; Glenwood code lives on amlegal (curl 403) so city official ordinances page reported, both curl 200."
+  },
+  {
+    "county": "Red Lake",
+    "county_seat": "Red Lake Falls",
+    "zoning_ordinance_url": "https://redlakecounty.gov/government/board_of_commissioners/county_ordinances.php",
+    "city_code_url": null,
+    "notes": "County ordinances page curl 200. City code hosted only on codelibrary.amlegal.com (linked from redlakefalls.com) which returns 403 to curl, so null per verification rule."
+  },
+  {
+    "county": "Redwood",
+    "county_seat": "Redwood Falls",
+    "zoning_ordinance_url": "https://redwoodcounty-mn.gov/departments/environmental-office/",
+    "city_code_url": "https://ci.redwood-falls.mn.us/city-code-of-ordinances/",
+    "notes": "County moved from redwoodcounty-mn.us to redwoodcounty-mn.gov; environmental office page covers planning/zoning. City code index on official city site, both curl 200."
+  },
+  {
+    "county": "Renville",
+    "county_seat": "Olivia",
+    "zoning_ordinance_url": "https://www.renvillecountymn.gov/government/ordinances/",
+    "city_code_url": "https://olivia.mn.us/government/city_code.php",
+    "notes": "County ordinances hub (land-use ordinance chapters); Olivia city code page on official city site, both curl 200."
+  },
+  {
+    "county": "Rice",
+    "county_seat": "Faribault",
+    "zoning_ordinance_url": "https://www.ricecountymn.gov/186/Rice-County-Zoning-Ordinances",
+    "city_code_url": "https://library.municode.com/mn/faribault/codes/code_of_ordinances",
+    "notes": "County zoning ordinances index; Faribault code on municode, both curl 200."
+  },
+  {
+    "county": "Roseau",
+    "county_seat": "Roseau",
+    "zoning_ordinance_url": "https://cms1files.revize.com/roseaucounty/document_center/Ordinances/Ordinance%20No.%204%20-%20Shoreland%20Management%20Ordinance.pdf",
+    "city_code_url": "https://www.city.roseau.mn.us/citycode",
+    "notes": "Main county site (co.roseau.mn.us) bot-blocks curl (302 to captcha validation), so a county shoreland-management ordinance PDF on its revize document host is reported (curl 200). City code page on official city site curl 200."
+  },
+  {
+    "county": "Sibley",
+    "county_seat": "Gaylord",
+    "zoning_ordinance_url": "https://www.sibleycounty.gov/279/Zoning",
+    "city_code_url": null,
+    "notes": "County zoning page curl 200. City code hosted only on codelibrary.amlegal.com (curl 403); the city's own site link (exploregaylord.org/businesses/city-codes/) redirects to a dead amlegal client URL (404), so null per verification rule."
+  },
+  {
+    "county": "Steele",
+    "county_seat": "Owatonna",
+    "zoning_ordinance_url": "https://www.steelecountymn.gov/departments/planning_zoning/ordinances_land_use_plans_mn_rules.php",
+    "city_code_url": "https://library.municode.com/mn/owatonna/codes/code_of_ordinances",
+    "notes": "County planning & zoning ordinances page; Owatonna code on municode, both curl 200. Legacy co.steele.mn.us host has TLS/redirect issues; steelecountymn.gov is current."
+  }
+]

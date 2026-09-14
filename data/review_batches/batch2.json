@@ -1,0 +1,72 @@
+[
+  {
+    "county": "Crow Wing",
+    "county_seat": "Brainerd",
+    "zoning_ordinance_url": "https://www.crowwing.gov/214/Ordinance-Policy",
+    "city_code_url": "https://www.ci.brainerd.mn.us/153/City-Code",
+    "notes": "County ordinance/policy landing page (curl 200). City hosts its own code on official city domain (curl 200)."
+  },
+  {
+    "county": "Douglas",
+    "county_seat": "Alexandria",
+    "zoning_ordinance_url": "https://www.douglascountymn.gov/land-use-zoning",
+    "city_code_url": "https://alexandriamn.city/alexandria-city-code/",
+    "notes": "County Land Use & Zoning landing page (curl 200). City code page on official city domain, titled 'Alexandria City Code' (curl 200)."
+  },
+  {
+    "county": "Faribault",
+    "county_seat": "Blue Earth",
+    "zoning_ordinance_url": "https://www.faribaultcountymn.gov/1298/Zoning-Ordinances",
+    "city_code_url": "https://becity.org/index.php/government/city-code",
+    "notes": "County moved to faribaultcountymn.gov; zoning ordinances page (curl 200). Older co.faribault.mn.us ordinance PDFs now 404. City hosts code docs on official becity.org page (curl 200)."
+  },
+  {
+    "county": "Freeborn",
+    "county_seat": "Albert Lea",
+    "zoning_ordinance_url": "https://www.freeborncountymn.gov/180/Ordinances",
+    "city_code_url": "https://www.cityofalbertlea.org/city-code/",
+    "notes": "County moved to freeborncountymn.gov; ordinances landing page (curl 200). City code page on official city domain embeds/links Municode Library (curl 200)."
+  },
+  {
+    "county": "Goodhue",
+    "county_seat": "Red Wing",
+    "zoning_ordinance_url": "https://goodhuecountymn.gov/land_use_management/planning_zoning/",
+    "city_code_url": "https://redwingmn.gov/227/City-Charter-and-Code",
+    "notes": "County Planning/Zoning landing page (curl 200); full zoning ordinance PDF also at co.goodhue.mn.us/DocumentCenter/View/2428 (curl 200). City Charter and Code page links city Laserfiche WebLink code docs (curl 200)."
+  },
+  {
+    "county": "Grant",
+    "county_seat": "Elbow Lake",
+    "zoning_ordinance_url": "https://www.grantcountymn.gov/355/Ordinances",
+    "city_code_url": "https://www.thecityofelbowlake.com/city-ordinances/",
+    "notes": "County moved to grantcountymn.gov; ordinances page (curl 200); current shoreland ordinance PDF verified (curl 200). City ordinances page on official city domain (curl 200); full code also on American Legal (curl-blocked, 403)."
+  },
+  {
+    "county": "Hubbard",
+    "county_seat": "Park Rapids",
+    "zoning_ordinance_url": "https://www.hubbardcounty.gov/environmental_services",
+    "city_code_url": null,
+    "notes": "Planning/zoning administered via Environmental Services page, the county's only sitemap-listed page for it (curl 200). City code exists on American Legal (codelibrary.amlegal.com/codes/parkrapids, linked from city site) but returns 403 to curl, so null per verification rule."
+  },
+  {
+    "county": "Itasca",
+    "county_seat": "Grand Rapids",
+    "zoning_ordinance_url": "https://itascacountymn.gov/235/Land-Management-Planning",
+    "city_code_url": "https://library.municode.com/mn/grand_rapids/codes/code_of_ordinances",
+    "notes": "County Land Management/Planning landing page (curl 200); zoning ordinance PDF also verified (curl 200). City code on Municode (curl 200), corroborated by third-party citation of library.municode.com/mn/grand_rapids code and Municode-printed ordinance headers; note Municode returns 200 even for invalid slugs, so hosting confirmed via search evidence, not curl alone."
+  },
+  {
+    "county": "Jackson",
+    "county_seat": "Jackson",
+    "zoning_ordinance_url": "https://jacksoncountymn.gov/ordinances",
+    "city_code_url": null,
+    "notes": "County ordinances page (curl 200); full Development Code/Zoning Ordinance PDF verified (curl 200). City code exists on American Legal (codelibrary.amlegal.com/codes/jacksonmn, linked from city site) but returns 403 to curl, so null per verification rule."
+  },
+  {
+    "county": "Kanabec",
+    "county_seat": "Mora",
+    "zoning_ordinance_url": "https://www.kanabeccounty.org/community/zoning.php",
+    "city_code_url": null,
+    "notes": "County has no county-wide zoning (townships/cities administer their own); zoning info page plus Shoreland Ordinance No. 5 PDF both curl 200. City code exists on American Legal (codelibrary.amlegal.com/codes/mora) but returns 403 to curl, and no code page found on city site static HTML, so null per verification rule."
+  }
+]

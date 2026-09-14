@@ -1,0 +1,73 @@
+[
+  {
+    "county": "Aitkin",
+    "county_seat": "Aitkin",
+    "zoning_ordinance_url": null,
+    "city_code_url": "https://www.ci.aitkin.mn.us/ordinances",
+    "notes": "County ordinances page https://www.co.aitkin.mn.us/ordinances/ returns 403 to plain curl (bot protection; 200 with browser UA), so reported null per 200-only rule. City ordinances page links its amlegal code."
+  },
+  {
+    "county": "Becker",
+    "county_seat": "Detroit Lakes",
+    "zoning_ordinance_url": null,
+    "city_code_url": "https://detroitlakesmn.govoffice3.com/vertical/Sites/%7BF991A069-E23D-412C-8132-49318B273050%7D/uploads/Code_Book_Updated_2026-04-10.pdf",
+    "notes": "Planning page https://www.beckercountymn.gov/142/Planning-Zoning 302-redirects to a Radware bot check for curl, so reported null; county homepage https://www.beckercountymn.gov/ returns 200. City code is the official City Code Book PDF."
+  },
+  {
+    "county": "Beltrami",
+    "county_seat": "Bemidji",
+    "zoning_ordinance_url": "https://www.beltramicountymn.gov/business-development/ordinances/",
+    "city_code_url": "https://library.municode.com/mn/bemidji/codes/code_of_ordinances",
+    "notes": "Municode URL verified 200 and is linked from the official city site (ci.bemidji.mn.us/citycode, also 200)."
+  },
+  {
+    "county": "Big Stone",
+    "county_seat": "Ortonville",
+    "zoning_ordinance_url": "https://bigstonecounty.gov/departments/environmental/planning-zoning/",
+    "city_code_url": "https://mnortonville.com/government/ordinances-city-code/",
+    "notes": "Both on official county/city domains."
+  },
+  {
+    "county": "Brown",
+    "county_seat": "New Ulm",
+    "zoning_ordinance_url": "https://browncountymn.gov/228/Planning-Zoning",
+    "city_code_url": "https://www.newulmmn.gov/258/City-Code---Planning-Zoning-Charter",
+    "notes": "Canonical URLs after redirects; document-center PDF links 404, so used landing pages."
+  },
+  {
+    "county": "Cass",
+    "county_seat": "Walker",
+    "zoning_ordinance_url": "https://www.casscountymn.gov/1263/Land-Use-Regulation-Zoning",
+    "city_code_url": "https://library.municode.com/mn/walker/codes/code_of_ordinances",
+    "notes": "Municode URL verified 200 and is linked from the official city site (ci.walker.mn.us)."
+  },
+  {
+    "county": "Chippewa",
+    "county_seat": "Montevideo",
+    "zoning_ordinance_url": "https://www.chippewacountymn.gov/177/Zoning-Ordinance",
+    "city_code_url": null,
+    "city_code_url_note": "City code lives on codelibrary.amlegal.com (linked from montevideomn.org) which returns 403 to curl, so reported null",
+    "notes": "City code on amlegal (curl 403, linked from official city site); no city-hosted code page found."
+  },
+  {
+    "county": "Clearwater",
+    "county_seat": "Bagley",
+    "zoning_ordinance_url": "https://www.clearwatercounty.org/departments/building_plan/index.php",
+    "city_code_url": "https://www.bagleymn.us/ordinance",
+    "notes": "County page hosts Land Use Ordinance 51 documents; city page titled City Ordinance."
+  },
+  {
+    "county": "Cook",
+    "county_seat": "Grand Marais",
+    "zoning_ordinance_url": "https://cookcountymn.gov/government/ordinances.php",
+    "city_code_url": "https://www.ci.grand-marais.mn.us/ordinances",
+    "notes": "City ordinances page links the full Code of Ordinances document."
+  },
+  {
+    "county": "Cottonwood",
+    "county_seat": "Windom",
+    "zoning_ordinance_url": "https://www.cottonwoodcountymn.gov/departments/services/environmental_office/planning_and_zoning/index.php",
+    "city_code_url": "https://www.windommn.gov/government/code_of_ordinances.php",
+    "notes": "Canonical https URLs after redirects from http/old domains."
+  }
+]

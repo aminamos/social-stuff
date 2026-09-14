@@ -1,0 +1,72 @@
+[
+  {
+    "county": "Stevens",
+    "county_seat": "Morris",
+    "zoning_ordinance_url": "https://www.stevenscountymn.gov/1116/Planning-Zoning",
+    "city_code_url": "https://www.ci.morris.mn.us/wp-content/uploads/2020/10/City-Code-Updated-2018-compressed.pdf",
+    "notes": "City code is a PDF on the official city site."
+  },
+  {
+    "county": "Swift",
+    "county_seat": "Benson",
+    "zoning_ordinance_url": "https://swiftcounty.gov/ordinances",
+    "city_code_url": null,
+    "notes": "Benson City Code is hosted on codelibrary.amlegal.com (codes/benson), but amlegal returns HTTP 403 to plain curl, so per verification rule reported as null."
+  },
+  {
+    "county": "Todd",
+    "county_seat": "Long Prairie",
+    "zoning_ordinance_url": "https://toddcountymn.gov/government/departments/planning_zoning/index.php",
+    "city_code_url": "https://www.longprairie.net/our-city/ordinances/",
+    "notes": "City ordinances landing page on the official city site."
+  },
+  {
+    "county": "Traverse",
+    "county_seat": "Wheaton",
+    "zoning_ordinance_url": "https://traversecountymn.gov/departments/departments/departments-planning-zoning/",
+    "city_code_url": "https://cityofwheaton.com/city-ordinances",
+    "notes": "City ordinances page on the official city site."
+  },
+  {
+    "county": "Wadena",
+    "county_seat": "Wadena",
+    "zoning_ordinance_url": "https://www.wadenacounty.gov/213/Planning-Zoning",
+    "city_code_url": "https://www.wadena.org/documents/city-government/resources/zoning-code/535030",
+    "notes": "City link is the official zoning-code document page; full city code is on codelibrary.amlegal.com (403 to curl)."
+  },
+  {
+    "county": "Waseca",
+    "county_seat": "Waseca",
+    "zoning_ordinance_url": "https://www.wasecacounty.gov/129/Planning-Zoning",
+    "city_code_url": "https://ci.waseca.mn.us/1496/City-Ordinance-Code",
+    "notes": "City ordinance code page on the official city site; full text also on amlegal (403 to curl)."
+  },
+  {
+    "county": "Watonwan",
+    "county_seat": "St. James",
+    "zoning_ordinance_url": "https://www.watonwancountymn.gov/151/Land-Management-Zoning",
+    "city_code_url": "https://www.ci.stjames.mn.us/97/City-Ordinances",
+    "notes": "City ordinances page on the official city site; full text also on amlegal (403 to curl)."
+  },
+  {
+    "county": "Wilkin",
+    "county_seat": "Breckenridge",
+    "zoning_ordinance_url": "https://wilkincounty.gov/zoningpermits",
+    "city_code_url": "https://www.breckenridgemn.net/ordinance",
+    "notes": "City ordinance page on the official city site."
+  },
+  {
+    "county": "Winona",
+    "county_seat": "Winona",
+    "zoning_ordinance_url": "https://www.winonacounty.gov/275/Planning-Environmental-Services",
+    "city_code_url": null,
+    "notes": "City's official 'City Code' quick-link points to a Laserfiche repository (lf.winonamn.gov/WebLink/Browse.aspx) that returns HTTP 302 to plain curl, so reported as null."
+  },
+  {
+    "county": "Yellow Medicine",
+    "county_seat": "Granite Falls",
+    "zoning_ordinance_url": "https://www.co.ym.mn.gov/land-resource-management",
+    "city_code_url": "https://granitefalls.com/government/ordinances/index.php",
+    "notes": "City ordinances page on the official city site."
+  }
+]

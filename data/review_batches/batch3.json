@@ -1,0 +1,72 @@
+[
+  {
+    "county": "Kandiyohi",
+    "county_seat": "Willmar",
+    "zoning_ordinance_url": "https://www.kcmn.us/departments/environmental_services/",
+    "city_code_url": "https://library.municode.com/mn/willmar/codes/code_of_ordinances",
+    "notes": "City code URL verified HTTP 200 and is linked directly from the City of Willmar official site (willmarmn.gov)."
+  },
+  {
+    "county": "Kittson",
+    "county_seat": "Hallock",
+    "zoning_ordinance_url": "https://www.co.kittson.mn.us/government/departments/zoning.php",
+    "city_code_url": "https://library.municode.com/mn/hallock/codes/code_of_ordinances",
+    "notes": "County seat corroborated via county site address (Hallock, MN 56728). Municode hosts the /mn/hallock municipality library."
+  },
+  {
+    "county": "Koochiching",
+    "county_seat": "International Falls",
+    "zoning_ordinance_url": "https://www.koochiching.gov/393/Planning-and-Zoning-Applications",
+    "city_code_url": "https://library.municode.com/mn/international_falls/codes/code_of_ordinances",
+    "notes": "Old co.koochiching.mn.us URLs 301-redirect to koochiching.gov; final URL verified 200. City code confirmed on municode via link from the official city site."
+  },
+  {
+    "county": "Lac qui Parle",
+    "county_seat": "Madison",
+    "zoning_ordinance_url": "https://www.lqpcomn.gov/236/Planning-Zoning",
+    "city_code_url": null,
+    "notes": "Madison's official code is on codelibrary.amlegal.com (linked from cityofmadisonmn.gov) but amlegal returns HTTP 403 to curl, so reported null per verification rule."
+  },
+  {
+    "county": "Lake",
+    "county_seat": "Two Harbors",
+    "zoning_ordinance_url": "https://www.co.lake.mn.us/environmental-services/planning-and-zoning/",
+    "city_code_url": null,
+    "notes": "Two Harbors' official code is on codelibrary.amlegal.com (linked from twoharborsmn.gov) but amlegal returns HTTP 403 to curl, so reported null per verification rule."
+  },
+  {
+    "county": "Lake of the Woods",
+    "county_seat": "Baudette",
+    "zoning_ordinance_url": "https://lotwcounty.gov/land-water/boa-planning-commission/",
+    "city_code_url": "https://www.ci.baudette.mn.us/ordinances",
+    "notes": "Old co.lake-of-the-woods.mn.us domain is deprecated; current county domain is lotwcounty.gov. City ordinances page is the official City of Baudette site."
+  },
+  {
+    "county": "Lincoln",
+    "county_seat": "Ivanhoe",
+    "zoning_ordinance_url": "https://www.co.lincoln.mn.us/zoning.html",
+    "city_code_url": "https://city-ivanhoe-mn.com/ordinances",
+    "notes": "County seat corroborated via county zoning office address (Ivanhoe, MN 56142). Ivanhoe's official site hosts its adopted MN Basic Code documents under /ordinances."
+  },
+  {
+    "county": "Lyon",
+    "county_seat": "Marshall",
+    "zoning_ordinance_url": null,
+    "city_code_url": "https://marshall-mn.municipalcodeonline.com/book?type=ordinances",
+    "notes": "Lyon County's official site (lyoncountymn.gov, incl. Planning-Zoning pages) blocks curl with 403/Access-Denied, so zoning URL reported null; the Planning-Zoning page exists but fails the HTTP 200 rule. City code is Marshall's official Municipal Code Online book, linked from ci.marshall.mn.us."
+  },
+  {
+    "county": "Mahnomen",
+    "county_seat": "Mahnomen",
+    "zoning_ordinance_url": "https://www.mahnomencounty.gov/department/departments_i_z/zoning_sanitation/index.php",
+    "city_code_url": "https://www.mahnomenmn.org/city-code",
+    "notes": "County uses mahnomencounty.gov (co.mahnomen.mn.us 301-redirects there). City-code page is the official City of Mahnomen site (full code text itself is on amlegal, which blocks curl)."
+  },
+  {
+    "county": "Marshall",
+    "county_seat": "Warren",
+    "zoning_ordinance_url": "https://www.marshallcountymn.gov/zoning/",
+    "city_code_url": "https://warrenminnesota.com/government-page/ordinances/",
+    "notes": "Old co.marshall.mn.us URLs 301-redirect to marshallcountymn.gov; final URL verified 200. Warren city code site hosts the full code titles/documents."
+  }
+]

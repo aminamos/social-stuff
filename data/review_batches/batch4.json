@@ -1,0 +1,72 @@
+[
+  {
+    "county": "Martin",
+    "county_seat": "Fairmont",
+    "zoning_ordinance_url": "https://www.co.martin.mn.us/your_government/departments/planning___zoning/land_use.php",
+    "city_code_url": null,
+    "notes": "Full city code lives on American Legal (codelibrary.amlegal.com/codes/fairmontmn, linked as Codes & Ordinances from fairmont.org) but returns 403 to automated checks, so null per verification rule."
+  },
+  {
+    "county": "McLeod",
+    "county_seat": "Glencoe",
+    "zoning_ordinance_url": "https://www.mcleodcountymn.gov/departments/environmental_services/planning___zoning/ordinances.php",
+    "city_code_url": "https://www.glencoemn.org/city-government/city-ordinances-zoning-map/",
+    "notes": "City hosts code chapters as PDFs on its official site; city's other domain links a wrong-state Municode page (Alabama), not reported."
+  },
+  {
+    "county": "Meeker",
+    "county_seat": "Litchfield",
+    "zoning_ordinance_url": "https://www.meekercountymn.gov/263/County-Ordinances",
+    "city_code_url": "https://www.ci.litchfield.mn.us/DocumentCenter",
+    "notes": "County canonical domain is meekercountymn.gov (co.meeker.mn.us redirects). City code (codified ordinances incl. Title XV zoning) is hosted in the city's Document Center hub."
+  },
+  {
+    "county": "Morrison",
+    "county_seat": "Little Falls",
+    "zoning_ordinance_url": "https://morrisoncountymn.gov/382/Ordinances-and-Plans",
+    "city_code_url": "https://mn-littlefalls.civicplus.com/172/City-Code",
+    "notes": "City-Code hub links the full code on American Legal (codelibrary.amlegal.com/codes/littlefallsmn), which blocks automated checks (403)."
+  },
+  {
+    "county": "Mower",
+    "county_seat": "Austin",
+    "zoning_ordinance_url": "https://www.co.mower.mn.us/DocumentCenter/View/1168/Mower-County-Zoning-Ordinance-PDF?bidId",
+    "city_code_url": "https://www.ci.austin.mn.us/city-code",
+    "notes": "City-Code page links the full code on American Legal (codelibrary.amlegal.com/codes/austinmn), which blocks automated checks (403)."
+  },
+  {
+    "county": "Murray",
+    "county_seat": "Slayton",
+    "zoning_ordinance_url": "https://murraycountymn.gov/government/ordinances.php",
+    "city_code_url": "https://slayton.govoffice.com/ordinances",
+    "notes": "City ordinances page links the full code on American Legal (codelibrary.amlegal.com/codes/slayton), which blocks automated checks (403)."
+  },
+  {
+    "county": "Nobles",
+    "county_seat": "Worthington",
+    "zoning_ordinance_url": "https://www.co.nobles.mn.us/wp-content/uploads/2024/01/Full-2016-Ordinance.pdf",
+    "city_code_url": null,
+    "notes": "City code is on American Legal (codelibrary.amlegal.com/codes/worthingtonmn) and the city page worthingtonmn.gov/Our-City/City-Code, but both return 403 to automated checks, so null per verification rule."
+  },
+  {
+    "county": "Norman",
+    "county_seat": "Ada",
+    "zoning_ordinance_url": "https://www.normanmn.gov/departments/environmental_services/planning___zoning_.php",
+    "city_code_url": "https://www.adamn.gov/p/getconnected/ordinances",
+    "notes": "County canonical domain is normanmn.gov (co.norman.mn.us redirects). No hosted online code publisher found for Ada; city ordinances page used."
+  },
+  {
+    "county": "Otter Tail",
+    "county_seat": "Fergus Falls",
+    "zoning_ordinance_url": "https://ottertailcounty.gov/department/land-and-resource-management/",
+    "city_code_url": "https://www.fergusfallsmn.gov/citycode",
+    "notes": "City-Code page links the full code on American Legal (codelibrary.amlegal.com/codes/fergusfallsmn), which blocks automated checks (403)."
+  },
+  {
+    "county": "Pennington",
+    "county_seat": "Thief River Falls",
+    "zoning_ordinance_url": null,
+    "city_code_url": "https://library.municode.com/mn/thief_river_falls/codes/code_of_ordinances",
+    "notes": "No county planning/zoning ordinance page exists on co.pennington.mn.us (no P&Z department; only floodplain rules in board docs). Note: docs.pennco.org zoning results are Pennington County SD, not MN. Municode returns 200 for any slug, but this URL is the exact link labeled Code of Ordinances on the city's official site (trfmn.gov)."
+  }
+]
