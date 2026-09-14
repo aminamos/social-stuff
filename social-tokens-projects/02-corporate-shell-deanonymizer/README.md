@@ -110,6 +110,11 @@ python -m pip install -r requirements.txt
 python -m pytest
 ```
 
+Worker ingest tests (Vitest, with Allure results in `cloudflare/allure-results/`):
+```bash
+cd cloudflare && npm install && npm test
+```
+
 ### 1. Live Municipal Open Data Search (Real-time City of Minneapolis)
 Query the City of Minneapolis Open Data FeatureServer directly to de-anonymize real corporate landlord portfolios:
 ```bash

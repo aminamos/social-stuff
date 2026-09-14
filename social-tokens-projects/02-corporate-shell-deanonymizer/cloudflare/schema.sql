@@ -59,6 +59,29 @@ CREATE TABLE IF NOT EXISTS sync_state (
     last_error TEXT
 );
 
+-- Habitability violations joined to the registry on parcel key
+-- (violations.join_key = rental_licenses.apn; NYC BBL). PK is feed-scoped.
+CREATE TABLE IF NOT EXISTS violations (
+    feed_id TEXT NOT NULL,
+    violation_id TEXT NOT NULL,
+    join_key TEXT,
+    violation_class TEXT,
+    status TEXT,
+    is_open INTEGER NOT NULL DEFAULT 0,
+    address TEXT,
+    boro TEXT,
+    description TEXT,
+    source_platform TEXT,
+    source_dataset TEXT,
+    row_hash TEXT,
+    synced_at TEXT,
+    PRIMARY KEY (feed_id, violation_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_v_join_key ON violations(join_key);
+CREATE INDEX IF NOT EXISTS idx_v_feed ON violations(feed_id);
+CREATE INDEX IF NOT EXISTS idx_v_feed_open_class ON violations(feed_id, is_open, violation_class);
+
 -- Multi-city property parcels across Hennepin and Ramsey counties
 CREATE TABLE IF NOT EXISTS county_parcels (
     pid TEXT PRIMARY KEY,

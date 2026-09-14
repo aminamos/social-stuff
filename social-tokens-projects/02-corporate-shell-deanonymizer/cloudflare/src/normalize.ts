@@ -58,7 +58,7 @@ export function toCanonicalRecord(
   const f = adapter.fieldMap;
   const d = adapter.defaults;
 
-  const apn = str(row, f.apn);
+  const apn = adapter.computeApn ? adapter.computeApn(row) : str(row, f.apn);
   if (!apn) return null;
 
   const county = str(row, f.county) || d.county;
@@ -85,7 +85,7 @@ export function toCanonicalRecord(
     city,
     county,
     state,
-    address: str(row, f.address),
+    address: adapter.computeAddress ? adapter.computeAddress(row) : str(row, f.address),
     units: int(row, f.units),
     owner_name: ownerName,
     owner_address: ownerAddress,
