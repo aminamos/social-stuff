@@ -17,6 +17,12 @@ Every organization listed here has been audited for **active maintenance pipelin
 
 ---
 
+## 🏛️ Special Project: [Council Data Project (CDP) Expansion Blueprint](cdp-expansion-blueprint.md)
+
+Strategic and technical expansion roadmap for **[aminamos/cdp](https://github.com/aminamos/cdp)**. Leverages the **Neon PostgreSQL 17 (`pgvector`) + Whisper** architecture to onboard new municipal jurisdictions (Minneapolis, St. Paul, Oakland, San Francisco, Chicago, and NYC) with tested API endpoints and local civic tech tie-ins.
+
+---
+
 ## ⚡ Top 10 Quick Wins (Ranked by PR Acceptance Probability)
 
 These issues feature active maintainers, isolated diffs, and immediate social or accessibility value:

@@ -51,3 +51,11 @@ Chicago has arguably the most vibrant and longest-running weekly civic tech comm
     * *Skills*: Django, HTML/templates, Accessibility.
   * **[#92](https://github.com/datamade/la-metro-translations/issues/92) — `Add tests for DocumentFiles API view`**
     * *Skills*: Python, pytest / Django REST Framework.
+
+---
+
+## 🚲 Honorary Civic Tech Spotlight: Bike Lane Uprising (BLU)
+* **Website**: [bikelaneuprising.com](https://www.bikelaneuprising.com/)
+* **Background**: Founded in Chicago by Christina Whiteley after a near-fatal bike lane crash, BLU is one of the most successful civic data advocacy projects in the US.
+* **Civic Impact**: By mobilizing cyclists to submit crowdsourced photos of bike lane obstructions (delivery vehicles, utility work, illegal parking), BLU created structured GIS data that forced municipal accountability across 100+ cities and influenced protected bike lane infrastructure decisions.
+* **Chi Hack Night Connection**: Featured at **Chi Hack Night (#277)** as a quintessential blueprint of how grassroots citizen data can shape urban policy.
