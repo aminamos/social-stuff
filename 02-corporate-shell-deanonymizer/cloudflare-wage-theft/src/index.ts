@@ -1,0 +1,332 @@
+import { renderWageTheftUI } from "./ui";
+import { WAGE_THEFT_SEED_DATA, WageTheftSeedRecord } from "./data";
+
+export interface Env {
+  DB: D1Database;
+  R2_BUCKET: R2Bucket;
+  AUTH_SECRET?: string;
+}
+
+export default {
+  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(backupSnapshotToR2(env));
+  },
+
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const url = new URL(request.url);
+
+    // Root Interactive Web Application
+    if (url.pathname === "/" || url.pathname === "") {
+      return new Response(renderWageTheftUI(), {
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "public, max-age=300",
+        },
+      });
+    }
+
+    // Search and filter enforcement cases
+    if (url.pathname === "/cases") {
+      const q = (url.searchParams.get("q") || "").trim();
+      const agency = (url.searchParams.get("agency") || "").trim();
+      const repeatOnly = url.searchParams.get("repeat") === "true";
+
+      let queryStr = `
+        SELECT * FROM wage_theft_records
+        WHERE 1=1
+      `;
+      const binds: any[] = [];
+
+      if (q) {
+        binds.push(`%${q}%`);
+        const idx = binds.length;
+        queryStr += ` AND (
+          respondent_legal_name LIKE ?${idx}
+          OR trade_name LIKE ?${idx}
+          OR case_id LIKE ?${idx}
+          OR description LIKE ?${idx}
+          OR violation_type LIKE ?${idx}
+          OR address LIKE ?${idx}
+          OR city LIKE ?${idx}
+        )`;
+      }
+
+      if (agency) {
+        binds.push(agency);
+        queryStr += ` AND source_agency = ?${binds.length}`;
+      }
+
+      if (repeatOnly) {
+        queryStr += ` AND repeat_violator = 1`;
+      }
+
+      queryStr += ` ORDER BY (back_wages_recovered + civil_penalties_assessed) DESC LIMIT 100`;
+
+      try {
+        const stmt = env.DB.prepare(queryStr);
+        const res = binds.length > 0 ? await stmt.bind(...binds).all() : await stmt.all();
+
+        return new Response(JSON.stringify({ query: q, cases: res.results }, null, 2), {
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err: any) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Top corporate offenders aggregated
+    if (url.pathname === "/offenders/top") {
+      try {
+        const topRes = await env.DB.prepare(`
+          SELECT 
+            respondent_legal_name,
+            trade_name,
+            industry_description,
+            city,
+            state,
+            COUNT(*) as case_count,
+            SUM(back_wages_recovered) as total_back_wages,
+            SUM(civil_penalties_assessed) as total_penalties,
+            SUM(COALESCE(NULLIF(settlement_amount, 0), back_wages_recovered + civil_penalties_assessed)) as total_recovered,
+            SUM(workers_affected) as total_workers_affected,
+            MAX(repeat_violator) as is_repeat_violator
+          FROM wage_theft_records
+          GROUP BY respondent_legal_name
+          ORDER BY total_recovered DESC
+          LIMIT 25
+        `).all();
+
+        return new Response(JSON.stringify({ top_offenders: topRes.results }, null, 2), {
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err: any) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Aggregate statistics
+    if (url.pathname === "/stats") {
+      try {
+        const stats = await env.DB.prepare(`
+          SELECT 
+            COUNT(*) as total_cases,
+            SUM(back_wages_recovered) as total_back_wages,
+            SUM(civil_penalties_assessed) as total_penalties,
+            SUM(COALESCE(NULLIF(settlement_amount, 0), back_wages_recovered + civil_penalties_assessed)) as total_recovered,
+            SUM(workers_affected) as total_workers_affected,
+            SUM(CASE WHEN repeat_violator = 1 THEN 1 ELSE 0 END) as repeat_violator_count
+          FROM wage_theft_records
+        `).first();
+
+        return new Response(JSON.stringify({ stats }, null, 2), {
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err: any) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // CSV dataset export for researchers, unions, and journalists
+    if (url.pathname === "/export.csv") {
+      try {
+        const allCases = await env.DB.prepare(`
+          SELECT 
+            case_id, source_agency, respondent_legal_name, trade_name, address, city, state, zip_code,
+            industry_description, violation_type, back_wages_recovered, civil_penalties_assessed,
+            settlement_amount, workers_affected, repeat_violator, status, findings_date, description
+          FROM wage_theft_records
+          ORDER BY (back_wages_recovered + civil_penalties_assessed) DESC
+        `).all();
+
+        const headers = [
+          "Case ID", "Agency", "Employer Legal Name", "Trade Name", "Address", "City", "State", "Zip",
+          "Industry", "Violation Type", "Back Wages ($)", "Civil Penalties ($)", "Settlement Amount ($)",
+          "Workers Affected", "Repeat Violator", "Status", "Findings Date", "Description"
+        ];
+
+        let csv = headers.join(",") + "\n";
+        for (const row of allCases.results as any[]) {
+          const vals = [
+            row.case_id,
+            row.source_agency,
+            `"${(row.respondent_legal_name || "").replace(/"/g, '""')}"`,
+            `"${(row.trade_name || "").replace(/"/g, '""')}"`,
+            `"${(row.address || "").replace(/"/g, '""')}"`,
+            row.city,
+            row.state,
+            row.zip_code,
+            `"${(row.industry_description || "").replace(/"/g, '""')}"`,
+            row.violation_type,
+            row.back_wages_recovered,
+            row.civil_penalties_assessed,
+            row.settlement_amount,
+            row.workers_affected,
+            row.repeat_violator ? "YES" : "NO",
+            row.status,
+            row.findings_date,
+            `"${(row.description || "").replace(/"/g, '""')}"`
+          ];
+          csv += vals.join(",") + "\n";
+        }
+
+        return new Response(csv, {
+          headers: {
+            "Content-Type": "text/csv; charset=utf-8",
+            "Content-Disposition": 'attachment; filename="twin_cities_wage_theft_records.csv"',
+          },
+        });
+      } catch (err: any) {
+        return new Response(`Error generating CSV: ${err.message}`, { status: 500 });
+      }
+    }
+
+    // Confidential whistleblower / worker incident report submission
+    if (url.pathname === "/report" && request.method === "POST") {
+      try {
+        const body: any = await request.json();
+        const employer = (body.employer_name || "").trim();
+        const narrative = (body.narrative || "").trim();
+
+        if (!employer || !narrative) {
+          return new Response(
+            JSON.stringify({ error: "Missing required fields: employer_name and narrative" }),
+            { status: 400, headers: { "Content-Type": "application/json" } }
+          );
+        }
+
+        const insertRes = await env.DB.prepare(`
+          INSERT INTO worker_reports (
+            employer_name, worksite_address, city, job_title, violation_types,
+            estimated_unpaid_amount, weeks_worked, narrative, contact_email,
+            contact_phone, union_affiliation, status
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          employer,
+          (body.worksite_address || "").trim(),
+          (body.city || "Minneapolis").trim(),
+          (body.job_title || "").trim(),
+          (body.violation_types || "").trim(),
+          parseFloat(body.estimated_unpaid_amount || 0),
+          parseInt(body.weeks_worked || 0, 10),
+          narrative,
+          (body.contact_email || "").trim(),
+          (body.contact_phone || "").trim(),
+          (body.union_affiliation || "NON_UNION").trim(),
+          "PENDING_ORGANIZER_REVIEW"
+        ).run();
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            report_id: insertRes.meta.last_row_id,
+            message: "Report logged confidentially. Thank you for standing up for labor standards.",
+          }),
+          { status: 201, headers: { "Content-Type": "application/json" } }
+        );
+      } catch (err: any) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Seed/sync endpoint to refresh database records
+    if (url.pathname === "/seed" && request.method === "POST") {
+      try {
+        const batchStatements: D1PreparedStatement[] = [];
+        for (const c of WAGE_THEFT_SEED_DATA) {
+          batchStatements.push(
+            env.DB.prepare(`
+              INSERT INTO wage_theft_records (
+                case_id, source_agency, respondent_legal_name, trade_name, address,
+                city, state, zip_code, naics_code, industry_description, violation_type,
+                back_wages_recovered, civil_penalties_assessed, workers_affected, repeat_violator,
+                status, findings_date, settlement_amount, description, synced_at
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+              ON CONFLICT(case_id) DO UPDATE SET
+                source_agency=excluded.source_agency,
+                respondent_legal_name=excluded.respondent_legal_name,
+                trade_name=excluded.trade_name,
+                address=excluded.address,
+                city=excluded.city,
+                state=excluded.state,
+                zip_code=excluded.zip_code,
+                naics_code=excluded.naics_code,
+                industry_description=excluded.industry_description,
+                violation_type=excluded.violation_type,
+                back_wages_recovered=excluded.back_wages_recovered,
+                civil_penalties_assessed=excluded.civil_penalties_assessed,
+                workers_affected=excluded.workers_affected,
+                repeat_violator=excluded.repeat_violator,
+                status=excluded.status,
+                findings_date=excluded.findings_date,
+                settlement_amount=excluded.settlement_amount,
+                description=excluded.description,
+                synced_at=CURRENT_TIMESTAMP
+            `).bind(
+              c.case_id,
+              c.source_agency,
+              c.respondent_legal_name,
+              c.trade_name,
+              c.address,
+              c.city,
+              c.state,
+              c.zip_code,
+              c.naics_code,
+              c.industry_description,
+              c.violation_type,
+              c.back_wages_recovered,
+              c.civil_penalties_assessed,
+              c.workers_affected,
+              c.repeat_violator,
+              c.status,
+              c.findings_date,
+              c.settlement_amount,
+              c.description
+            )
+          );
+        }
+
+        await env.DB.batch(batchStatements);
+        return new Response(
+          JSON.stringify({ status: "Seeded successfully", count: batchStatements.length }),
+          { headers: { "Content-Type": "application/json" } }
+        );
+      } catch (err: any) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    return new Response(
+      "Twin Cities Wage Theft & Labor Standards Registry Worker. Routes: /, /cases, /offenders/top, /stats, /export.csv, /report, /seed",
+      { status: 200 }
+    );
+  },
+};
+
+async function backupSnapshotToR2(env: Env): Promise<void> {
+  try {
+    const allRecords = await env.DB.prepare("SELECT * FROM wage_theft_records").all();
+    const today = new Date().toISOString().split("T")[0];
+    const key = `snapshots/wage_theft_records_${today}.json`;
+    await env.R2_BUCKET.put(key, JSON.stringify(allRecords.results, null, 2), {
+      httpMetadata: { contentType: "application/json" },
+    });
+    console.log(`Backed up ${allRecords.results.length} wage theft records to R2: ${key}`);
+  } catch (err) {
+    console.error("R2 backup error:", err);
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "twin-cities-wage-theft-worker",
+  "version": "1.0.0",
+  "description": "Twin Cities & Minnesota Wage Theft & Labor Standards Public Registry Cloudflare Worker",
+  "main": "src/index.ts",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240903.0",
+    "typescript": "^5.5.4",
+    "wrangler": "^4.131.1"
+  }
+}
