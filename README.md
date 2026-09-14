@@ -16,6 +16,7 @@ This repo is also where I show how I use AI to help civic tech and social causes
 * **[Landlord De-anonymizer](https://mpls-rental-sync-worker.a-8c6.workers.dev)** — ownership graphs for Twin Cities rental properties, reconstructing corporate landlord networks from tax rolls, SOS filings, violations, and mortgage deeds.
 * **[Wage Theft & Labor Standards Registry](https://twin-cities-wage-theft-worker.a-8c6.workers.dev)** — searchable registry of wage theft and labor standards violations across the Twin Cities.
 * **[Slumlord & Wage Theft Crossover Matrix](https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev)** — cross-index of corporate syndicates cited for both slumlord code violations and wage theft, with a crossover API and in-browser AI assistant.
+* **[Housing & Labor Unified Registry](https://twin-cities-housing-labor-registry.a-8c6.workers.dev)** — one site browsing all cities/areas for bad landlords, wage theft, and dual offenders; merges the three registries above with a unified city browser and crossover API.
 * **[Field Notes: AI & Earth](https://field-notes.awdnowusaa.cc/)** ([source](field-notes/)) — evidence-first guide to AI energy, water, materials, and labor impacts, with an estimator converting everyday energy use into inference-token equivalents.
 * **[Decarb My State](https://decarb-my-state.a-8c6.workers.dev)** — state-by-state decarbonization progress for all 50 states + DC: emissions through 2022 (EPA), power generation through 2024 (EIA). Source: [aminamos/decarbonize-my-state](https://github.com/aminamos/decarbonize-my-state).
 
@@ -43,7 +44,7 @@ Strategic and technical expansion roadmap for **[aminamos/cdp](https://github.co
 High-leverage agent systems directing LLM tokens toward structural transparency and collective civic power — now housed in this repo (mirrored from [aminamos/social-tokens-projects](https://github.com/aminamos/social-tokens-projects)):
 
 * **01 — Eviction Defense & Right-to-Counsel Navigator** ([`social-tokens-projects/01-eviction-defense-navigator/`](social-tokens-projects/01-eviction-defense-navigator/README.md)): verified answers, fee waivers, discovery requests.
-* **02 — Corporate Shell Entity & Slumlord De-anonymization** ([`social-tokens-projects/02-corporate-shell-deanonymizer/`](social-tokens-projects/02-corporate-shell-deanonymizer/README.md)): ownership graphs from tax rolls, SOS filings, violations, mortgage deeds + 3 Cloudflare Workers.
+* **02 — Corporate Shell Entity & Slumlord De-anonymization** ([`social-tokens-projects/02-corporate-shell-deanonymizer/`](social-tokens-projects/02-corporate-shell-deanonymizer/README.md)): ownership graphs from tax rolls, SOS filings, violations, mortgage deeds + 4 Cloudflare Workers (3 standalone + 1 unified registry).
 * **06 — SSDI Hearing-Stage Pilot** ([`social-tokens-projects/06-ssdi-hearing-pilot/`](social-tokens-projects/06-ssdi-hearing-pilot/README.md)): 5-step back-office pipeline with attorney sign-off.
 
 ---

@@ -1,0 +1,22 @@
+name = "twin-cities-housing-labor-registry"
+main = "src/index.ts"
+compatibility_date = "2024-09-01"
+
+# Merged cron set from the three source workers:
+#  - housing registry: daily full-cycle reset + 15-min resume tick
+#  - wage-theft live enforcement sync: daily 05:00
+#  - crossover matrix R2 snapshot: daily 06:00
+[triggers]
+crons = ["0 4 * * *", "*/15 * * * *", "0 5 * * *", "0 6 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "social-housing-db"
+database_id = "d95726b6-247d-4400-abb8-7cc97e4e4f7c"
+
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "landlord-directory-data"
+
+[observability]
+enabled = true
