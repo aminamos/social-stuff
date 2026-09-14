@@ -16,3 +16,6 @@ probe_metro.py
 sync_metro_sample.py
 
 .wrangler/
+node_modules/
+allure-results/
+coverage/
