@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slumlord & Shell Entity De-anonymizer | Social Tokens</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+      --accent-yellow: #f59e0b;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    header {
+      background: #090d16;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .tag {
+      background: #312e81;
+      color: #c7d2fe;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+    .token-counter {
+      background: #1e1b4b;
+      border: 1px solid #4338ca;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-family: monospace;
+      color: #a5b4fc;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 380px 1fr 420px;
+      height: calc(100vh - 65px);
+      overflow: hidden;
+    }
+    /* Left Panel: Search & Controls */
+    .sidebar-left {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .search-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .search-box label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .search-box input {
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .search-box input:focus {
+      border-color: var(--accent-blue);
+    }
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip {
+      background: #334155;
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .chip:hover { background: #475569; }
+    .card {
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .card-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      letter-spacing: 0.05em;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    .stat-row .label { color: var(--text-muted); }
+    .stat-row .val { font-weight: 600; }
+    .val.highlight { color: var(--accent-yellow); font-size: 1.05rem; }
+    .val.danger { color: var(--accent-red); }
+    .val.success { color: var(--accent-green); }
+
+    /* Center Panel: Interactive Canvas */
+    .graph-viewport {
+      position: relative;
+      background: #090d16;
+      display: flex;
+      flex-direction: column;
+    }
+    #graphCanvas {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+    #graphCanvas:active { cursor: grabbing; }
+    .graph-legend {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      gap: 16px;
+      font-size: 0.8rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* Right Panel: Tenant Union Dossier */
+    .sidebar-right {
+      background: var(--bg-card);
+      border-left: 1px solid var(--border-color);
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .btn-action {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-action:hover { background: #1d4ed8; }
+    .dossier-preview {
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: #cbd5e1;
+      height: 100%;
+      overflow-y: auto;
+    }
+    .dossier-preview h1, .dossier-preview h2, .dossier-preview h3 {
+      color: #fff;
+      margin: 14px 0 8px;
+    }
+    .dossier-preview h2 { font-size: 1.05rem; border-bottom: 1px solid #334155; padding-bottom: 4px; }
+    .dossier-preview h3 { font-size: 0.95rem; }
+    .dossier-preview table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 0.8rem;
+    }
+    .dossier-preview th, .dossier-preview td {
+      border: 1px solid #334155;
+      padding: 6px 8px;
+      text-align: left;
+    }
+    .dossier-preview th { background: #1e293b; color: #f8fafc; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span class="tag">SOCIAL TOKENS #02</span>
+      <h1>Corporate Shell Entity & Slumlord De-anonymizer</h1>
+    </div>
+    <div class="token-counter" id="tokenLedger">
+      Tokens: 6,348 | Prompt: 4,163 | Cost: $0.0161
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Left: Search & Metrics -->
+    <div class="sidebar-left">
+      <div class="search-box">
+        <label for="addressInput">Search Property Address or PIN</label>
+        <input type="text" id="addressInput" value="1420 11th Ave S" placeholder="e.g. 1420 11th Ave S">
+        <div class="quick-chips">
+          <span class="chip" onclick="searchAddr('1420 11th Ave S')">1420 11th Ave S</span>
+          <span class="chip" onclick="searchAddr('2815 Grand Ave S')">2815 Grand Ave S</span>
+          <span class="chip" onclick="searchAddr('3104 Cedar Ave S')">3104 Cedar Ave S</span>
+          <span class="chip" onclick="searchAddr('415 6th Ave SE')">415 6th Ave SE</span>
+        </div>
+      </div>
+
+      <div class="card" id="unmaskedCard">
+        <div class="card-title">Unmasked Beneficial Ownership</div>
+        <div class="stat-row">
+          <span class="label">Target Address:</span>
+          <span class="val" id="targetAddrVal">1420 11th Ave S</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Paper Shell LLC:</span>
+          <span class="val" style="color:var(--accent-cyan);" id="paperLlcVal">1420 ELEVENTH AVE LLC</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Beneficial Owners:</span>
+          <span class="val highlight" id="beneficialOwnerVal">Marcus Vance, Eleanor Vance</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Total Portfolio Units:</span>
+          <span class="val" id="totalUnitsVal">120 Units (4 Buildings)</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Open Code Violations:</span>
+          <span class="val danger" id="totalViolationsVal">5 Active Citations</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Master Blanket Debt:</span>
+          <span class="val success" id="totalDebtVal">$14,800,000</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Identified Sister Buildings</div>
+        <div id="sisterList" style="font-size:0.85rem; display:flex; flex-direction:column; gap:8px;">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Interactive Graph -->
+    <div class="graph-viewport">
+      <canvas id="graphCanvas"></canvas>
+      <div class="graph-legend">
+        <div class="legend-item"><div class="dot" style="background: #10b981;"></div> Property</div>
+        <div class="legend-item"><div class="dot" style="background: #06b6d4;"></div> Shell LLC</div>
+        <div class="legend-item"><div class="dot" style="background: #f59e0b;"></div> Owner / Officer</div>
+        <div class="legend-item"><div class="dot" style="background: #3b82f6;"></div> Master Mortgage</div>
+        <div class="legend-item"><div class="dot" style="background: #ef4444;"></div> Code Violation</div>
+      </div>
+    </div>
+
+    <!-- Right: Tenant Action Dossier -->
+    <div class="sidebar-right">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:1rem; font-weight:700;">Tenant Union Action Dossier</h3>
+        <button class="btn-action" onclick="copyDossier()">📋 Copy</button>
+      </div>
+      <div class="dossier-preview" id="dossierContent">
+        <!-- Rendered Dossier Markdown content -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Embedded Graph Data Exported from Pipeline
+    const GRAPH_DATA = {
+      nodes: [
+        { id: "prop:1420", label: "1420 11th Ave S", type: "Property", units: 24, val: 2850000 },
+        { id: "prop:2815", label: "2815 Grand Ave S", type: "Property", units: 36, val: 4150000 },
+        { id: "prop:712", label: "712 E 15th St", type: "Property", units: 18, val: 1950000 },
+        { id: "prop:3104", label: "3104 Cedar Ave S", type: "Property", units: 42, val: 5200000 },
+        { id: "prop:415", label: "415 6th Ave SE", type: "Property", units: 12, val: 1400000 },
+        
+        { id: "ent:1420", label: "1420 ELEVENTH AVE LLC", type: "ShellEntity" },
+        { id: "ent:2815", label: "GRAND AVE SUITES SPE LLC", type: "ShellEntity" },
+        { id: "ent:712", label: "MIDTOWN RESIDENTIAL VENTURES LLC", type: "ShellEntity" },
+        { id: "ent:3104", label: "SOUTHSIDE URBAN LIVING LLC", type: "ShellEntity" },
+        { id: "ent:415", label: "DINKYTOWN STUDENT LOFTS LLC", type: "ShellEntity" },
+        
+        { id: "person:marcus", label: "Marcus Vance", type: "Person" },
+        { id: "person:eleanor", label: "Eleanor Vance", type: "Person" },
+        { id: "person:sarah", label: "Sarah Jenkins", type: "Person" },
+        
+        { id: "mort:arbor", label: "Loan $14.8M (Arbor)", type: "Mortgage" },
+        { id: "mort:bell", label: "Loan $950k (Bell Bank)", type: "Mortgage" },
+        
+        { id: "viol:v1", label: "Boiler Outage (Critical)", type: "CodeViolation" },
+        { id: "viol:v2", label: "Raw Sewage", type: "CodeViolation" },
+        { id: "viol:v3", label: "Black Mold", type: "CodeViolation" },
+        { id: "viol:v4", label: "Compromised Fire Escape", type: "CodeViolation" },
+        { id: "viol:v5", label: "Ceiling Collapse", type: "CodeViolation" }
+      ],
+      edges: [
+        { source: "ent:1420", target: "prop:1420", rel: "OWNS" },
+        { source: "ent:2815", target: "prop:2815", rel: "OWNS" },
+        { source: "ent:712", target: "prop:712", rel: "OWNS" },
+        { source: "ent:3104", target: "prop:3104", rel: "OWNS" },
+        { source: "ent:415", target: "prop:415", rel: "OWNS" },
+
+        { source: "person:marcus", target: "ent:1420", rel: "HAS_OFFICER" },
+        { source: "person:marcus", target: "ent:2815", rel: "HAS_OFFICER" },
+        { source: "person:marcus", target: "ent:712", rel: "HAS_OFFICER" },
+        { source: "person:marcus", target: "ent:3104", rel: "HAS_OFFICER" },
+        
+        { source: "person:eleanor", target: "ent:2815", rel: "HAS_OFFICER" },
+        { source: "person:eleanor", target: "ent:712", rel: "HAS_OFFICER" },
+        { source: "person:eleanor", target: "ent:3104", rel: "HAS_OFFICER" },
+        
+        { source: "person:sarah", target: "ent:415", rel: "HAS_OFFICER" },
+
+        { source: "mort:arbor", target: "prop:1420", rel: "CROSS_COLLATERALIZED" },
+        { source: "mort:arbor", target: "prop:2815", rel: "CROSS_COLLATERALIZED" },
+        { source: "mort:arbor", target: "prop:712", rel: "CROSS_COLLATERALIZED" },
+        { source: "mort:arbor", target: "prop:3104", rel: "CROSS_COLLATERALIZED" },
+        { source: "person:marcus", target: "mort:arbor", rel: "GUARANTOR" },
+        { source: "person:eleanor", target: "mort:arbor", rel: "GUARANTOR" },
+
+        { source: "mort:bell", target: "prop:415", rel: "MORTGAGE" },
+        { source: "person:sarah", target: "mort:bell", rel: "GUARANTOR" },
+
+        { source: "prop:1420", target: "viol:v1", rel: "CITED" },
+        { source: "prop:1420", target: "viol:v2", rel: "CITED" },
+        { source: "prop:2815", target: "viol:v3", rel: "CITED" },
+        { source: "prop:712", target: "viol:v4", rel: "CITED" },
+        { source: "prop:3104", target: "viol:v5", rel: "CITED" }
+      ]
+    };
+
+    // Canvas Physics Engine
+    const canvas = document.getElementById("graphCanvas");
+    const ctx = canvas.getContext("2d");
+    let width, height;
+    let nodes = [];
+    let edges = [];
+
+    const typeColors = {
+      Property: "#10b981",
+      ShellEntity: "#06b6d4",
+      Person: "#f59e0b",
+      Mortgage: "#3b82f6",
+      CodeViolation: "#ef4444"
+    };
+
+    function resize() {
+      width = canvas.parentElement.clientWidth;
+      height = canvas.parentElement.clientHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+    window.addEventListener("resize", resize);
+
+    function initSimulation() {
+      resize();
+      nodes = GRAPH_DATA.nodes.map((n, i) => {
+        const angle = (i / GRAPH_DATA.nodes.length) * 2 * Math.PI;
+        const radius = 180 + Math.random() * 80;
+        return {
+          ...n,
+          x: width / 2 + radius * Math.cos(angle),
+          y: height / 2 + radius * Math.sin(angle),
+          vx: 0,
+          vy: 0,
+          radius: n.type === "Person" ? 14 : (n.type === "Property" ? 12 : 9)
+        };
+      });
+
+      const nodeMap = new Map(nodes.map(n => [n.id, n]));
+      edges = GRAPH_DATA.edges.map(e => ({
+        source: nodeMap.get(e.source),
+        target: nodeMap.get(e.target),
+        rel: e.rel
+      })).filter(e => e.source && e.target);
+    }
+
+    function stepSimulation() {
+      // Repulsion
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[j].x - nodes[i].x;
+          const dy = nodes[j].y - nodes[i].y;
+          const distSq = dx * dx + dy * dy || 1;
+          const dist = Math.sqrt(distSq);
+          if (dist < 320) {
+            const force = 120 / distSq;
+            nodes[i].vx -= (dx / dist) * force;
+            nodes[i].vy -= (dy / dist) * force;
+            nodes[j].vx += (dx / dist) * force;
+            nodes[j].vy += (dy / dist) * force;
+          }
+        }
+      }
+
+      // Spring Edges
+      for (const e of edges) {
+        const dx = e.target.x - e.source.x;
+        const dy = e.target.y - e.source.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const targetDist = 75;
+        const spring = (dist - targetDist) * 0.035;
+        e.source.vx += (dx / dist) * spring;
+        e.source.vy += (dy / dist) * spring;
+        e.target.vx -= (dx / dist) * spring;
+        e.target.vy -= (dy / dist) * spring;
+      }
+
+      // Center Gravity
+      const cx = width / 2;
+      const cy = height / 2;
+      for (const n of nodes) {
+        n.vx += (cx - n.x) * 0.003;
+        n.vy += (cy - n.y) * 0.003;
+        n.vx *= 0.88;
+        n.vy *= 0.88;
+        n.x += n.vx;
+        n.y += n.vy;
+      }
+    }
+
+    function draw() {
+      stepSimulation();
+      ctx.clearRect(0, 0, width, height);
+
+      // Edges
+      for (const e of edges) {
+        ctx.beginPath();
+        ctx.moveTo(e.source.x, e.source.y);
+        ctx.lineTo(e.target.x, e.target.y);
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.25)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Nodes
+      for (const n of nodes) {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = typeColors[n.type] || "#ffffff";
+        ctx.fill();
+        ctx.strokeStyle = "#0f172a";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Labels
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "11px sans-serif";
+        ctx.fillText(n.label, n.x + n.radius + 4, n.y + 4);
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    // Interaction & Search
+    function searchAddr(addr) {
+      document.getElementById("addressInput").value = addr;
+      if (addr.includes("415 6th")) {
+        // Sarah Jenkins
+        document.getElementById("targetAddrVal").innerText = "415 6th Ave SE";
+        document.getElementById("paperLlcVal").innerText = "DINKYTOWN STUDENT LOFTS LLC";
+        document.getElementById("beneficialOwnerVal").innerText = "Sarah Jenkins";
+        document.getElementById("totalUnitsVal").innerText = "12 Units (1 Building)";
+        document.getElementById("totalViolationsVal").innerText = "1 Active Citation";
+        document.getElementById("totalDebtVal").innerText = "$950,000 (Bell Bank)";
+        document.getElementById("sisterList").innerHTML = "<div style='color:var(--text-muted)'>No other corporate properties detected across city. Isolated ownership.</div>";
+        renderDossier("415 6th Ave SE", "Sarah Jenkins", 1, 12, "$950,000", 1);
+      } else {
+        // Vance Syndicate
+        document.getElementById("targetAddrVal").innerText = addr;
+        document.getElementById("paperLlcVal").innerText = addr.includes("2815") ? "GRAND AVE SUITES SPE LLC" : (addr.includes("3104") ? "SOUTHSIDE URBAN LIVING LLC" : "1420 ELEVENTH AVE LLC");
+        document.getElementById("beneficialOwnerVal").innerText = "Marcus Vance, Eleanor Vance";
+        document.getElementById("totalUnitsVal").innerText = "120 Units (4 Buildings)";
+        document.getElementById("totalViolationsVal").innerText = "5 Active Citations";
+        document.getElementById("totalDebtVal").innerText = "$14,800,000 (Arbor Commercial)";
+        document.getElementById("sisterList").innerHTML = `
+          <div style="background:#1e293b; padding:8px; border-radius:6px;"><b>2815 Grand Ave S</b> (36 units) - Black Mold Citations</div>
+          <div style="background:#1e293b; padding:8px; border-radius:6px;"><b>712 E 15th St</b> (18 units) - Compromised Fire Escape</div>
+          <div style="background:#1e293b; padding:8px; border-radius:6px;"><b>3104 Cedar Ave S</b> (42 units) - Ceiling Plaster Collapse</div>
+        `;
+        renderDossier(addr, "Marcus Vance & Eleanor Vance", 4, 120, "$14,800,000", 5);
+      }
+    }
+
+    function renderDossier(target, owners, props, units, debt, viols) {
+      document.getElementById("dossierContent").innerHTML = `
+        <h2>Executive Summary</h2>
+        <p>Public records crossover de-anonymization unmasks <b>${owners}</b> as the beneficial owners controlling <b>${props} residential properties</b> with <b>${units} total tenant households</b> across Minneapolis.</p>
+        
+        <h2>The Master Mortgage Pressure Point</h2>
+        <p>These properties are bound under a single <b>${debt} cross-collateralized blanket mortgage</b>. A coordinated rent escrow withholding campaign across 2 or 3 sister buildings exerts direct monthly liquidity default pressure on the ownership syndicate.</p>
+
+        <h2>Identified Sister Buildings</h2>
+        <table>
+          <tr><th>Address</th><th>Units</th><th>Legal Shell</th></tr>
+          <tr><td>1420 11th Ave S</td><td>24</td><td>1420 ELEVENTH AVE LLC</td></tr>
+          <tr><td>2815 Grand Ave S</td><td>36</td><td>GRAND AVE SUITES SPE LLC</td></tr>
+          <tr><td>712 E 15th St</td><td>18</td><td>MIDTOWN RESIDENTIAL VENTURES LLC</td></tr>
+          <tr><td>3104 Cedar Ave S</td><td>42</td><td>SOUTHSIDE URBAN LIVING LLC</td></tr>
+        </table>
+
+        <h2>Action Recommendations</h2>
+        <ul>
+          <li>Canvass sister properties to build a multi-building Tenant Union.</li>
+          <li>Establish joint rent escrow under Minn. Stat. § 504B.385.</li>
+          <li>File a consolidated municipal code enforcement petition with City Regulatory Services.</li>
+          <li>Serve certified notice of life-safety violations to the mortgage servicer.</li>
+        </ul>
+      `;
+    }
+
+    function copyDossier() {
+      const text = document.getElementById("dossierContent").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Tenant Union Action Dossier copied to clipboard!");
+      });
+    }
+
+    initSimulation();
+    draw();
+    searchAddr("1420 11th Ave S");
+  </script>
+</body>
+</html>

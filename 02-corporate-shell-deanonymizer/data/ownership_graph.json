@@ -1,0 +1,695 @@
+{
+  "nodes": [
+    {
+      "data": {
+        "id": "prop:26-029-24-12-0045",
+        "label": "1420 11th Ave S",
+        "type": "Property",
+        "parcel_id": "26-029-24-12-0045",
+        "address": "1420 11th Ave S",
+        "units": 24,
+        "assessed_value": 2850000.0,
+        "taxpayer": "1420 ELEVENTH AVE LLC"
+      }
+    },
+    {
+      "data": {
+        "id": "prop:34-029-24-21-0089",
+        "label": "2815 Grand Ave S",
+        "type": "Property",
+        "parcel_id": "34-029-24-21-0089",
+        "address": "2815 Grand Ave S",
+        "units": 36,
+        "assessed_value": 4150000.0,
+        "taxpayer": "GRAND AVE SUITES SPE LLC"
+      }
+    },
+    {
+      "data": {
+        "id": "prop:26-029-24-13-0012",
+        "label": "712 E 15th St",
+        "type": "Property",
+        "parcel_id": "26-029-24-13-0012",
+        "address": "712 E 15th St",
+        "units": 18,
+        "assessed_value": 1950000.0,
+        "taxpayer": "MIDTOWN RESIDENTIAL VENTURES LLC"
+      }
+    },
+    {
+      "data": {
+        "id": "prop:35-029-24-34-0102",
+        "label": "3104 Cedar Ave S",
+        "type": "Property",
+        "parcel_id": "35-029-24-34-0102",
+        "address": "3104 Cedar Ave S",
+        "units": 42,
+        "assessed_value": 5200000.0,
+        "taxpayer": "SOUTHSIDE URBAN LIVING LLC"
+      }
+    },
+    {
+      "data": {
+        "id": "prop:24-029-24-41-0033",
+        "label": "415 6th Ave SE",
+        "type": "Property",
+        "parcel_id": "24-029-24-41-0033",
+        "address": "415 6th Ave SE",
+        "units": 12,
+        "assessed_value": 1400000.0,
+        "taxpayer": "DINKYTOWN STUDENT LOFTS LLC"
+      }
+    },
+    {
+      "data": {
+        "id": "entity:1420_eleventh_ave_llc",
+        "label": "1420 ELEVENTH AVE LLC",
+        "type": "ShellEntity",
+        "entity_id": "1420_eleventh_ave_llc",
+        "state": "MN",
+        "registered_agent": "CT Corporation System"
+      }
+    },
+    {
+      "data": {
+        "id": "entity:grand_ave_suites_spe_llc",
+        "label": "GRAND AVE SUITES SPE LLC",
+        "type": "ShellEntity",
+        "entity_id": "grand_ave_suites_spe_llc",
+        "state": "MN",
+        "registered_agent": "CT Corporation System"
+      }
+    },
+    {
+      "data": {
+        "id": "entity:midtown_residential_ventures_llc",
+        "label": "MIDTOWN RESIDENTIAL VENTURES LLC",
+        "type": "ShellEntity",
+        "entity_id": "midtown_residential_ventures_llc",
+        "state": "MN",
+        "registered_agent": "CT Corporation System"
+      }
+    },
+    {
+      "data": {
+        "id": "entity:southside_urban_living_llc",
+        "label": "SOUTHSIDE URBAN LIVING LLC",
+        "type": "ShellEntity",
+        "entity_id": "southside_urban_living_llc",
+        "state": "MN",
+        "registered_agent": "CT Corporation System"
+      }
+    },
+    {
+      "data": {
+        "id": "entity:dinkytown_student_lofts_llc",
+        "label": "DINKYTOWN STUDENT LOFTS LLC",
+        "type": "ShellEntity",
+        "entity_id": "dinkytown_student_lofts_llc",
+        "state": "MN",
+        "registered_agent": "Northwest Registered Agent LLC"
+      }
+    },
+    {
+      "data": {
+        "id": "person:marcus_vance",
+        "label": "Marcus Vance",
+        "type": "Person",
+        "person_id": "marcus_vance",
+        "is_commercial": false
+      }
+    },
+    {
+      "data": {
+        "id": "person:eleanor_vance",
+        "label": "Eleanor Vance",
+        "type": "Person",
+        "person_id": "eleanor_vance",
+        "is_commercial": false
+      }
+    },
+    {
+      "data": {
+        "id": "person:sarah_jenkins",
+        "label": "Sarah Jenkins",
+        "type": "Person",
+        "person_id": "sarah_jenkins",
+        "is_commercial": false
+      }
+    },
+    {
+      "data": {
+        "id": "violation:V-2024-00192",
+        "label": "Violation V-2024-00192: Heating System Failure",
+        "type": "CodeViolation",
+        "severity": "CRITICAL_LIFE_SAFETY",
+        "fine": 2500.0
+      }
+    },
+    {
+      "data": {
+        "id": "violation:V-2024-00215",
+        "label": "Violation V-2024-00215: Plumbing / Sewage",
+        "type": "CodeViolation",
+        "severity": "HIGH",
+        "fine": 1000.0
+      }
+    },
+    {
+      "data": {
+        "id": "violation:V-2023-09811",
+        "label": "Violation V-2023-09811: Toxic Mold / Water Intrusion",
+        "type": "CodeViolation",
+        "severity": "HIGH",
+        "fine": 1500.0
+      }
+    },
+    {
+      "data": {
+        "id": "violation:V-2023-10044",
+        "label": "Violation V-2023-10044: Fire Safety / Egress",
+        "type": "CodeViolation",
+        "severity": "CRITICAL_LIFE_SAFETY",
+        "fine": 3000.0
+      }
+    },
+    {
+      "data": {
+        "id": "violation:V-2024-00412",
+        "label": "Violation V-2024-00412: Structural Integrity",
+        "type": "CodeViolation",
+        "severity": "HIGH",
+        "fine": 1200.0
+      }
+    },
+    {
+      "data": {
+        "id": "violation:V-2024-00088",
+        "label": "Violation V-2024-00088: Window Screen",
+        "type": "CodeViolation",
+        "severity": "LOW",
+        "fine": 100.0
+      }
+    },
+    {
+      "data": {
+        "id": "mortgage:DOC-2023-0914820",
+        "label": "Loan $14,800,000 (Arbor Commercial Mortgage LLC)",
+        "type": "Mortgage",
+        "amount": 14800000.0,
+        "lender": "Arbor Commercial Mortgage LLC"
+      }
+    },
+    {
+      "data": {
+        "id": "mortgage:DOC-2022-0449102",
+        "label": "Loan $950,000 (Bell Bank)",
+        "type": "Mortgage",
+        "amount": 950000.0,
+        "lender": "Bell Bank"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "data": {
+        "id": "e0",
+        "source": "prop:26-029-24-12-0045",
+        "target": "violation:V-2024-00192",
+        "relation": "CITED_FOR",
+        "confidence": 1.0,
+        "evidence": [
+          "Municipal inspection citation V-2024-00192"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e1",
+        "source": "prop:26-029-24-12-0045",
+        "target": "violation:V-2024-00215",
+        "relation": "CITED_FOR",
+        "confidence": 1.0,
+        "evidence": [
+          "Municipal inspection citation V-2024-00215"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e2",
+        "source": "prop:26-029-24-12-0045",
+        "target": "prop:34-029-24-21-0089",
+        "relation": "SAME_UBO_AS",
+        "confidence": 0.88,
+        "evidence": [
+          "Shared taxpayer mailing address: '7400 Metro Blvd Ste 210, Edina MN 55439'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e3",
+        "source": "prop:26-029-24-12-0045",
+        "target": "prop:34-029-24-21-0089",
+        "relation": "CROSS_COLLATERALIZED_WITH",
+        "confidence": 0.95,
+        "evidence": [
+          "Cross-collateralized under single master loan #DOC-2023-0914820 ($14,800,000) from Arbor Commercial Mortgage LLC"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e4",
+        "source": "prop:26-029-24-12-0045",
+        "target": "prop:26-029-24-13-0012",
+        "relation": "SAME_UBO_AS",
+        "confidence": 0.88,
+        "evidence": [
+          "Shared taxpayer mailing address: '7400 Metro Blvd Ste 210, Edina MN 55439'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e5",
+        "source": "prop:26-029-24-12-0045",
+        "target": "prop:26-029-24-13-0012",
+        "relation": "CROSS_COLLATERALIZED_WITH",
+        "confidence": 0.95,
+        "evidence": [
+          "Cross-collateralized under single master loan #DOC-2023-0914820 ($14,800,000) from Arbor Commercial Mortgage LLC"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e6",
+        "source": "prop:26-029-24-12-0045",
+        "target": "prop:35-029-24-34-0102",
+        "relation": "SAME_UBO_AS",
+        "confidence": 0.88,
+        "evidence": [
+          "Shared taxpayer mailing address: '7400 Metro Blvd Ste 210, Edina MN 55439'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e7",
+        "source": "prop:26-029-24-12-0045",
+        "target": "prop:35-029-24-34-0102",
+        "relation": "CROSS_COLLATERALIZED_WITH",
+        "confidence": 0.95,
+        "evidence": [
+          "Cross-collateralized under single master loan #DOC-2023-0914820 ($14,800,000) from Arbor Commercial Mortgage LLC"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e8",
+        "source": "prop:34-029-24-21-0089",
+        "target": "violation:V-2023-09811",
+        "relation": "CITED_FOR",
+        "confidence": 1.0,
+        "evidence": [
+          "Municipal inspection citation V-2023-09811"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e9",
+        "source": "prop:34-029-24-21-0089",
+        "target": "prop:26-029-24-13-0012",
+        "relation": "SAME_UBO_AS",
+        "confidence": 0.88,
+        "evidence": [
+          "Shared taxpayer mailing address: '7400 Metro Blvd Ste 210, Edina MN 55439'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e10",
+        "source": "prop:34-029-24-21-0089",
+        "target": "prop:26-029-24-13-0012",
+        "relation": "CROSS_COLLATERALIZED_WITH",
+        "confidence": 0.95,
+        "evidence": [
+          "Cross-collateralized under single master loan #DOC-2023-0914820 ($14,800,000) from Arbor Commercial Mortgage LLC"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e11",
+        "source": "prop:34-029-24-21-0089",
+        "target": "prop:35-029-24-34-0102",
+        "relation": "SAME_UBO_AS",
+        "confidence": 0.88,
+        "evidence": [
+          "Shared taxpayer mailing address: '7400 Metro Blvd Ste 210, Edina MN 55439'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e12",
+        "source": "prop:34-029-24-21-0089",
+        "target": "prop:35-029-24-34-0102",
+        "relation": "CROSS_COLLATERALIZED_WITH",
+        "confidence": 0.95,
+        "evidence": [
+          "Cross-collateralized under single master loan #DOC-2023-0914820 ($14,800,000) from Arbor Commercial Mortgage LLC"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e13",
+        "source": "prop:26-029-24-13-0012",
+        "target": "violation:V-2023-10044",
+        "relation": "CITED_FOR",
+        "confidence": 1.0,
+        "evidence": [
+          "Municipal inspection citation V-2023-10044"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e14",
+        "source": "prop:26-029-24-13-0012",
+        "target": "prop:35-029-24-34-0102",
+        "relation": "SAME_UBO_AS",
+        "confidence": 0.88,
+        "evidence": [
+          "Shared taxpayer mailing address: '7400 Metro Blvd Ste 210, Edina MN 55439'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e15",
+        "source": "prop:26-029-24-13-0012",
+        "target": "prop:35-029-24-34-0102",
+        "relation": "CROSS_COLLATERALIZED_WITH",
+        "confidence": 0.95,
+        "evidence": [
+          "Cross-collateralized under single master loan #DOC-2023-0914820 ($14,800,000) from Arbor Commercial Mortgage LLC"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e16",
+        "source": "prop:35-029-24-34-0102",
+        "target": "violation:V-2024-00412",
+        "relation": "CITED_FOR",
+        "confidence": 1.0,
+        "evidence": [
+          "Municipal inspection citation V-2024-00412"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e17",
+        "source": "prop:24-029-24-41-0033",
+        "target": "violation:V-2024-00088",
+        "relation": "CITED_FOR",
+        "confidence": 1.0,
+        "evidence": [
+          "Municipal inspection citation V-2024-00088"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e18",
+        "source": "entity:1420_eleventh_ave_llc",
+        "target": "prop:26-029-24-12-0045",
+        "relation": "OWNS",
+        "confidence": 0.98,
+        "evidence": [
+          "Tax roll owner '1420 ELEVENTH AVE LLC' matches SOS entity '1420 ELEVENTH AVE LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e19",
+        "source": "entity:grand_ave_suites_spe_llc",
+        "target": "prop:34-029-24-21-0089",
+        "relation": "OWNS",
+        "confidence": 0.98,
+        "evidence": [
+          "Tax roll owner 'GRAND AVE SUITES SPE LLC' matches SOS entity 'GRAND AVE SUITES SPE LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e20",
+        "source": "entity:midtown_residential_ventures_llc",
+        "target": "prop:26-029-24-13-0012",
+        "relation": "OWNS",
+        "confidence": 0.98,
+        "evidence": [
+          "Tax roll owner 'MIDTOWN RESIDENTIAL VENTURES LLC' matches SOS entity 'MIDTOWN RESIDENTIAL VENTURES LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e21",
+        "source": "entity:southside_urban_living_llc",
+        "target": "prop:35-029-24-34-0102",
+        "relation": "OWNS",
+        "confidence": 0.98,
+        "evidence": [
+          "Tax roll owner 'SOUTHSIDE URBAN LIVING LLC' matches SOS entity 'SOUTHSIDE URBAN LIVING LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e22",
+        "source": "entity:dinkytown_student_lofts_llc",
+        "target": "prop:24-029-24-41-0033",
+        "relation": "OWNS",
+        "confidence": 0.98,
+        "evidence": [
+          "Tax roll owner 'DINKYTOWN STUDENT LOFTS LLC' matches SOS entity 'DINKYTOWN STUDENT LOFTS LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e23",
+        "source": "person:marcus_vance",
+        "target": "entity:1420_eleventh_ave_llc",
+        "relation": "HAS_OFFICER",
+        "confidence": 0.99,
+        "evidence": [
+          "Listed as Governor/Manager on SOS filing for '1420 ELEVENTH AVE LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e24",
+        "source": "person:marcus_vance",
+        "target": "entity:grand_ave_suites_spe_llc",
+        "relation": "HAS_OFFICER",
+        "confidence": 0.99,
+        "evidence": [
+          "Listed as Governor/Manager on SOS filing for 'GRAND AVE SUITES SPE LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e25",
+        "source": "person:marcus_vance",
+        "target": "entity:midtown_residential_ventures_llc",
+        "relation": "HAS_OFFICER",
+        "confidence": 0.99,
+        "evidence": [
+          "Listed as Governor/Manager on SOS filing for 'MIDTOWN RESIDENTIAL VENTURES LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e26",
+        "source": "person:marcus_vance",
+        "target": "entity:southside_urban_living_llc",
+        "relation": "HAS_OFFICER",
+        "confidence": 0.99,
+        "evidence": [
+          "Listed as Governor/Manager on SOS filing for 'SOUTHSIDE URBAN LIVING LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e27",
+        "source": "person:marcus_vance",
+        "target": "mortgage:DOC-2023-0914820",
+        "relation": "HAS_OFFICER",
+        "confidence": 0.98,
+        "evidence": [
+          "Guaranteed commercial note DOC-2023-0914820"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e28",
+        "source": "person:eleanor_vance",
+        "target": "entity:grand_ave_suites_spe_llc",
+        "relation": "HAS_OFFICER",
+        "confidence": 0.99,
+        "evidence": [
+          "Listed as Governor/Manager on SOS filing for 'GRAND AVE SUITES SPE LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e29",
+        "source": "person:eleanor_vance",
+        "target": "entity:midtown_residential_ventures_llc",
+        "relation": "HAS_OFFICER",
+        "confidence": 0.99,
+        "evidence": [
+          "Listed as Governor/Manager on SOS filing for 'MIDTOWN RESIDENTIAL VENTURES LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e30",
+        "source": "person:eleanor_vance",
+        "target": "entity:southside_urban_living_llc",
+        "relation": "HAS_OFFICER",
+        "confidence": 0.99,
+        "evidence": [
+          "Listed as Governor/Manager on SOS filing for 'SOUTHSIDE URBAN LIVING LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e31",
+        "source": "person:eleanor_vance",
+        "target": "mortgage:DOC-2023-0914820",
+        "relation": "HAS_OFFICER",
+        "confidence": 0.98,
+        "evidence": [
+          "Guaranteed commercial note DOC-2023-0914820"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e32",
+        "source": "person:sarah_jenkins",
+        "target": "entity:dinkytown_student_lofts_llc",
+        "relation": "HAS_OFFICER",
+        "confidence": 0.99,
+        "evidence": [
+          "Listed as Governor/Manager on SOS filing for 'DINKYTOWN STUDENT LOFTS LLC'"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e33",
+        "source": "person:sarah_jenkins",
+        "target": "mortgage:DOC-2022-0449102",
+        "relation": "HAS_OFFICER",
+        "confidence": 0.98,
+        "evidence": [
+          "Guaranteed commercial note DOC-2022-0449102"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e34",
+        "source": "mortgage:DOC-2023-0914820",
+        "target": "entity:1420_eleventh_ave_llc",
+        "relation": "FINANCED_BY",
+        "confidence": 1.0,
+        "evidence": [
+          "Recorded mortgage DOC-2023-0914820 for $14,800,000 from Arbor Commercial Mortgage LLC"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e35",
+        "source": "mortgage:DOC-2023-0914820",
+        "target": "prop:26-029-24-12-0045",
+        "relation": "FINANCED_BY",
+        "confidence": 0.99,
+        "evidence": [
+          "Master mortgage blanket encumbers parcel 26-029-24-12-0045"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e36",
+        "source": "mortgage:DOC-2023-0914820",
+        "target": "prop:34-029-24-21-0089",
+        "relation": "FINANCED_BY",
+        "confidence": 0.99,
+        "evidence": [
+          "Master mortgage blanket encumbers parcel 34-029-24-21-0089"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e37",
+        "source": "mortgage:DOC-2023-0914820",
+        "target": "prop:26-029-24-13-0012",
+        "relation": "FINANCED_BY",
+        "confidence": 0.99,
+        "evidence": [
+          "Master mortgage blanket encumbers parcel 26-029-24-13-0012"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e38",
+        "source": "mortgage:DOC-2023-0914820",
+        "target": "prop:35-029-24-34-0102",
+        "relation": "FINANCED_BY",
+        "confidence": 0.99,
+        "evidence": [
+          "Master mortgage blanket encumbers parcel 35-029-24-34-0102"
+        ]
+      }
+    },
+    {
+      "data": {
+        "id": "e39",
+        "source": "mortgage:DOC-2022-0449102",
+        "target": "entity:dinkytown_student_lofts_llc",
+        "relation": "FINANCED_BY",
+        "confidence": 1.0,
+        "evidence": [
+          "Recorded mortgage DOC-2022-0449102 for $950,000 from Bell Bank"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+[
+  {
+    "entity_id": "1420_eleventh_ave_llc",
+    "legal_name": "1420 ELEVENTH AVE LLC",
+    "state_of_formation": "MN",
+    "filing_number": "MN-LLC-2021-99812",
+    "formation_date": "2021-04-15",
+    "status": "Active",
+    "registered_agent_name": "CT Corporation System",
+    "registered_agent_address": "100 S 5th St Ste 1075, Minneapolis MN 55402",
+    "principal_office_address": "7400 Metro Blvd Ste 210, Edina MN 55439",
+    "governors": ["Marcus Vance"],
+    "managers": ["Marcus Vance"]
+  },
+  {
+    "entity_id": "grand_ave_suites_spe_llc",
+    "legal_name": "GRAND AVE SUITES SPE LLC",
+    "state_of_formation": "MN",
+    "filing_number": "MN-LLC-2022-10492",
+    "formation_date": "2022-08-11",
+    "status": "Active",
+    "registered_agent_name": "CT Corporation System",
+    "registered_agent_address": "100 S 5th St Ste 1075, Minneapolis MN 55402",
+    "principal_office_address": "7400 Metro Blvd Ste 210, Edina MN 55439",
+    "governors": ["Eleanor Vance"],
+    "managers": ["Marcus Vance"]
+  },
+  {
+    "entity_id": "midtown_residential_ventures_llc",
+    "legal_name": "MIDTOWN RESIDENTIAL VENTURES LLC",
+    "state_of_formation": "MN",
+    "filing_number": "MN-LLC-2020-04312",
+    "formation_date": "2020-02-19",
+    "status": "Active",
+    "registered_agent_name": "CT Corporation System",
+    "registered_agent_address": "100 S 5th St Ste 1075, Minneapolis MN 55402",
+    "principal_office_address": "7400 Metro Blvd Ste 210, Edina MN 55439",
+    "governors": ["Marcus Vance"],
+    "managers": ["Eleanor Vance"]
+  },
+  {
+    "entity_id": "southside_urban_living_llc",
+    "legal_name": "SOUTHSIDE URBAN LIVING LLC",
+    "state_of_formation": "MN",
+    "filing_number": "MN-LLC-2023-55912",
+    "formation_date": "2023-01-20",
+    "status": "Active",
+    "registered_agent_name": "CT Corporation System",
+    "registered_agent_address": "100 S 5th St Ste 1075, Minneapolis MN 55402",
+    "principal_office_address": "7400 Metro Blvd Ste 210, Edina MN 55439",
+    "governors": ["Eleanor Vance"],
+    "managers": ["Marcus Vance"]
+  },
+  {
+    "entity_id": "dinkytown_student_lofts_llc",
+    "legal_name": "DINKYTOWN STUDENT LOFTS LLC",
+    "state_of_formation": "MN",
+    "filing_number": "MN-LLC-2022-77219",
+    "formation_date": "2022-05-14",
+    "status": "Active",
+    "registered_agent_name": "Northwest Registered Agent LLC",
+    "registered_agent_address": "200 S 6th St, Minneapolis MN 55402",
+    "principal_office_address": "1200 Washington Ave S Ste 400, Minneapolis MN 55415",
+    "governors": ["Sarah Jenkins"],
+    "managers": ["Sarah Jenkins"]
+  }
+]
