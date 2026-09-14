@@ -95,12 +95,59 @@ async function recheckSource(
   return { changed: true, detail: `first archive: ${newKey}` };
 }
 
+/** Re-fetch one archived child document by row id; update in place on change. */
+async function recheckDocument(
+  env: Env, id: number
+): Promise<{ changed: boolean; detail: string }> {
+  const doc = await env.DB.prepare(
+    "SELECT county, kind, source_url, r2_key, content_sha256 FROM documents WHERE id = ?"
+  ).bind(id).first<{ county: string; kind: string; source_url: string; r2_key: string | null; content_sha256: string | null }>();
+  if (!doc || !doc.r2_key) return { changed: false, detail: "no archived copy" };
+  let resp: Response;
+  try {
+    resp = await fetch(doc.source_url, { headers: UA });
+  } catch (e) {
+    return { changed: false, detail: `fetch failed: ${String(e)}` };
+  }
+  if (!resp.ok) return { changed: false, detail: `HTTP ${resp.status}` };
+  const bytes = await resp.arrayBuffer();
+  const hash = await sha256Hex(bytes);
+  if (hash === doc.content_sha256) {
+    await env.DB.prepare("UPDATE documents SET checked_at = datetime('now') WHERE id = ?").bind(id).run();
+    return { changed: false, detail: "unchanged" };
+  }
+  await env.R2_DATA.put(doc.r2_key, bytes);
+  await env.DB.prepare(
+    "UPDATE documents SET content_sha256 = ?, checked_at = datetime('now') WHERE id = ?"
+  ).bind(hash, id).run();
+  await env.DB.prepare(
+    "INSERT INTO change_log (county, kind, old_r2_key, new_r2_key, old_sha256, new_sha256) VALUES (?, ?, ?, ?, ?, ?)"
+  ).bind(doc.county, doc.kind, doc.r2_key, doc.r2_key, doc.content_sha256, hash).run();
+  return { changed: true, detail: `refreshed in place: ${doc.r2_key}` };
+}
+
 async function recheckCounty(env: Env, county: string): Promise<object> {
   const row = await env.DB.prepare("SELECT * FROM counties WHERE county = ?").bind(county).first<County>();
   if (!row) return { county, error: "unknown county" };
   const out: Record<string, object> = {};
   if (row.city_code_url) out.city_code = await recheckSource(env, county, "city_code", row.city_code_url, "city-code");
   if (row.zoning_ordinance_url) out.zoning = await recheckSource(env, county, "zoning", row.zoning_ordinance_url, "zoning");
+  // Child documents (per-PDF archives): refresh the stalest few in place so a
+  // county official editing or deleting a file can't silently rot our copy.
+  // Capped per run so the monthly sweep stays inside Worker CPU limits.
+  const stale = await env.DB.prepare(
+    `SELECT id FROM documents WHERE county = ? AND r2_key IS NOT NULL
+     AND source_url NOT IN (?, ?) ORDER BY checked_at ASC LIMIT 5`
+  ).bind(county, row.city_code_url ?? "", row.zoning_ordinance_url ?? "").all<{ id: number }>();
+  const refreshed: Record<string, object> = {};
+  for (const { id } of (stale.results || [])) {
+    try {
+      refreshed[String(id)] = await recheckDocument(env, id);
+    } catch {
+      refreshed[String(id)] = { changed: false, detail: "error" };
+    }
+  }
+  if (Object.keys(refreshed).length) out.child_docs = refreshed;
   return { county, ...out };
 }
 
@@ -121,9 +168,9 @@ export default {
     if (url.pathname === "/changes") {
       const { results } = await env.DB.prepare(
         "SELECT county, kind, old_r2_key, new_r2_key, detected_at FROM change_log ORDER BY detected_at DESC LIMIT 100"
-      ).all();
+      ).all<Record<string, string>>();
       const rows = results
-        .map((c: Record<string, string>) =>
+        .map((c) =>
           `<tr><td>${c.detected_at.slice(0, 10)}</td><td><a href="/county/${encodeURIComponent(c.county)}">${c.county}</a></td>` +
           `<td>${c.kind}</td><td><a href="/docs/${c.old_r2_key}">before</a> → <a href="/docs/${c.new_r2_key}">after</a></td></tr>`)
         .join("");
