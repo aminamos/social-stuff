@@ -5,7 +5,7 @@ import { detroit } from "./arcgis/detroit";
 import { nashvilleStr } from "./arcgis/nashville-str";
 import { seattle } from "./socrata/seattle";
 import { nyc } from "./socrata/nyc";
-import { austinRegistration, austinDeficiencies } from "./socrata/austin";
+import { austinDeficiencies } from "./socrata/austin";
 import { sanFrancisco } from "./socrata/sanfrancisco";
 import { buffalo } from "./socrata/buffalo";
 import { denverStr } from "./socrata/denver-str";
@@ -28,7 +28,11 @@ export const ADAPTERS: CityAdapter[] = [
   nashvilleStr,
   seattle,
   nyc,
-  austinRegistration,
+  // NOTE: austinRegistration (activity-grain: ~2k events on the top parcel)
+  // is deliberately unregistered. Both Austin feeds key on parcelid, so
+  // registering both would clobber the same parcel_ids back and forth every
+  // tick. The deficiencies feed carries owner names; the activity feed does
+  // not, so deficiencies wins for a landlord-identity registry.
   austinDeficiencies,
   sanFrancisco,
   buffalo,

@@ -173,7 +173,7 @@ export const charlotteViolations: ViolationAdapter = {
   source: {
     platform: "arcgis",
     endpoint:
-      "https://gis.charlottenc.gov/arcgis/rest/services/HNS/CodeEnforcementCasesAll/MapServer/0",
+      "https://gis.charlottenc.gov/arcgis/rest/services/HNS/CodeEnforcementCasesAll/MapServer/0/query",
     dataset: "CodeEnforcementCasesAll",
     pageSize: 1000,
     where: "CaseStatus IN ('New', 'Open')",
@@ -208,7 +208,7 @@ export const miamiDadeViolations: ViolationAdapter = {
   source: {
     platform: "arcgis",
     endpoint:
-      "https://services.arcgis.com/8Pc9XBTAsYuxx9Ny/arcgis/rest/services/CCVIOL_gdb/FeatureServer/0",
+      "https://services.arcgis.com/8Pc9XBTAsYuxx9Ny/arcgis/rest/services/CCVIOL_gdb/FeatureServer/0/query",
     dataset: "CCVIOL_gdb",
     pageSize: 1000,
     where: "CASE_STATUS <> '2'",
@@ -243,7 +243,7 @@ export const nashvilleViolations: ViolationAdapter = {
   source: {
     platform: "arcgis",
     endpoint:
-      "https://services2.arcgis.com/HdTo6HJqh92wn4D8/arcgis/rest/services/Property_Standards_Violations_2/FeatureServer/0",
+      "https://services2.arcgis.com/HdTo6HJqh92wn4D8/arcgis/rest/services/Property_Standards_Violations_2/FeatureServer/0/query",
     dataset: "Property_Standards_Violations_2",
     pageSize: 1000,
     where: "Status='OPEN'",
@@ -279,7 +279,7 @@ export const lasVegasViolations: ViolationAdapter = {
   source: {
     platform: "arcgis",
     endpoint:
-      "https://services1.arcgis.com/F1v0ufATbBQScMtY/arcgis/rest/services/Code_Enforcement_Open_Data/FeatureServer/0",
+      "https://services1.arcgis.com/F1v0ufATbBQScMtY/arcgis/rest/services/Code_Enforcement_Open_Data/FeatureServer/0/query",
     dataset: "Code_Enforcement_Open_Data",
     pageSize: 1000,
     where: "STAT='Open'",
@@ -315,7 +315,7 @@ export const phoenixViolations: ViolationAdapter = {
   source: {
     platform: "arcgis",
     endpoint:
-      "https://maps.phoenix.gov/pub/rest/services/Public/NSD_Property_Maintenance/MapServer/0",
+      "https://maps.phoenix.gov/pub/rest/services/Public/NSD_Property_Maintenance/MapServer/0/query",
     dataset: "NSD_Property_Maintenance",
     pageSize: 1000,
     where: "NOT (CSM_STATUS LIKE 'CLOSED%' OR CSM_STATUS LIKE 'CASE CLOSED%')",
@@ -359,7 +359,7 @@ export const westSacViolations: ViolationAdapter = {
   source: {
     platform: "arcgis",
     endpoint:
-      "https://gis.cityofwestsacramento.org/server/rest/services/code_enforcement/MapServer/0",
+      "https://gis.cityofwestsacramento.org/server/rest/services/code_enforcement/MapServer/0/query",
     dataset: "code_enforcement",
     pageSize: 1000,
     where: "Status IN ('COMPLAINT RECEIVED', 'ENFORCEMENT', 'INSPECTIONS')",

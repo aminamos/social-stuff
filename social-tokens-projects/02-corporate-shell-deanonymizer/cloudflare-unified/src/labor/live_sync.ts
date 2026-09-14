@@ -70,8 +70,14 @@ function mapDolRowToRecord(item: Record<string, any>): WageTheftSeedRecord | nul
   const caseId = String(rawId).trim();
 
   const backWages = sumActFields(item, "_bw_atp_amt");
-  const penalties = sumActFields(item, "_cmp_assd_amt");
-  const workers = Math.round(sumActFields(item, "_ee_atp_cnt"));
+  // Live v4 rows carry the base penalty as `cmp_assd` alongside per-act
+  // `*_cmp_assd_amt` fields; neither suffix matches the other, so sum both.
+  const penalties = sumActFields(item, "_cmp_assd_amt") + sumActFields(item, "cmp_assd");
+  // `_ee_atp_cnt` counts workers paid; `ee_violtd_cnt` counts workers violated.
+  const workers = Math.max(
+    Math.round(sumActFields(item, "_ee_atp_cnt")),
+    Math.round(dolNum(item.ee_violtd_cnt)),
+  );
 
   const repeatRaw = String(item.flsa_repeat_violator ?? "").trim().toUpperCase();
   const repeatViolator = ["R", "W", "RW", "Y"].includes(repeatRaw) ? 1 : 0;
@@ -110,17 +116,18 @@ export async function fetchUSDOLOpenData(apiKey?: string): Promise<WageTheftSeed
   const records: WageTheftSeedRecord[] = [];
   if (!apiKey) return records;
 
-  const filterObject = JSON.stringify({ naic_cd: DOL_PROPERTY_NAICS });
-
+  // Verified live 2026-09-14: the v4 API accepts the key ONLY as the
+  // `X-API-KEY` query param (header form is rejected as missing), and the
+  // documented `filter_object` shape errors server-side, so filtering stays
+  // client-side via the NAICS guard below.
   for (let page = 0; page < DOL_MAX_PAGES; page++) {
     const offset = page * DOL_PAGE_LIMIT;
     const url =
-      `${DOL_V4_ENDPOINT}?limit=${DOL_PAGE_LIMIT}&offset=${offset}` +
-      `&filter_object=${encodeURIComponent(filterObject)}`;
+      `${DOL_V4_ENDPOINT}?X-API-KEY=${encodeURIComponent(apiKey)}` +
+      `&limit=${DOL_PAGE_LIMIT}&offset=${offset}`;
     const headers: Record<string, string> = {
       "Accept": "application/json",
       "User-Agent": "TwinCities-Civic-Labor-Standards-Registry/2.0",
-      "X-API-KEY": apiKey
     };
 
     const controller = new AbortController();

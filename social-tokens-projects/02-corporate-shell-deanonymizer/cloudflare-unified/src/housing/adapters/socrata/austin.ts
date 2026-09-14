@@ -12,6 +12,11 @@ import { CityAdapter } from "../../canonical";
  * (tx-austin-rental-deficiencies), so linkage stays pending until that feed
  * is ingested.
  */
+/**
+ * UNREGISTERED BY DESIGN (see adapters/index.ts): activity-grain feed whose
+ * rows share parcel_ids with tx-austin-rental-deficiencies below. Kept for
+ * documentation; do not add to ADAPTERS without a parcel-namespace fix.
+ */
 export const austinRegistration: CityAdapter = {
   feed: {
     id: "tx-austin-rental-registration",
