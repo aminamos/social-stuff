@@ -11,6 +11,9 @@ Every organization listed here has been audited for **active maintenance pipelin
 ## 🌐 Live Sites
 
 * 🏠 **[Social Housing Info](https://social-housing-info.a-8c6.workers.dev/)** — public information resource on rent stabilization definitions, the NYC rent freeze, block-by-block housing development, community land trusts, and further reading.
+* 🏢 **[Landlord De-anonymizer](https://mpls-rental-sync-worker.a-8c6.workers.dev)** — ownership graphs for Twin Cities rental properties, reconstructing corporate landlord networks from tax rolls, SOS filings, violations, and mortgage deeds.
+* ⚖️ **[Wage Theft & Labor Standards Registry](https://twin-cities-wage-theft-worker.a-8c6.workers.dev)** — searchable registry of wage theft and labor standards violations across the Twin Cities.
+* 🧩 **[Slumlord & Wage Theft Crossover Matrix](https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev)** — cross-index of corporate syndicates cited for both slumlord code violations and wage theft, with a crossover API and in-browser AI assistant.
 
 ---
 
