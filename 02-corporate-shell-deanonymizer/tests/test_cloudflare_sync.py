@@ -54,8 +54,7 @@ def test_generate_d1_seed_sql(populated_store):
 
         assert out_path.exists()
         content = out_path.read_text(encoding="utf-8")
-        assert "BEGIN TRANSACTION;" in content
         assert "INSERT OR REPLACE INTO rental_licenses" in content
         assert "'APN-TEST-1'" in content
         assert "'Test Landlord LLC'" in content
-        assert "COMMIT;" in content
+

@@ -352,6 +352,172 @@ def cmd_export_graph(args):
     console.print(f"[bold green]Exported ownership graph ({len(cyto['nodes'])} nodes, {len(cyto['edges'])} edges) to:[/] {out_path.resolve()}")
 
 
+def cmd_metro_cities(args):
+    from .engine.local_store import LocalRentalStore
+    from .extractors.metro_client import HENNEPIN_MUNICIPALITIES, RAMSEY_MUNICIPALITIES
+    store = LocalRentalStore()
+    summary = store.get_metro_summary()
+
+    console.print(
+        Panel(
+            f"[bold yellow]TWIN CITIES METRO COVERAGE REPORT[/]\n"
+            f"[bold cyan]Total Hennepin Municipalities:[/] {len(HENNEPIN_MUNICIPALITIES)} cities/townships (448,087 parcels)\n"
+            f"[bold magenta]Total Ramsey Municipalities:[/] {len(RAMSEY_MUNICIPALITIES)} cities/townships (167,853 parcels)\n"
+            f"[bold green]Active Rental Licenses in Local DB:[/] {summary['total_licenses']:,} properties ({summary['total_units']:,} units)\n"
+            f"[bold white]Multi-Family Parcels in Local DB:[/] {summary['total_parcels']:,} parcels",
+            title="[bold blue]Hennepin & Ramsey County Jurisdictions[/]",
+            border_style="blue",
+        )
+    )
+
+    # Table of Rental Licenses by City
+    table_lic = Table(title="Municipal Rental Licensing / Certificate of Occupancy Coverage", show_header=True, header_style="bold green")
+    table_lic.add_column("City / Municipality", style="bold white")
+    table_lic.add_column("County", style="cyan")
+    table_lic.add_column("Rental Licenses / Certificates", justify="right", style="yellow")
+    table_lic.add_column("Total Units", justify="right", style="bold green")
+
+    for row in summary["rental_licenses_by_city"]:
+        table_lic.add_row(
+            row["city"],
+            row["county"],
+            f"{row['license_count']:,}",
+            f"{row['total_units']:,}" if row["total_units"] else "N/A"
+        )
+    console.print(table_lic)
+
+    # Table of Parcels by City
+    if summary["parcels_by_city"]:
+        table_p = Table(title="County Property Parcels by City (Sample/Multi-Family Ingestion)", show_header=True, header_style="bold magenta")
+        table_p.add_column("City / Municipality", style="bold white")
+        table_p.add_column("County", style="cyan")
+        table_p.add_column("Parcels", justify="right", style="yellow")
+        table_p.add_column("Total Market Value", justify="right", style="bold green")
+
+        for row in summary["parcels_by_city"][:20]:
+            table_p.add_row(
+                row["city"],
+                row["county"],
+                f"{row['parcel_count']:,}",
+                f"${row['total_market_val']:,.0f}" if row["total_market_val"] else "$0"
+            )
+        console.print(table_p)
+
+
+def cmd_metro_search(args):
+    from .extractors.metro_client import MetroCountyClient
+    from .engine.local_store import LocalRentalStore
+
+    query = args.query.strip()
+    console.print(f"[cyan]Searching Twin Cities Metro registries for:[/] [bold white]'{query}'[/]...")
+
+    if args.live:
+        client = MetroCountyClient()
+        res = client.search_metro_syndicate(query, limit_per_jurisdiction=args.limit)
+
+        summary = res["summary"]
+        console.print(
+            Panel(
+                f"[bold yellow]CROSS-COUNTY DE-ANONYMIZATION MATCHES:[/] {summary['total_records']} total records\n"
+                f"[bold cyan]Municipalities Identified:[/] {', '.join(summary['jurisdictions']) if summary['jurisdictions'] else 'None'}\n"
+                f"[bold green]Total Residential Units:[/] {summary['total_units']:,}\n"
+                f"[bold white]Estimated Market Valuation:[/] ${summary['total_market_value']:,.0f}\n"
+                f"[bold magenta]Associated Shell Entities:[/] {', '.join(summary['owner_names'][:5])}...",
+                title=f"[bold green]Live Metro Footprint: {query}[/]",
+                border_style="green",
+            )
+        )
+
+        table = Table(title=f"Live Properties Associated with '{query}'", show_header=True, header_style="bold yellow")
+        table.add_column("Jurisdiction", style="cyan")
+        table.add_column("Property Address / ID", style="bold white")
+        table.add_column("Paper Shell / Owner", style="magenta")
+        table.add_column("Units / Value", justify="right", style="green")
+
+        for lic in res["minneapolis_licenses"][:10]:
+            table.add_row("Minneapolis", lic.get("address", ""), lic.get("ownerName", ""), f"{lic.get('licensedUnits', 1)} units")
+        for stp in res["stpaul_licenses"][:10]:
+            table.add_row("Saint Paul", stp.get("ADDRESS", ""), stp.get("PROPNAME", ""), f"{stp.get('UNITS', 1)} units ({stp.get('GRADE', 'Grade A')})")
+        for bp in res["brooklyn_park_rentals"][:5]:
+            table.add_row("Brooklyn Park", bp.get("FullAddress", ""), bp.get("LicenseTypeDescription", ""), "Rental License")
+        for rc in res["ramsey_parcels"][:10]:
+            table.add_row(rc.get("SiteCityName", "Ramsey"), rc.get("SiteAddress", ""), rc.get("OwnerName", ""), f"${float(rc.get('EMVTotal') or 0):,.0f}")
+        for hc in res["hennepin_parcels"][:10]:
+            table.add_row(str(hc.get("MUNIC_NM", "Hennepin")).strip(), f"{hc.get('HOUSE_NO', '')} {hc.get('STREET_NM', '')}", hc.get("OWNER_NM", ""), f"${float(hc.get('MKT_VAL_TOT') or 0):,.0f}")
+
+        console.print(table)
+    else:
+        # Search local fast SQLite store
+        store = LocalRentalStore()
+        lic_results = store.search(query, limit=args.limit)
+        parcel_results = store.search_parcels(query, limit=args.limit)
+
+        table = Table(title=f"Local Database Results for '{query}'", show_header=True, header_style="bold green")
+        table.add_column("City", style="cyan")
+        table.add_column("Address / APN", style="bold white")
+        table.add_column("Owner / Entity", style="magenta")
+        table.add_column("Contact / Taxpayer", style="dim")
+        table.add_column("Units / Value", justify="right", style="green")
+
+        for r in lic_results:
+            table.add_row(
+                r.get("city", "Minneapolis"),
+                f"{r.get('address', '')}\n[dim]{r.get('apn', '')}[/]",
+                r.get("owner_name", "") or "Unknown",
+                r.get("applicant_name", "") or r.get("applicant_email", "") or "",
+                f"{r.get('units', 1)} units ({r.get('tier', '')})"
+            )
+
+        for p in parcel_results:
+            table.add_row(
+                p.get("city", ""),
+                f"{p.get('address', '')}\n[dim]PID: {p.get('pid', '')}[/]",
+                p.get("owner_name", "") or "Unknown",
+                p.get("taxpayer_name", "") or "",
+                f"${p.get('market_value', 0):,.0f}"
+            )
+
+        console.print(table)
+        console.print(f"[bold green]Found {len(lic_results)} rental licenses and {len(parcel_results)} parcels matching '{query}'.[/]")
+
+
+def cmd_sync_metro(args):
+    from .extractors.metro_client import MetroCountyClient
+    from .engine.local_store import LocalRentalStore
+
+    store = LocalRentalStore()
+    client = MetroCountyClient()
+
+    console.print("[bold cyan]1. Syncing City of Saint Paul Residential Certificates of Occupancy...[/]")
+    stp_synced = store.sync_stpaul_cofo(batch_size=2000)
+    console.print(f"[bold green]Synced {stp_synced:,} Saint Paul rental licenses![/]")
+
+    console.print("\n[bold cyan]2. Syncing City of Brooklyn Park Rental Licenses...[/]")
+    bp_synced = store.sync_brooklyn_park_rentals(batch_size=2000)
+    console.print(f"[bold green]Synced {bp_synced:,} Brooklyn Park rental licenses![/]")
+
+    console.print("\n[bold cyan]3. Ingesting Ramsey County Multi-Family Parcels (4+ units)...[/]")
+    ramsey_apts = client.fetch_ramsey_parcels(where="LivingUnit >= 4 OR UseType1 LIKE '%APARTMENT%'", limit=3000)
+    r_count = store.insert_county_parcels(ramsey_apts, "Ramsey")
+    console.print(f"[bold green]Ingested {r_count:,} Ramsey County apartment parcels![/]")
+
+    console.print("\n[bold cyan]4. Ingesting Hennepin County Suburban Multi-Family Parcels...[/]")
+    hennepin_apts = client.fetch_hennepin_parcels(where="MUNIC_NM NOT LIKE 'MINNEAPOLIS%' AND (PR_TYP_NM1 = 'APARTMENT' OR PR_TYP_NM1 = 'LOW INCOME RENTAL')", limit=3000)
+    h_count = store.insert_county_parcels(hennepin_apts, "Hennepin")
+    console.print(f"[bold green]Ingested {h_count:,} Hennepin County suburban apartment parcels![/]")
+
+    summary = store.get_metro_summary()
+    console.print(
+        Panel(
+            f"[bold green]Total Rental Licenses in Store:[/] {summary['total_licenses']:,} ({summary['total_units']:,} units)\n"
+            f"[bold green]Total Multi-Family Parcels in Store:[/] {summary['total_parcels']:,} parcels across Hennepin and Ramsey",
+            title="[bold yellow]Metro Sync Complete[/]",
+            border_style="green",
+        )
+    )
+
+
+
 def main():
     parser = argparse.ArgumentParser(description="Corporate Shell Entity & Slumlord De-anonymizer CLI")
     parser.add_argument("--provider", help="LLM provider: ollama, openai, groq, deepseek, offline")
@@ -416,14 +582,24 @@ def main():
     p_d1.add_argument("--output", "-o", help="Output .sql file path")
     p_d1.set_defaults(func=cmd_generate_d1_seed)
 
-    # export-graph
-    p_exp = subparsers.add_parser("export-graph", help="Export ownership graph to Cytoscape JSON")
-    p_exp.add_argument("--output", "-o", default="ownership_graph.json", help="Output file path")
-    p_exp.add_argument("--fixtures", "-f", help="Path to fixtures folder")
-    p_exp.set_defaults(func=cmd_export_graph)
+    # metro-cities
+    p_mc = subparsers.add_parser("metro-cities", help="Display rental licenses and parcel counts across Hennepin and Ramsey cities")
+    p_mc.set_defaults(func=cmd_metro_cities)
+
+    # metro-search
+    p_ms = subparsers.add_parser("metro-search", help="Search across all cities in Hennepin and Ramsey counties simultaneously")
+    p_ms.add_argument("--query", "-q", required=True, help="Landlord name, shell entity, or address")
+    p_ms.add_argument("--limit", "-l", type=int, default=25, help="Max results to display")
+    p_ms.add_argument("--live", action="store_true", help="Query live ArcGIS FeatureServers instead of local SQLite store")
+    p_ms.set_defaults(func=cmd_metro_search)
+
+    # sync-metro
+    p_sm = subparsers.add_parser("sync-metro", help="Sync rental licenses and multi-family parcels for St. Paul, Brooklyn Park, and county GIS")
+    p_sm.set_defaults(func=cmd_sync_metro)
 
     args = parser.parse_args()
     args.func(args)
+
 
 
 if __name__ == "__main__":

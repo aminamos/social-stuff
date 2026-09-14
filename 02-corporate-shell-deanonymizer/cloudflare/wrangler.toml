@@ -7,9 +7,10 @@ crons = ["0 4 * * *"] # Daily at 4:00 AM UTC
 
 [[d1_databases]]
 binding = "DB"
-database_name = "mpls-housing-db"
-database_id = "<YOUR_D1_DATABASE_ID>"
+database_name = "social-housing-db"
+database_id = "d95726b6-247d-4400-abb8-7cc97e4e4f7c"
 
 [[r2_buckets]]
 binding = "R2_BUCKET"
-bucket_name = "mpls-rental-registry"
+bucket_name = "landlord-directory-data"
+

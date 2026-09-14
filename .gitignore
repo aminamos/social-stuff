@@ -8,3 +8,9 @@ htmlcov/
 *.egg-info/
 dist/
 build/
+*.db
+*.sqlite
+*.sql
+*.json.gz
+probe_metro.py
+sync_metro_sample.py
