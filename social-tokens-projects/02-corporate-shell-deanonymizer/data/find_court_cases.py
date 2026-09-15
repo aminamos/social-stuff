@@ -1,31 +1,30 @@
-import urllib.request
-import urllib.parse
-import re
 import json
+import os
+import urllib.request
 
-def search(query):
-    url = f"https://html.duckduckgo.com/html/?q={urllib.parse.quote(query)}"
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
+def search(query, limit=10):
+    key = os.environ.get("KAGI_API_KEY")
+    if not key:
+        print("Search error: KAGI_API_KEY is not set")
+        return []
+    body = json.dumps({"query": query, "workflow": "search", "format": "json", "limit": limit}).encode("utf-8")
+    req = urllib.request.Request(
+        "https://kagi.com/api/v1/search",
+        data=body,
+        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+        method="POST",
+    )
     try:
         with urllib.request.urlopen(req) as resp:
-            html = resp.read().decode("utf-8", errors="ignore")
-            results = []
-            blocks = re.findall(r'<div class="result__body">(.*?)</div>\s*</div>', html, re.DOTALL)
-            for b in blocks:
-                url_m = re.search(r'class="result__snippet"[^>]*href="([^"]+)"', b)
-                snippet_m = re.search(r'class="result__snippet"[^>]*>(.*?)</a>', b, re.DOTALL)
-                title_m = re.search(r'class="result__title"[^>]*>(.*?)</a>', b, re.DOTALL)
-                if url_m and snippet_m and title_m:
-                    u = urllib.parse.unquote(url_m.group(1))
-                    if "uddg=" in u:
-                        u = u.split("uddg=")[1].split("&")[0]
-                    title = re.sub(r'<[^>]+>', '', title_m.group(1)).strip()
-                    snip = re.sub(r'<[^>]+>', '', snippet_m.group(1)).strip()
-                    results.append({"title": title, "url": u, "snippet": snip})
-            return results
+            payload = json.loads(resp.read().decode("utf-8", errors="ignore"))
     except Exception as e:
         print("Search error:", e)
         return []
+    hits = (payload.get("data") or {}).get("search") or []
+    return [
+        {"title": h.get("title") or "Untitled result", "url": h.get("url") or "", "snippet": h.get("snippet") or ""}
+        for h in hits[:limit]
+    ]
 
 print("=== SEARCH 1: MN AG Wage Theft Court Cases ===")
 for r in search("site:ag.state.mn.us wage theft lawsuit court")[:6]:
