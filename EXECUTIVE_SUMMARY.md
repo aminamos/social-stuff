@@ -59,7 +59,7 @@ A common pitfall in civic tech is investing effort into dormant repositories whe
 
 | Rank | Organization | Repo & Issue | Technology | Effort | Impact |
 |:---:|:---|:---|:---:|:---:|:---|
-| **1** | Hennepin County | [`ed-hcds-components#59`](https://github.com/HennepinCounty/ed-hcds-components/issues/59) | CSS / a11y | 15 mins | Adds `:focus` visible indicator to hyperlinks across all Hennepin County web apps. |
+| **1** | Hennepin County | [`ed-hcds-components#59`](https://github.com/HennepinCounty/ed-hcds-components/issues/59) | CSS / a11y | 15 mins | Adds `:focus` visible indicator to hyperlinks across all Hennepin County web apps. 🔄 **In review: [PR #69](https://github.com/HennepinCounty/ed-hcds-components/pull/69)** |
 | **2** | Science Museum of MN | [`laparoscopy-camera#5`](https://github.com/scimusmn/laparoscopy-camera/issues/5) | C++ / Arduino | 5 mins | Inverts `digitalRead` boolean logic (`!digitalRead`) for kiosk controller. |
 | **3** | OneBusAway | [`watchdog#147`](https://github.com/OneBusAway/watchdog/issues/147) | Python / GTFS | 30 mins | Prevents floating-point coordinate precision rounding from triggering false stop moves. |
 | **4** | DataMade | [`usaddress#410`](https://github.com/datamade/usaddress/issues/410) | Python / Regex | 20 mins | Precompiles regexes once to eliminate overhead during batch address standardization. |

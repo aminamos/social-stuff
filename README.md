@@ -61,7 +61,7 @@ These issues feature active maintainers, isolated diffs, and immediate social or
 
 | # | Organization / Project | Issue | Stack | Why It's a Great First PR |
 |---|---|---|---|---|
-| **1** | **Hennepin County** | [ed-hcds-components#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59) | CSS / a11y | **Add `:focus` ring to hyperlink elements**: Direct accessibility fix for county digital services. |
+| **1** | **Hennepin County** | [ed-hcds-components#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59) | CSS / a11y | **Add `:focus` ring to hyperlink elements**: Direct accessibility fix for county digital services. 🔄 **In review — [PR #69](https://github.com/HennepinCounty/ed-hcds-components/pull/69)** (also addresses [#57](https://github.com/HennepinCounty/ed-hcds-components/issues/57)) |
 | **2** | **Science Museum of MN** | [laparoscopy-camera#5](https://github.com/scimusmn/laparoscopy-camera/issues/5) | C++ / Arduino | **Invert `digitalRead` logic**: One-line boolean fix (`!digitalRead(button_pin)`) on museum interactive. |
 | **3** | **OneBusAway** | [watchdog#147](https://github.com/OneBusAway/watchdog/issues/147) | Python / GTFS | **Precision rounding fix**: Stop treating micro-coordinate shifts as transit stop relocations. (`good first issue`) |
 | **4** | **DataMade** | [usaddress#410](https://github.com/datamade/usaddress/issues/410) | Python / Regex | **Precompile regular expressions**: Performance optimization on nationwide address parser. |
@@ -71,6 +71,14 @@ These issues feature active maintainers, isolated diffs, and immediate social or
 | **8** | **Bay Area Metro** | [travel-model-one#113](https://github.com/BayAreaMetro/travel-model-one/issues/113) | Python | **Typo in truck trip distribution**: Fix formula variable typo in regional transit model. |
 | **9** | **Northern Widget** | [Margay_Library#28](https://github.com/NorthernWidget/Margay_Library/issues/28) | Jekyll / Actions | **GitHub Pages API docs**: Setup Doxygen + Jekyll automated doc deployment for civic sensors. |
 | **10** | **OpenOakland** | [openoakland.org#295](https://github.com/openoakland/openoakland.org/issues/295) | Jekyll / JS | **Markdown rendering fix**: Convert raw meetup descriptions to formatted HTML. (`good first issue`) |
+
+---
+
+## Submitted Pull Requests
+
+| PR | Repo | Closes | Status |
+|---|---|---|---|
+| [#69](https://github.com/HennepinCounty/ed-hcds-components/pull/69) | HennepinCounty/ed-hcds-components | [#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59) (also addresses [#57](https://github.com/HennepinCounty/ed-hcds-components/issues/57)) | 🔄 In review |
 
 ---
 
