@@ -58,6 +58,12 @@ export const INDEX_HTML = `<!doctype html>
   #cands button{display:block;width:100%;text-align:left;background:#fff;color:var(--ink);
     border:1px solid var(--line);padding:7px 10px;margin-top:5px;font-weight:400}
   #cands button:hover{background:#eef3f8}
+  .examples{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .examples span{font:11px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:#6b6252;margin-right:4px}
+  .ex{background:#fff;color:var(--ink);border:1px solid var(--line);padding:5px 10px;
+    font:12.5px var(--mono);font-weight:400;border-radius:2px}
+  .ex:hover{background:#eef3f8;border-color:var(--accent)}
+  .ex i{font-style:normal;color:#8a8272}
   footer{font:11.5px var(--mono);color:#8a8272;margin-top:24px;line-height:1.7}
   a{color:var(--accent)}
 </style>
@@ -85,6 +91,14 @@ export const INDEX_HTML = `<!doctype html>
         </select></div>
       <div><button id="go" type="submit">Run feasibility</button></div>
     </form>
+    <div class="examples"><span>Try a real parcel:</span>
+      <button type="button" class="ex" data-a="2080 Fry St" data-s="3">2080 Fry St <i>investor duplex</i></button>
+      <button type="button" class="ex" data-a="2072 Fry St" data-s="3">2072 Fry St <i>owner-occupied duplex</i></button>
+      <button type="button" class="ex" data-a="1780 Skillman Ave W" data-s="3">1780 Skillman Ave W <i>SFH + accessory unit</i></button>
+      <button type="button" class="ex" data-a="2730 Herschel St N" data-s="7">2730 Herschel St N <i>277-unit apartment</i></button>
+      <button type="button" class="ex" data-a="2540 Cleveland Ave N" data-s="7">2540 Cleveland Ave N <i>hotel parcel</i></button>
+      <button type="button" class="ex" data-a="2660 Civic Center Dr" data-s="7">2660 Civic Center Dr <i>City Hall</i></button>
+    </div>
     <div id="cands"></div>
   </div>
 
@@ -192,6 +206,12 @@ f.addEventListener('submit', async ev => {
   }catch(e){ out.innerHTML = '<div class="panel err"><b>Request failed:</b> '+esc(e.message)+'</div>'; }
   go.disabled = false; go.textContent = 'Run feasibility';
 });
+
+document.querySelectorAll('.ex').forEach(b => b.addEventListener('click', () => {
+  document.getElementById('addr').value = b.dataset.a;
+  document.getElementById('stay').value = b.dataset.s || 3;
+  f.requestSubmit();
+}));
 </script>
 </body>
 </html>`;

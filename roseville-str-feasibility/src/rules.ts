@@ -399,6 +399,11 @@ export function evaluate(p: ParcelFacts | null, s: Scenario): EngineResult {
       "Homesteaded multi-unit: your own unit is owner-occupied, but the RENTED unit is non-owner-occupied — full Ch. 909 licensing, frequency caps, and spacing rules apply to that unit. Rooms inside your own unit stay exempt (909.08).",
     );
   }
+  if (/ACCESSORY|ADU/i.test(`${p.dwellingType ?? ""} ${p.landUseDescription ?? ""}`)) {
+    flags.push(
+      "Accessory unit on parcel: 909.08 exempts ADUs that are NOT detached from the principal dwelling and permitted under Title 10. County data doesn't record attached vs detached — if this ADU is attached, it may be exempt; confirm with Community Development.",
+    );
+  }
   if (p.salePrice && p.lastSaleDate) {
     flags.push(
       `Last recorded sale ${p.lastSaleDate} at $${p.salePrice.toLocaleString()} — if you are evaluating a purchase, remember the 909 license is not transferable.`,

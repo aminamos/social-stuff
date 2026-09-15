@@ -23,6 +23,17 @@ transfer on sale**.
   computed verdict; constrained to engine output, deterministic template
   fallback when the binding is unavailable
 
+## Try these real parcels
+
+| Address | What it demonstrates |
+|---|---|
+| `2080 Fry St` | Non-owner-occupied duplex → frequency-cap math, STR vs mid-term verdict |
+| `2072 Fry St` | Homesteaded duplex on the same street → house-hack path (rented unit still needs 909 license) |
+| `1780 Skillman Ave W` | SFH + accessory unit → 909.08 ADU exemption nuance |
+| `2730 Herschel St N` | 277-unit complex → Ch. 908 multifamily regime, no STR path |
+| `2540 Cleveland Ave N` | Hotel parcel → non-residential, Ch. 317 is the only route |
+| `2660 Civic Center Dr` | City Hall → non-residential / municipally exempt |
+
 ## Endpoints
 
 | Route | Description |

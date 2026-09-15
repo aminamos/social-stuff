@@ -123,6 +123,12 @@ console.log("== verdicts ==");
   const ownerDuplex = evaluate({ ...duplexNonOwner, homestead: true }, baseScenario);
   check("owner-occupied duplex → STR applies to rented unit + househack flag",
     ownerDuplex.strApplies === true && ownerDuplex.flags.some(f => f.includes("Homesteaded multi-unit")));
+
+  const adu = evaluate(
+    { ...duplexNonOwner, dwellingType: "SINGLE FAMILY W/ACCESSORY UNIT", landUseDescription: "SINGLE FAMILY W/ACCESSORY UNIT" },
+    baseScenario,
+  );
+  check("accessory unit → ADU exemption flag", adu.flags.some(f => f.includes("Accessory unit")));
 }
 
 console.log("== economics ==");
