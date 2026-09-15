@@ -107,6 +107,8 @@ export const INDEX_HTML = `<!doctype html>
   <footer>
     Deterministic engine: Roseville City Code Ch. 909 (Ord. 1657, eff. 2024-02-12), Ch. 907, Ch. 908,
     Ch. 312 lodging tax (3%), Fee Schedule §314.05. Parcel data: Ramsey County Open Data FeatureServer (layer 12).
+    Rule parameters live in D1; source documents archived in R2 — see <a href="/api/sources">/api/sources</a>,
+    <a href="/api/rules">/api/rules</a>, <a href="/api/lookups">/api/lookups</a>.
     Not legal advice — verify the 500-ft spacing rule and current fees with Community Development (651-792-7013).
   </footer>
 </main>

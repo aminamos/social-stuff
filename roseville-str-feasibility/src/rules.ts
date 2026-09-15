@@ -17,7 +17,15 @@
 // Statutory constants (verify against current fee schedule before relying)
 // ---------------------------------------------------------------------------
 
-export const FEES = {
+export interface FeeParams {
+  strLicenseAnnual: number;
+  strLicenseLateFee: number;
+  rentalRegistrationPerUnit: number;
+  rentalRegistrationLate: number;
+  lodgingTaxRate: number;
+}
+
+export const FEES: FeeParams = {
   /** 909.05.A + Fee Schedule §314.05: STR license, per year. */
   strLicenseAnnual: 540,
   /** Late renewal penalty for 909 license (909.04.B). */
@@ -28,7 +36,7 @@ export const FEES = {
   rentalRegistrationLate: 43,
   /** Ch. 312 lodging tax on rentals < 30 days, remitted monthly (909.05.B). */
   lodgingTaxRate: 0.03,
-} as const;
+};
 
 /** Local agent must reside in one of these MN counties (909.02 "Local Agent"). */
 export const LOCAL_AGENT_COUNTIES = [
@@ -92,6 +100,36 @@ export const SEASONS: Season[] = [
 
 /** Stays longer than this are not STRs at all (909.02). */
 export const STR_MAX_NIGHTS = 30;
+
+// ---------------------------------------------------------------------------
+// Runtime-tunable parameters — D1 `rule_params` overrides these defaults.
+// ---------------------------------------------------------------------------
+
+export interface RuleParams {
+  fees: FeeParams;
+  spacingFeet: number;
+  noticeRadiusFeet: number;
+  winterDays: number;
+  winterSpacing: number;
+  summerDays: number;
+  summerSpacing: number;
+  strMaxNights: number;
+  maxUnrelatedAdults: number;
+}
+
+export function defaultParams(): RuleParams {
+  return {
+    fees: { ...FEES },
+    spacingFeet: SPACING_FEET,
+    noticeRadiusFeet: NOTICE_RADIUS_FEET,
+    winterDays: SEASONS[0].daysNonLeap,
+    winterSpacing: SEASONS[0].minStartSpacingDays,
+    summerDays: SEASONS[1].daysNonLeap,
+    summerSpacing: SEASONS[1].minStartSpacingDays,
+    strMaxNights: STR_MAX_NIGHTS,
+    maxUnrelatedAdults: MAX_UNRELATED_ADULTS,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Input types
@@ -237,18 +275,23 @@ export function seasonBookingMath(
   days: number,
   spacing: number,
   avgStay: number,
+  maxStay: number = STR_MAX_NIGHTS,
 ): { bookings: number; nights: number } {
-  const stay = Math.max(1, Math.min(avgStay, STR_MAX_NIGHTS));
+  const stay = Math.max(1, Math.min(avgStay, maxStay));
   const cycle = Math.max(stay, spacing);
   const bookings = Math.floor(days / cycle);
   return { bookings, nights: bookings * stay };
 }
 
-/** Optimal stay length (1..30) maximizing sellable nights under the cap. */
-export function optimalStay(days: number, spacing: number): { stay: number; nights: number } {
+/** Optimal stay length (1..maxStay) maximizing sellable nights under the cap. */
+export function optimalStay(
+  days: number,
+  spacing: number,
+  maxStay: number = STR_MAX_NIGHTS,
+): { stay: number; nights: number } {
   let best = { stay: spacing, nights: 0 };
-  for (let stay = 1; stay <= STR_MAX_NIGHTS; stay++) {
-    const { nights } = seasonBookingMath(days, spacing, stay);
+  for (let stay = 1; stay <= maxStay; stay++) {
+    const { nights } = seasonBookingMath(days, spacing, stay, maxStay);
     if (nights > best.nights) best = { stay, nights };
   }
   return best;
@@ -258,7 +301,11 @@ export function optimalStay(days: number, spacing: number): { stay: number; nigh
 // Main evaluation
 // ---------------------------------------------------------------------------
 
-export function evaluate(p: ParcelFacts | null, s: Scenario): EngineResult {
+export function evaluate(
+  p: ParcelFacts | null,
+  s: Scenario,
+  params: RuleParams = defaultParams(),
+): EngineResult {
   const sources = [
     "Roseville City Code Ch. 909 (Ord. 1657, eff. 2024-02-12)",
     "Roseville City Code Ch. 907 (rental registration, 1–4 units)",
@@ -344,17 +391,22 @@ export function evaluate(p: ParcelFacts | null, s: Scenario): EngineResult {
   const partialOwnerOccupied = ownerOccupied && units > 1;
   const unitType = dwelling ?? "single family";
 
-  const seasonMath: SeasonMath[] = SEASONS.map((se) => {
+  const seasonSpecs = [
+    { label: SEASONS[0].label, days: params.winterDays, spacing: params.winterSpacing },
+    { label: SEASONS[1].label, days: params.summerDays, spacing: params.summerSpacing },
+  ];
+  const seasonMath: SeasonMath[] = seasonSpecs.map((se) => {
     const { bookings, nights } = seasonBookingMath(
-      se.daysNonLeap,
-      se.minStartSpacingDays,
+      se.days,
+      se.spacing,
       s.avgStayNights,
+      params.strMaxNights,
     );
-    const opt = optimalStay(se.daysNonLeap, se.minStartSpacingDays);
+    const opt = optimalStay(se.days, se.spacing, params.strMaxNights);
     return {
       season: se.label,
-      windowDays: se.daysNonLeap,
-      minStartSpacingDays: se.minStartSpacingDays,
+      windowDays: se.days,
+      minStartSpacingDays: se.spacing,
       maxBookings: bookings,
       sellableNights: nights,
       optimalStayNights: opt.stay,
@@ -367,8 +419,8 @@ export function evaluate(p: ParcelFacts | null, s: Scenario): EngineResult {
   const optimalNights = seasonMath.reduce((a, m) => a + m.optimalNights, 0);
 
   const gross = Math.round(sellableNights * s.adr);
-  const lodgingTax = Math.round(gross * FEES.lodgingTaxRate);
-  const licenseAndFees = FEES.strLicenseAnnual;
+  const lodgingTax = Math.round(gross * params.fees.lodgingTaxRate);
+  const licenseAndFees = params.fees.strLicenseAnnual;
   const net = gross - lodgingTax - licenseAndFees;
 
   // Naive pro-forma an uninformed investor would run (75% occupancy).
@@ -376,13 +428,13 @@ export function evaluate(p: ParcelFacts | null, s: Scenario): EngineResult {
   const naiveRevenue = Math.round(naiveNights * s.adr);
 
   const compliance: string[] = [
-    `Max occupancy per unit: ${MAX_UNRELATED_ADULTS} unrelated adults OR one family (909.03.A.6; 906.06/1001.10).`,
-    `One rental commencement per ${SEASONS[0].minStartSpacingDays} days Oct 1–May 1; per ${SEASONS[1].minStartSpacingDays} days May 1–Oct 1 (909.02).`,
-    `Stay ceiling: rentals >${STR_MAX_NIGHTS} days exit the STR regime and need Ch. 907/908/317 authority (909.02).`,
+    `Max occupancy per unit: ${params.maxUnrelatedAdults} unrelated adults OR one family (909.03.A.6; 906.06/1001.10).`,
+    `One rental commencement per ${params.winterSpacing} days Oct 1–May 1; per ${params.summerSpacing} days May 1–Oct 1 (909.02).`,
+    `Stay ceiling: rentals >${params.strMaxNights} days exit the STR regime and need Ch. 907/908/317 authority (909.02).`,
     `Local agent must reside in: ${LOCAL_AGENT_COUNTIES.join(", ")} counties (909.02).`,
-    `Notify all 1–4 unit residential properties within ${NOTICE_RADIUS_FEET} ft within 10 days of license approval AND every annual renewal (909.07.C).`,
+    `Notify all 1–4 unit residential properties within ${params.noticeRadiusFeet} ft within 10 days of license approval AND every annual renewal (909.07.C).`,
     "Post the license + noise/nuisance/parking code sections (405, 407, 602) inside the unit (909.07.A).",
-    "Keep a guest register (dates + duration); submit it WITH the monthly 3% lodging-tax return (909.05.B, 909.12).",
+    `Keep a guest register (dates + duration); submit it WITH the monthly ${params.fees.lodgingTaxRate * 100}% lodging-tax return (909.05.B, 909.12).`,
     "License runs 365 days; late renewal = fee penalty; operating 5+ days past expiry = violation (909.04).",
     "Caught renting unlicensed: license cannot take effect for 90 days after application (909.06.F).",
     "License does NOT transfer on sale — buyer must apply within 30 days and cannot host until issued (909.06.C).",
@@ -391,7 +443,7 @@ export function evaluate(p: ParcelFacts | null, s: Scenario): EngineResult {
   ];
 
   const flags: string[] = [
-    `500-FT SPACING RULE (909.03.B): no new license if another Ch. 909-licensed property is within ${SPACING_FEET} ft. Not published as open data — search Accela "Short-Term Rental License" records near the address before offering: https://aca-prod.accela.com/ROSEVILLE_MN/Cap/CapHome.aspx?module=Licenses`,
+    `${params.spacingFeet}-FT SPACING RULE (909.03.B): no new license if another Ch. 909-licensed property is within ${params.spacingFeet} ft. Not published as open data — search Accela "Short-Term Rental License" records near the address before offering: https://aca-prod.accela.com/ROSEVILLE_MN/Cap/CapHome.aspx?module=Licenses`,
     "Acquisition risk: if buying, the seller's license dies at closing — budget the application gap into the pro-forma (909.06.C).",
   ];
   if (partialOwnerOccupied) {
@@ -414,7 +466,7 @@ export function evaluate(p: ParcelFacts | null, s: Scenario): EngineResult {
     {
       chapter: "909",
       name: "Short-Term Rental License",
-      annualFeeUsd: FEES.strLicenseAnnual,
+      annualFeeUsd: params.fees.strLicenseAnnual,
       trigger: "Any rental ≤30 consecutive days of a non-owner-occupied unit",
       notes:
         "Annual via ePermits; requires unit type, bedroom count, occupancy attestation, owner + local-agent contacts. Subject to 500-ft spacing.",
@@ -422,16 +474,16 @@ export function evaluate(p: ParcelFacts | null, s: Scenario): EngineResult {
     {
       chapter: "907",
       name: "Rental Registration",
-      annualFeeUsd: FEES.rentalRegistrationPerUnit * units,
+      annualFeeUsd: params.fees.rentalRegistrationPerUnit * units,
       trigger: "Rentals >30 days in a 1–4 unit property",
-      notes: `$${FEES.rentalRegistrationPerUnit}/unit/yr. Waived while a valid 909 license exists and lease periods exceed 30 days (909.06.D).`,
+      notes: `$${params.fees.rentalRegistrationPerUnit}/unit/yr. Waived while a valid 909 license exists and lease periods exceed 30 days (909.06.D).`,
     },
     {
       chapter: "312",
       name: "Lodging tax",
       annualFeeUsd: null,
       trigger: "All rentals <30 days",
-      notes: `3% of gross monthly receipts, remitted monthly with the guest register.`,
+      notes: `${params.fees.lodgingTaxRate * 100}% of gross monthly receipts, remitted monthly with the guest register.`,
     },
     {
       chapter: "317",

@@ -22,6 +22,10 @@ transfer on sale**.
 - **Workers AI** (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) — narrates the
   computed verdict; constrained to engine output, deterministic template
   fallback when the binding is unavailable
+- **R2** (`roseville-str-docs`) — archived source ordinances/forms, served at
+  `GET /docs/<key>`; registry at `GET /api/sources`
+- **D1** (`roseville-str-db`) — `rule_params` overrides (update fees without
+  redeploying), `source_documents` registry, `lookups` audit log
 
 ## Try these real parcels
 
@@ -41,7 +45,10 @@ transfer on sale**.
 | `GET /` | Calculator UI |
 | `GET /api/feasibility?address=&adr=&stay=&ownerOccupied=` | Full pipeline: geocode → parcel → engine → narrative |
 | `GET /api/geocode?address=` | County geocoder candidates |
-| `GET /api/rules` | Engine constants (fees, seasonal windows) |
+| `GET /api/rules` | Effective rule parameters (D1-backed) |
+| `GET /api/sources` | Source-document registry |
+| `GET /api/lookups` | Recent lookups audit log |
+| `GET /docs/<key>` | Archived ordinance/fee documents from R2 |
 
 ## Regulatory model
 
@@ -78,6 +85,16 @@ npm run check     # tsc --noEmit
 npm run dev       # wrangler dev (AI binding runs remote, may incur usage)
 npm run deploy
 ```
+
+### Data layer
+
+```bash
+npx wrangler d1 migrations apply roseville-str-db --remote   # schema + seeds
+npx tsx scripts/snapshot-rules.ts rules-snapshot.json        # engine constants → JSON
+```
+
+Source documents (original PDFs/DOCX + extracted text) live in `reference/` and
+in the R2 bucket; see `reference/SOURCES.md` for provenance.
 
 ## Caveats
 

@@ -7,7 +7,13 @@ import {
   toParcelFacts,
   type GeocodeCandidate,
 } from "./gis";
-import { evaluate, FEES, SEASONS, type ParcelFacts, type Scenario } from "./rules";
+import {
+  evaluate,
+  defaultParams,
+  type ParcelFacts,
+  type RuleParams,
+  type Scenario,
+} from "./rules";
 import { narrate } from "./report";
 
 const JSON_HEADERS = {
@@ -35,6 +41,71 @@ function parseScenario(url: URL): Scenario {
     strategy:
       strategy === "str" || strategy === "midterm" ? strategy : "auto",
   };
+}
+
+/**
+ * Rule parameters from D1 `rule_params` (seeded to the compiled defaults).
+ * Fee/threshold changes need an UPDATE, not a redeploy. Falls back to the
+ * compiled defaults when the binding is absent or the query fails.
+ */
+async function loadParams(env: Env): Promise<{ params: RuleParams; source: "d1" | "defaults" }> {
+  const params = defaultParams();
+  if (!env.DB) return { params, source: "defaults" };
+  try {
+    const { results } = await env.DB.prepare(
+      "SELECT key, value FROM rule_params",
+    ).all<{ key: string; value: string }>();
+    const map = new Map(results.map((r) => [r.key, JSON.parse(r.value) as number]));
+    const num = (k: string, fallback: number) => {
+      const v = map.get(k);
+      return typeof v === "number" && Number.isFinite(v) ? v : fallback;
+    };
+    params.fees.strLicenseAnnual = num("fees.strLicenseAnnual", params.fees.strLicenseAnnual);
+    params.fees.strLicenseLateFee = num("fees.strLicenseLateFee", params.fees.strLicenseLateFee);
+    params.fees.rentalRegistrationPerUnit = num("fees.rentalRegistrationPerUnit", params.fees.rentalRegistrationPerUnit);
+    params.fees.rentalRegistrationLate = num("fees.rentalRegistrationLate", params.fees.rentalRegistrationLate);
+    params.fees.lodgingTaxRate = num("fees.lodgingTaxRate", params.fees.lodgingTaxRate);
+    params.spacingFeet = num("spacing.feet", params.spacingFeet);
+    params.noticeRadiusFeet = num("notice.radiusFeet", params.noticeRadiusFeet);
+    params.winterDays = num("cap.winterDays", params.winterDays);
+    params.summerDays = num("cap.summerDays", params.summerDays);
+    params.winterSpacing = num("cap.winterSpacing", params.winterSpacing);
+    params.summerSpacing = num("cap.summerSpacing", params.summerSpacing);
+    params.strMaxNights = num("str.maxNights", params.strMaxNights);
+    params.maxUnrelatedAdults = num("occupancy.maxUnrelatedAdults", params.maxUnrelatedAdults);
+    return { params, source: "d1" };
+  } catch {
+    return { params, source: "defaults" };
+  }
+}
+
+function logLookup(
+  env: Env,
+  ctx: ExecutionContext,
+  input: string,
+  parcel: ParcelFacts | null,
+  verdict: string,
+  scenario: Scenario,
+  narrativeSource: string,
+): void {
+  if (!env.DB) return;
+  ctx.waitUntil(
+    env.DB.prepare(
+      `INSERT INTO lookups (address_input, matched_address, parcel_id, city, verdict, scenario_json, narrative_source)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(
+        input,
+        parcel?.siteAddress ?? null,
+        parcel?.parcelId ?? null,
+        parcel?.siteCity ?? null,
+        verdict,
+        JSON.stringify(scenario),
+        narrativeSource,
+      )
+      .run()
+      .catch(() => {}),
+  );
 }
 
 /** Resolve an address string to the best Roseville parcel. */
@@ -69,7 +140,7 @@ async function resolveParcel(address: string): Promise<{
   return { parcel: null, geocode: best, candidates };
 }
 
-async function handleFeasibility(url: URL, env: Env): Promise<Response> {
+async function handleFeasibility(url: URL, env: Env, ctx: ExecutionContext): Promise<Response> {
   const address = (url.searchParams.get("address") ?? "").trim();
   if (!address) return err("Missing ?address= parameter");
   const scenario = parseScenario(url);
@@ -80,6 +151,7 @@ async function handleFeasibility(url: URL, env: Env): Promise<Response> {
   } catch (e) {
     return err(`County GIS lookup failed: ${(e as Error).message}`, 502);
   }
+  const { params, source: paramsSource } = await loadParams(env);
 
   const { parcel, geocode, candidates } = resolved;
   if (!parcel) {
@@ -98,8 +170,8 @@ async function handleFeasibility(url: URL, env: Env): Promise<Response> {
   if (lon != null && lat != null) {
     try {
       const [n300, n500] = await Promise.all([
-        countResidentialParcelsWithin(lon, lat, 300),
-        countResidentialParcelsWithin(lon, lat, 500),
+        countResidentialParcelsWithin(lon, lat, params.noticeRadiusFeet),
+        countResidentialParcelsWithin(lon, lat, params.spacingFeet),
       ]);
       context = { noticeParcels300ft: n300, spacingZoneParcels500ft: n500 };
     } catch {
@@ -107,12 +179,15 @@ async function handleFeasibility(url: URL, env: Env): Promise<Response> {
     }
   }
 
-  const engine = evaluate(parcel, scenario);
+  const engine = evaluate(parcel, scenario, params);
   const narrative = await narrate(env, parcel, scenario, engine);
+
+  logLookup(env, ctx, address, parcel, engine.verdict, scenario, narrative.source);
 
   return json({
     input: { address },
     scenario,
+    paramsSource,
     geocode,
     parcel,
     context,
@@ -123,7 +198,7 @@ async function handleFeasibility(url: URL, env: Env): Promise<Response> {
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
     if (request.method === "OPTIONS") {
@@ -139,15 +214,50 @@ export default {
           headers: { "content-type": "text/html; charset=utf-8" },
         });
       case "/api/feasibility":
-        return handleFeasibility(url, env);
+        return handleFeasibility(url, env, ctx);
       case "/api/geocode": {
         const a = (url.searchParams.get("address") ?? "").trim();
         if (!a) return err("Missing ?address=");
         return json({ candidates: await geocodeAddress(a) });
       }
-      case "/api/rules":
-        return json({ fees: FEES, seasons: SEASONS });
+      case "/api/rules": {
+        const { params, source } = await loadParams(env);
+        return json({ params, paramsSource: source });
+      }
+      case "/api/sources": {
+        if (!env.DB) return err("Registry unavailable", 503);
+        const { results } = await env.DB.prepare(
+          "SELECT r2_key, title, source_url, fetched_at, content_type, notes FROM source_documents ORDER BY r2_key",
+        ).all();
+        return json({
+          documents: (results as Array<Record<string, unknown>>).map((r) => ({
+            ...r,
+            download: `/docs/${r.r2_key}`,
+          })),
+        });
+      }
+      case "/api/lookups": {
+        if (!env.DB) return err("Registry unavailable", 503);
+        const { results } = await env.DB.prepare(
+          "SELECT requested_at, address_input, matched_address, city, verdict FROM lookups ORDER BY id DESC LIMIT 20",
+        ).all();
+        return json({ lookups: results });
+      }
       default:
+        if (url.pathname.startsWith("/docs/")) {
+          const key = decodeURIComponent(url.pathname.slice("/docs/".length));
+          if (!key || key.includes("..")) return err("Bad key", 400);
+          const obj = await env.DOCS.get(key);
+          if (!obj) return err("Document not found", 404);
+          return new Response(obj.body, {
+            headers: {
+              "content-type":
+                obj.httpMetadata?.contentType ?? "application/octet-stream",
+              "cache-control": "public, max-age=86400",
+              "etag": obj.httpEtag,
+            },
+          });
+        }
         return err("Not found", 404);
     }
   },
