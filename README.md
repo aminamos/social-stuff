@@ -74,14 +74,6 @@ These issues feature active maintainers, isolated diffs, and immediate social or
 
 ---
 
-## Submitted Pull Requests
-
-| PR | Repo | Closes | Status |
-|---|---|---|---|
-| [#69](https://github.com/HennepinCounty/ed-hcds-components/pull/69) | HennepinCounty/ed-hcds-components | [#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59) (also addresses [#57](https://github.com/HennepinCounty/ed-hcds-components/issues/57)) | 🔄 In review |
-
----
-
 ## Finding Issues by Tech Stack
 
 ### Frontend & Design Systems (HTML / SCSS / React / Vue)
@@ -128,6 +120,18 @@ Opened PRs awaiting maintainer review. Move to Done once merged.
 
 | Project | Issue | PR | Status |
 |---|---|---|---|
+| Hennepin County `ed-hcds-components` | [#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59) (also [#57](https://github.com/HennepinCounty/ed-hcds-components/issues/57)) | [#69](https://github.com/HennepinCounty/ed-hcds-components/pull/69) | 🔄 In review |
+| Chi Hack Night `govbot` | [#27](https://github.com/chihacknight/govbot/issues/27) | [#143](https://github.com/chihacknight/govbot/pull/143) | 🔄 In review |
+| Chi Hack Night `govbot` | [#24](https://github.com/chihacknight/govbot/issues/24) | [#144](https://github.com/chihacknight/govbot/pull/144) | 🔄 In review |
+| Chi Hack Night `govbot` | [#25](https://github.com/chihacknight/govbot/issues/25) | [#145](https://github.com/chihacknight/govbot/pull/145) | 🔄 In review |
+| Chi Hack Night `govbot` | [#19](https://github.com/chihacknight/govbot/issues/19) | [#146](https://github.com/chihacknight/govbot/pull/146) | 🔄 In review |
+| Chi Hack Night `govbot` | [#20](https://github.com/chihacknight/govbot/issues/20) | [#147](https://github.com/chihacknight/govbot/pull/147) | 🔄 In review |
+| Chi Hack Night `govbot` | [#26](https://github.com/chihacknight/govbot/issues/26) | [#148](https://github.com/chihacknight/govbot/pull/148) | 🔄 In review |
+| DataMade `la-metro-translations` | [#84](https://github.com/datamade/la-metro-translations/issues/84) | [#93](https://github.com/datamade/la-metro-translations/pull/93) | 🔄 In review |
+| Mia `collection-elasticsearch` | [#10](https://github.com/artsmia/collection-elasticsearch/issues/10) | [#11](https://github.com/artsmia/collection-elasticsearch/pull/11) | 🔄 In review |
+| Mia `collection` | [#10](https://github.com/artsmia/collection/issues/10), [#7](https://github.com/artsmia/collection/issues/7) | [#11](https://github.com/artsmia/collection/pull/11) | 🔄 In review |
+| Mia `art` | — | [#109](https://github.com/artsmia/art/pull/109) | 🔄 In review |
+| MobilityData `transit-operational-data-standard` | — | [#161](https://github.com/MobilityData/transit-operational-data-standard/pull/161), [#162](https://github.com/MobilityData/transit-operational-data-standard/pull/162), [#163](https://github.com/MobilityData/transit-operational-data-standard/pull/163), [#164](https://github.com/MobilityData/transit-operational-data-standard/pull/164) | 🔄 In review |
 
 ---
 

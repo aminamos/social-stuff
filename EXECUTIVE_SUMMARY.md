@@ -24,7 +24,7 @@ A common pitfall in civic tech is investing effort into dormant repositories whe
 
 ### 🌲 Minnesota (Twin Cities)
 * **Hennepin County (`HennepinCounty/ed-hcds-components`)**: HTML/SCSS/JS. Actively maintained Design System used across county public services. Target issues include focus ring accessibility ([#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59)), mobile header search button ([#66](https://github.com/HennepinCounty/ed-hcds-components/issues/66)), and flex/grid gap utility classes ([#61](https://github.com/HennepinCounty/ed-hcds-components/issues/61)).
-* **Minneapolis Institute of Art (`artsmia/collection-elasticsearch`)**: Python/Elasticsearch. 403 rendition error on public domain records ([#10](https://github.com/artsmia/collection-elasticsearch/issues/10)).
+* **Minneapolis Institute of Art (`artsmia/collection-elasticsearch`)**: Python/Elasticsearch. 403 rendition error on public domain records ([#10](https://github.com/artsmia/collection-elasticsearch/issues/10) - 🔄 [PR #11](https://github.com/artsmia/collection-elasticsearch/pull/11) in review).
 * **UMN Libraries (`UMNLibraries/racial_covenants_processor`)**: Python/Django. Data pipeline for the Mapping Prejudice project; parcel count rollups across child workflows ([#151](https://github.com/UMNLibraries/racial_covenants_processor/issues/151)).
 * **Science Museum of Minnesota (`scimusmn/laparoscopy-camera`)**: C++/Arduino. Interactive hardware inverted digitalRead bug ([#5](https://github.com/scimusmn/laparoscopy-camera/issues/5)).
 * **Northern Widget (`NorthernWidget/Margay_Library`)**: C++/Jekyll. Environmental sensor documentation pipeline via GitHub Actions ([#28](https://github.com/NorthernWidget/Margay_Library/issues/28)).
@@ -45,7 +45,7 @@ A common pitfall in civic tech is investing effort into dormant repositories whe
 
 ### 🏙️ Chicago & Cook County
 * **Chi Hack Night (`chihacknight/govbot`)**: Python/FastAPI. Chicago City Council Councilmatic catalog ([#30](https://github.com/chihacknight/govbot/issues/30) - `good first issue`), executive actions data item ([#28](https://github.com/chihacknight/govbot/issues/28) - `good first issue`), scraper regression ([#78](https://github.com/chihacknight/govbot/issues/78)).
-* **DataMade (`datamade`)**: Python/Django. Regex compilation caching on `usaddress` ([#410](https://github.com/datamade/usaddress/issues/410)), accessible language download links ([la-metro-translations#84](https://github.com/datamade/la-metro-translations/issues/84)).
+* **DataMade (`datamade`)**: Python/Django. Regex compilation caching on `usaddress` ([#410](https://github.com/datamade/usaddress/issues/410)), accessible language download links ([la-metro-translations#84](https://github.com/datamade/la-metro-translations/issues/84) - 🔄 [PR #93](https://github.com/datamade/la-metro-translations/pull/93) in review).
 * **Bike Lane Uprising (BLU)**: Chicago-born benchmark of crowdsourced spatial data influencing municipal protected bike infrastructure across 100+ cities.
 
 ### 🌳 Oakland & East Bay

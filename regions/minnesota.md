@@ -32,10 +32,12 @@ Minnesota has a rich ecosystem of civic tech, cultural institutions, and public 
 * **Stack**: Python, Elasticsearch, JSON REST APIs
 * **Activity**: Active collection API updates in 2026.
 * **Target Issues**:
-  * **[#10](https://github.com/artsmia/collection-elasticsearch/issues/10) — `Records flagged image: valid whose image renditions return 403 on all sizes`**
+  * **[#10](https://github.com/artsmia/collection-elasticsearch/issues/10) — `Records flagged image: valid whose image renditions return 403 on all sizes`** 🔄 *In review*
+    * *Status*: [PR #11](https://github.com/artsmia/collection-elasticsearch/pull/11) open.
     * *Why solve*: Integrators building digital frames and public displays hit 403 errors on certain public domain artwork IDs.
     * *Skills*: Python, Elasticsearch queries, API verification.
-  * **[#10](https://github.com/artsmia/collection/issues/10) — `broken link for image rights`**
+  * **[#10](https://github.com/artsmia/collection/issues/10) — `broken link for image rights`** 🔄 *In review*
+    * *Status*: [PR #11](https://github.com/artsmia/collection/pull/11) open (also fixes [#7](https://github.com/artsmia/collection/issues/7)).
     * *Skills*: Markdown / link verification.
 
 ---
