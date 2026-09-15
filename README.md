@@ -56,7 +56,7 @@ High-leverage agent systems directing LLM tokens toward structural transparency 
 
 ---
 
-## Top 10 Quick Wins (Ranked by PR Acceptance Probability)
+## Top Quick Wins (Ranked by PR Acceptance Probability)
 
 These issues feature active maintainers, isolated diffs, and immediate social or accessibility value:
 
@@ -65,13 +65,10 @@ These issues feature active maintainers, isolated diffs, and immediate social or
 | **1** | **Hennepin County** | [ed-hcds-components#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59) | CSS / a11y | **Add `:focus` ring to hyperlink elements**: Direct accessibility fix for county digital services. 🔄 **In review — [PR #69](https://github.com/HennepinCounty/ed-hcds-components/pull/69)** (also addresses [#57](https://github.com/HennepinCounty/ed-hcds-components/issues/57)) |
 | **2** | **Science Museum of MN** | [laparoscopy-camera#5](https://github.com/scimusmn/laparoscopy-camera/issues/5) | C++ / Arduino | **Invert `digitalRead` logic**: One-line boolean fix (`!digitalRead(button_pin)`) on museum interactive. |
 | **3** | **OneBusAway** | [watchdog#147](https://github.com/OneBusAway/watchdog/issues/147) | Python / GTFS | **Precision rounding fix**: Stop treating micro-coordinate shifts as transit stop relocations. (`good first issue`) |
-| **4** | **DataMade** | [usaddress#410](https://github.com/datamade/usaddress/issues/410) | Python / Regex | **Precompile regular expressions**: Performance optimization on nationwide address parser. ⚠️ **Claimed — [PR #411](https://github.com/datamade/usaddress/pull/411) open by another contributor** |
-| **5** | **OneBusAway** | [onebusaway-ios#1412](https://github.com/OneBusAway/onebusaway-ios/issues/1412) | SwiftUI / a11y | **VoiceOver accessibility fix**: Fix misleading button narration for the map settings sheet. ⚠️ **Claimed — [PR #1413](https://github.com/OneBusAway/onebusaway-ios/pull/1413) open by another contributor** |
-| **6** | **NYC Planning** | [equity-tool#303](https://github.com/NYCPlanning/equity-tool/issues/303) | React / TS | **Remove deprecated props**: Clean up `react-map-gl` deprecation warnings on public zoning tool. |
-| **7** | **Chi Hack Night** | [govbot#30](https://github.com/chihacknight/govbot/issues/30) | Python / APIs | **Councilmatic Catalog Entry**: Add Chicago City Council feed to public discovery tool. (`good first issue`) |
-| **8** | **Bay Area Metro** | [travel-model-one#113](https://github.com/BayAreaMetro/travel-model-one/issues/113) | Python | **Typo in truck trip distribution**: Fix formula variable typo in regional transit model. ⚠️ **Possibly claimed — [PR #88](https://github.com/BayAreaMetro/travel-model-one/pull/88) references this issue** |
-| **9** | **Northern Widget** | [Margay_Library#28](https://github.com/NorthernWidget/Margay_Library/issues/28) | Jekyll / Actions | **GitHub Pages API docs**: Setup Doxygen + Jekyll automated doc deployment for civic sensors. |
-| **10** | **OpenOakland** | [openoakland.org#295](https://github.com/openoakland/openoakland.org/issues/295) | Jekyll / JS | **Markdown rendering fix**: Convert raw meetup descriptions to formatted HTML. (`good first issue`) |
+| **4** | **NYC Planning** | [equity-tool#303](https://github.com/NYCPlanning/equity-tool/issues/303) | React / TS | **Remove deprecated props**: Clean up `react-map-gl` deprecation warnings on public zoning tool. |
+| **5** | **Chi Hack Night** | [govbot#30](https://github.com/chihacknight/govbot/issues/30) | Python / APIs | **Councilmatic Catalog Entry**: Add Chicago City Council feed to public discovery tool. (`good first issue`) |
+| **6** | **Northern Widget** | [Margay_Library#28](https://github.com/NorthernWidget/Margay_Library/issues/28) | Jekyll / Actions | **GitHub Pages API docs**: Setup Doxygen + Jekyll automated doc deployment for civic sensors. |
+| **7** | **OpenOakland** | [openoakland.org#295](https://github.com/openoakland/openoakland.org/issues/295) | Jekyll / JS | **Markdown rendering fix**: Convert raw meetup descriptions to formatted HTML. (`good first issue`) |
 
 ---
 
