@@ -89,7 +89,7 @@ These issues feature active maintainers, isolated diffs, and immediate social or
 * **UMN Libraries** ([`racial_covenants_processor`](https://github.com/UMNLibraries/racial_covenants_processor)): Multi-workflow parcel count rollup for Mapping Prejudice ([#151](https://github.com/UMNLibraries/racial_covenants_processor/issues/151)).
 * **Chi Hack Night** ([`govbot`](https://github.com/chihacknight/govbot)): Scraper organization reference fix ([#78](https://github.com/chihacknight/govbot/issues/78)), executive actions parser ([#28](https://github.com/chihacknight/govbot/issues/28)).
 
-### Mobile & Transit (iOS / Android)
+### Mobile & Transit
 * **OneBusAway** ([`onebusaway-ios`](https://github.com/OneBusAway/onebusaway-ios), [`onebusaway-android`](https://github.com/OneBusAway/onebusaway-android)): VoiceOver accessibility fix ([#1412](https://github.com/OneBusAway/onebusaway-ios/issues/1412)), offline banner ([#2301](https://github.com/OneBusAway/onebusaway-android/issues/2301)).
 * **Code for San Francisco** ([`resource-binder-app`](https://github.com/sfbrigade/resource-binder-app)): Android onboarding screen ([#5](https://github.com/sfbrigade/resource-binder-app/issues/5)).
 * **aminamos** ([`transit-alert-mirror`](https://github.com/aminamos/transit-alert-mirror)): Plain-English transit alert, detour, and service advisory enrichment engine.
