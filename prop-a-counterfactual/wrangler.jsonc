@@ -11,7 +11,7 @@
     {
       "binding": "DB",
       "database_name": "prop-a-db",
-      "database_id": "REPLACE-ON-CREATE",
+      "database_id": "42d222ca-9774-4ec6-9fb2-4de6eafef793",
       "migrations_dir": "./migrations"
     }
   ],
