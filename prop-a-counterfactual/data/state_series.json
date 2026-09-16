@@ -1,0 +1,212 @@
+[
+ {
+  "year": 2004,
+  "levy": 12190159841,
+  "avg_rate": 40.0,
+  "homestead_rate": 32.71,
+  "nonhomestead_rate": 50.81,
+  "sev": 392622129163,
+  "tv": 304715983822,
+  "gap": 87906145341
+ },
+ {
+  "year": 2005,
+  "levy": 12827379130,
+  "avg_rate": 39.88,
+  "homestead_rate": 32.6,
+  "nonhomestead_rate": 51.38,
+  "sev": 415796891405,
+  "tv": 321653083189,
+  "gap": 94143808216
+ },
+ {
+  "year": 2006,
+  "levy": 13598087169,
+  "avg_rate": 39.96,
+  "homestead_rate": 32.66,
+  "nonhomestead_rate": 51.38,
+  "sev": 436421254945,
+  "tv": 340334442504,
+  "gap": 96086812441
+ },
+ {
+  "year": 2007,
+  "levy": 14254167244,
+  "avg_rate": 39.89,
+  "homestead_rate": 32.72,
+  "nonhomestead_rate": 51.49,
+  "sev": 453108709674,
+  "tv": 357297813947,
+  "gap": 95810895727
+ },
+ {
+  "year": 2008,
+  "levy": 14143523815,
+  "avg_rate": 38.94,
+  "homestead_rate": 33.14,
+  "nonhomestead_rate": 50.94,
+  "sev": 448139540701,
+  "tv": 363224971676,
+  "gap": 84914569025
+ },
+ {
+  "year": 2009,
+  "levy": 14109656243,
+  "avg_rate": 39.13,
+  "homestead_rate": 32.86,
+  "nonhomestead_rate": 51.09,
+  "sev": 423901291288,
+  "tv": 360567123684,
+  "gap": 63334167604
+ },
+ {
+  "year": 2010,
+  "levy": 13373802844,
+  "avg_rate": 39.7,
+  "homestead_rate": 33.13,
+  "nonhomestead_rate": 50.4,
+  "sev": 385050244105,
+  "tv": 336844978185,
+  "gap": 48205265920
+ },
+ {
+  "year": 2011,
+  "levy": 12945615255,
+  "avg_rate": 40.0,
+  "homestead_rate": 33.68,
+  "nonhomestead_rate": 50.97,
+  "sev": 362775003998,
+  "tv": 323615578293,
+  "gap": 39159425705
+ },
+ {
+  "year": 2012,
+  "levy": 12756792023,
+  "avg_rate": 40.4,
+  "homestead_rate": 33.47,
+  "nonhomestead_rate": 51.24,
+  "sev": 349306360220,
+  "tv": 315771624702,
+  "gap": 33534735518
+ },
+ {
+  "year": 2013,
+  "levy": 12817640021,
+  "avg_rate": 40.47,
+  "homestead_rate": 33.53,
+  "nonhomestead_rate": 51.47,
+  "sev": 350024690293,
+  "tv": 316725641035,
+  "gap": 33299049258
+ },
+ {
+  "year": 2014,
+  "levy": 13033563727,
+  "avg_rate": 40.79,
+  "homestead_rate": 33.92,
+  "nonhomestead_rate": 51.77,
+  "sev": 360592938004,
+  "tv": 319540491233,
+  "gap": 41052446771
+ },
+ {
+  "year": 2015,
+  "levy": 13475399279,
+  "avg_rate": 41.12,
+  "homestead_rate": 34.21,
+  "nonhomestead_rate": 52.33,
+  "sev": 382415289516,
+  "tv": 327674240055,
+  "gap": 54741049461
+ },
+ {
+  "year": 2016,
+  "levy": 13653142170,
+  "avg_rate": 41.7,
+  "homestead_rate": 34.55,
+  "nonhomestead_rate": 52.95,
+  "sev": 396717823846,
+  "tv": 327405282805,
+  "gap": 69312541041
+ },
+ {
+  "year": 2017,
+  "levy": 13983326284,
+  "avg_rate": 41.68,
+  "homestead_rate": 34.56,
+  "nonhomestead_rate": 52.96,
+  "sev": 415539572755,
+  "tv": 335481143174,
+  "gap": 80058429581
+ },
+ {
+  "year": 2018,
+  "levy": 14621532048,
+  "avg_rate": 41.98,
+  "homestead_rate": 34.96,
+  "nonhomestead_rate": 52.23,
+  "sev": 429570217983,
+  "tv": 348260934781,
+  "gap": 81309283202
+ },
+ {
+  "year": 2019,
+  "levy": 15293062311,
+  "avg_rate": 42.06,
+  "homestead_rate": 35.04,
+  "nonhomestead_rate": 53.38,
+  "sev": 458915383280,
+  "tv": 363559888235,
+  "gap": 95355495045
+ },
+ {
+  "year": 2020,
+  "levy": 16061149929,
+  "avg_rate": 42.44,
+  "homestead_rate": 35.44,
+  "nonhomestead_rate": 53.86,
+  "sev": 486867874410,
+  "tv": 378423377715,
+  "gap": 108444496695
+ },
+ {
+  "year": 2021,
+  "levy": 16524953736,
+  "avg_rate": 42.16,
+  "homestead_rate": 35.12,
+  "nonhomestead_rate": 53.81,
+  "sev": 510607972727,
+  "tv": 391916524915,
+  "gap": 118691447812
+ },
+ {
+  "year": 2022,
+  "levy": 17487242497,
+  "avg_rate": 42.06,
+  "homestead_rate": 34.99,
+  "nonhomestead_rate": 53.79,
+  "sev": 545761342310,
+  "tv": 415753014220,
+  "gap": 130008328090
+ },
+ {
+  "year": 2023,
+  "levy": 18771362956,
+  "avg_rate": 42.11,
+  "homestead_rate": 35.04,
+  "nonhomestead_rate": 53.9,
+  "sev": 604346666415,
+  "tv": 445756053922,
+  "gap": 158590612493
+ },
+ {
+  "year": 2024,
+  "levy": 20324680828,
+  "avg_rate": 42.21,
+  "homestead_rate": 35.18,
+  "nonhomestead_rate": 54.14,
+  "sev": 679173427952,
+  "tv": 481508518562,
+  "gap": 197664909390
+ }
+]

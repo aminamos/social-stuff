@@ -20,6 +20,7 @@ This repo is also where I show how I use AI to help civic tech and social causes
 * **[Field Notes: AI & Earth](https://field-notes.awdnowusaa.cc/)** ([source](field-notes/)) — evidence-first guide to AI energy, water, materials, and labor impacts, with an estimator converting everyday energy use into inference-token equivalents.
 * **[Decarb My State](https://decarb-my-state.a-8c6.workers.dev)** — state-by-state decarbonization progress for all 50 states + DC: emissions through 2022 (EPA), power generation through 2024 (EIA). Source: [aminamos/decarbonize-my-state](https://github.com/aminamos/decarbonize-my-state).
 * **[Roseville STR Feasibility Engine](https://roseville-str-feasibility.a-8c6.workers.dev)** ([source](roseville-str-feasibility/)) — models Roseville, MN City Code Ch. 907/908/909 for any address: seasonal STR frequency caps, 500-ft license spacing, occupancy ceilings, and real revenue limits vs. naive Airbnb pro-formas, backed by Ramsey County parcel data.
+* **[Michigan Prop A Uncap Counterfactual](https://prop-a-counterfactual.a-8c6.workers.dev)** ([source](prop-a-counterfactual/)) — taxes every MI parcel at full SEV instead of Proposal-A-capped taxable value: ≈ +$8.3B/yr vs the $11.4B income tax (~72% coverage), +5–12k annual sales turnover, −1.6–3.3% residential price effect. County-level gap explorer (D1) + archived Treasury source PDFs (R2); see [ANALYSIS.md](prop-a-counterfactual/ANALYSIS.md).
 
 ---
 
