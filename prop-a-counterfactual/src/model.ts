@@ -38,12 +38,30 @@ export interface ModelParams {
   turnoverLiftHigh: number;
   /** Share of extra tax that capitalizes into home prices (0-1). */
   capShare: number;
-  /** Real discount rate for PV of the tax stream. */
+  /** Real discount rate for PV of the tax stream. Clamped to [0.01, 0.5]. */
   discountRate: number;
-  /** Median sale price for context. */
-  medianPrice: number;
   incomeTaxNote?: string;
   baseSalesNote?: string;
+}
+
+/** Clamp raw params (query strings, D1 rows) to sane bounds so the engine
+ *  can never produce Infinity/NaN. Client mirror in src/ui.ts must match. */
+export function sanitizeParams(raw: ModelParams): ModelParams {
+  const clamp = (v: number, lo: number, hi: number) =>
+    Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo;
+  return {
+    ...raw,
+    uncapShare: clamp(raw.uncapShare, 0, 1),
+    millMult: clamp(raw.millMult, 0, 2),
+    residentialOnly: raw.residentialOnly ? 1 : 0,
+    incomeTaxRevenue: Math.max(0, Number.isFinite(raw.incomeTaxRevenue) ? raw.incomeTaxRevenue : 0),
+    baseAnnualSales: Math.max(0, Number.isFinite(raw.baseAnnualSales) ? raw.baseAnnualSales : 0),
+    longTenureShare: clamp(raw.longTenureShare, 0, 1),
+    turnoverLiftLow: clamp(raw.turnoverLiftLow, 0, 1),
+    turnoverLiftHigh: clamp(raw.turnoverLiftHigh, 0, 1),
+    capShare: clamp(raw.capShare, 0, 1),
+    discountRate: clamp(raw.discountRate, 0.01, 0.5),
+  };
 }
 
 export function defaultParams(): ModelParams {
@@ -58,7 +76,6 @@ export function defaultParams(): ModelParams {
     turnoverLiftHigh: 0.25,
     capShare: 0.25,
     discountRate: 0.05,
-    medianPrice: 265_000,
   };
 }
 
@@ -105,8 +122,9 @@ export interface ModelResult {
 export function runModel(
   counties: CountyRow[],
   classes: ClassRow[],
-  params: ModelParams,
+  rawParams: ModelParams,
 ): ModelResult {
+  const params = sanitizeParams(rawParams);
   const residentialGap = classes
     .filter((c) => c.year === 2024 && c.cls === "residential")
     .reduce((a, c) => a + c.gap, 0);

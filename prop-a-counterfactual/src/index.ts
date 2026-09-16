@@ -95,6 +95,7 @@ export default {
       }
       default:
         if (url.pathname.startsWith("/docs/")) {
+          if (!env.DOCS) return err("Archive unavailable", 503);
           const key = decodeURIComponent(url.pathname.slice("/docs/".length));
           if (!key || key.includes("..")) return err("Bad key", 400);
           const obj = await env.DOCS.get(key);

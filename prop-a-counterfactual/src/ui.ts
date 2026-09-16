@@ -112,8 +112,20 @@ const LEVERS=[
 ];
 let data=null, P0=null, R0=null;
 
-// mirror of src/model.ts runModel()
-function compute(P){
+// mirror of src/model.ts runModel() + sanitizeParams() — keep bounds in sync
+function san(P){
+  const clamp=(v,lo,hi)=>Number.isFinite(v)?Math.min(hi,Math.max(lo,v)):lo;
+  return {...P,
+    uncapShare:clamp(P.uncapShare,0,1), millMult:clamp(P.millMult,0,2),
+    residentialOnly:P.residentialOnly?1:0,
+    incomeTaxRevenue:Math.max(0,Number.isFinite(P.incomeTaxRevenue)?P.incomeTaxRevenue:0),
+    baseAnnualSales:Math.max(0,Number.isFinite(P.baseAnnualSales)?P.baseAnnualSales:0),
+    longTenureShare:clamp(P.longTenureShare,0,1),
+    turnoverLiftLow:clamp(P.turnoverLiftLow,0,1), turnoverLiftHigh:clamp(P.turnoverLiftHigh,0,1),
+    capShare:clamp(P.capShare,0,1), discountRate:clamp(P.discountRate,0.01,0.5)};
+}
+function compute(raw){
+  const P=san(raw);
   const resGap=data.classes.filter(c=>c.year===2024&&c.cls==='residential').reduce((a,c)=>a+c.gap,0);
   const resSev=data.classes.filter(c=>c.year===2024&&c.cls==='residential').reduce((a,c)=>a+c.sev,0);
   const cs=data.counties.map(c=>{
@@ -210,15 +222,29 @@ function buildLevers(){
     render();syncUrl();
   };
 }
+function fatal(msg){
+  document.querySelector('#c_rev').innerHTML='<div class="card"><div class="k">Error</div><div class="v">Unavailable</div><div class="s">'+msg+'</div></div>';
+}
 async function load(){
-  const r=await fetch('/api/model'); const d=await r.json();
-  data={counties:d.result.counties,classes:(await (await fetch('/api/classes')).json()).classes};
+  let d;
+  try{
+    const r=await fetch('/api/model');
+    if(!r.ok) throw new Error('model '+r.status);
+    d=await r.json();
+    if(!d.result) throw new Error('bad model payload');
+  }catch(e){ fatal('Could not load model data ('+(e.message||e)+').'); return; }
+  try{
+    const rc=await fetch('/api/classes');
+    if(!rc.ok) throw new Error('classes '+rc.status);
+    data={counties:d.result.counties,classes:(await rc.json()).classes};
+  }catch(e){ fatal('Could not load class data ('+(e.message||e)+').'); return; }
   const def=d.result.params;
-  P0={...def,millMult:1};
+  P0=san({...def});
   const q=new URLSearchParams(location.search);
   q.forEach((v,k)=>{const n=Number(v);if(Number.isFinite(n)&&k in P0)P0[k]=n;});
-  R0=compute({...def,millMult:1});
-  R0._def={...def,millMult:1};
+  P0=san(P0);
+  R0=compute({...def});
+  R0._def=san({...def});
   buildLevers(); render();
   // sorting
   document.querySelectorAll('#ctab th').forEach(th=>th.onclick=()=>{
@@ -234,10 +260,10 @@ fetch('/api/series').then(r=>r.json()).then(d=>{
     const w=(x.gap/max*100).toFixed(1);
     return '<div style="display:grid;grid-template-columns:44px 1fr 90px;gap:10px;align-items:center;font-size:12px;margin:3px 0"><div>'+x.year+'</div><div class="bar"><i style="width:'+w+'%"></i></div><div>'+B(x.gap)+'</div></div>';
   }).join('')+'<div class="note">Gap nearly tripled since 2021 ($118B → $198B) as market values outran the inflation cap.</div>';
-});
+}).catch(()=>{ document.querySelector('#series').innerHTML='<div class="note">Series data unavailable.</div>'; });
 fetch('/api/sources').then(r=>r.json()).then(d=>{
   document.querySelector('#method').innerHTML='<ul style="margin:0;padding-left:18px">'+d.documents.map(x=>'<li><a href="'+x.download+'">'+x.title+'</a> · <a href="'+x.source_url+'">original</a><br><span class="note">'+x.notes+'</span></li>').join('')+'</ul>'+
   '<details><summary>Definitions</summary>SEV = state equalized value ≈ 50% of market value. TV = taxable value, capped at lesser of inflation or 5%/yr until transfer (Proposal A, 1994), then reset to SEV. Uplift = gap × county average millage — i.e. the levy the same millages would raise on the uncapped base.</details>';
-});
+}).catch(()=>{ document.querySelector('#method').innerHTML='<div class="note">Source registry unavailable.</div>'; });
 load();
 </script></body></html>`;

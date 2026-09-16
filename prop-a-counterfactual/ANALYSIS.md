@@ -31,19 +31,19 @@ Macomb ($14.6B), Kent ($13.9B), Washtenaw ($7.4B). By class: residential holds
 $154.0B of the gap (31% of residential SEV); agriculture is deepest in
 percentage terms (54.7% of ag SEV escapes); commercial 24.2%; industrial 20.8%;
 personal property is nearly uncapped already. Residential-only uncapping raises
-≈ **+$6.2B**.
+≈ **+$6.5B**.
 
 Treasury's own estimate for 2022 was $5.43B on a $130B gap; the gap has since
 grown ~50% to $197.7B (and $224.6B in 2025 assessments), which is why the
 figure is larger now.
 
-## Answer 2 — Replace income + capital gains tax? **Not quite — ≈ 70%**
+## Answer 2 — Replace income + capital gains tax? **Not quite — ≈ 72%**
 
 - Michigan net individual income tax: **~$11.4B** (CY2024, Census STC) to
   ~$12.1B (FY2023-24, SFA). Michigan levies **no separate capital-gains tax** —
   gains are ordinary income at the flat 4.25% IIT rate, so "income + capital
   gains" = the whole IIT line.
-- Uncap uplift **$8.3B ÷ $11.4B ≈ 72%**. Shortfall ≈ **$3.1B**.
+- Uncap uplift **$8.2B ÷ $11.4B ≈ 72%**. Shortfall ≈ **$3.2B**.
 - Full replacement through the property base would need ≈ **46.7 avg mills on
   SEV** vs 42.21 today — i.e. uncap *and* ~11% higher millages. Alternatives:
   uncap + keep a ~1.2% flat income tax, or pair uncapping with a broader sales
@@ -54,7 +54,7 @@ shifts from income-earners onto owners of long-held (mostly residential)
 property — a transfer from renters/workers toward incumbent owners' tax bills,
 offset by their share of the income-tax cut.
 
-## Answer 3 — Turnover from older → younger owners: **≈ +4.8k–12k sales/yr**
+## Answer 3 — Turnover from older → younger owners: **≈ +4.8k–11.9k sales/yr**
 
 Mechanism: the capped TV is a **lock-in subsidy** — selling forfeits it, so
 long-tenure (disproportionately older) owners stay put. Remove the cap and the
@@ -75,7 +75,7 @@ baseline)**, front-loaded: once the subsidized stock turns over, the lock-in is
 gone permanently and turnover settles above today's level. Effect concentrates
 in the oldest-owner neighborhoods — exactly where TV/SEV ratios are lowest.
 
-## Answer 4 — Prices for young buyers: **−1.5% to −3.1% on the residential stock, with a caveat**
+## Answer 4 — Prices for young buyers: **−1.6% to −3.3% on the residential stock, with a caveat**
 
 The honest subtlety the premise misses: **a buyer already pays tax on full
 SEV** — the seller's capped TV dies at closing. So the cap's subsidy is a
@@ -83,11 +83,12 @@ wealth transfer to incumbents, not a wedge embedded in purchase prices. Young
 buyers' price relief comes through two channels, not direct capitalization:
 
 1. **Supply**: the turnover above adds inventory in older-owner neighborhoods.
-2. **Carrying cost**: ~$6.2B/yr more residential tax raises the user cost of
+2. **Carrying cost**: ~$6.5B/yr more residential tax raises the user cost of
    holding, partially capitalizing into lower values.
 
-Modeled: PV of residential uplift at a 5% discount rate, 25–100%
-capitalization share → **−1.5% to −3.1%** on ≈ $994B residential market value.
+Modeled: PV of residential uplift at a 5% discount rate, 25%
+capitalization share (low bound halved) → **−1.6% to −3.3%** on ≈ $994B
+residential market value.
 Offsetting it: the income-tax cut raises buyer purchasing power, pushing prices
 back up — the *net* is ambiguous and county-specific. Michigan's version is
 weaker than the Prop 13 literature (Sommer & Sullivan, *AEJ: Macro* 2018)

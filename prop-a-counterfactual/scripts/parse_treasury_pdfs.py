@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 """Extract Michigan property-tax tables from Treasury PDFs into data/*.json.
 
-Inputs (download to this directory first — see reference/SOURCES.md):
+Requires: pip install -r requirements.txt (pypdf).
+
+Inputs (download to ../reference/ first — URLs in ../reference/SOURCES.md):
   mi-2024-ad-valorem-levy-report.pdf   -> county TV, levies, avg rates; statewide series
   mi-stc-annual-report-2024.pdf        -> county SEV by class (Appendix 3)
 
 Outputs: data/county_2024.json, data/state_series.json
 Verified: county SEV sums reproduce the official statewide total exactly
 ($679,173,427,952), TV reproduces the levy-report county sum ($481,508,518,562).
+
+NOTE: data/class_values.json is NOT generated here. It was transcribed from
+STC 2024 Annual Report Appendix 4 (class-level SEV/TV) plus the STC 2025 Annual
+Report for the 2025 rows. Cross-checks: 2024 class SEV sums to the county SEV
+total exactly ($679,173,427,952); county residential-SEV sums to the class
+residential SEV exactly ($497,228,918,165). Class TV sums to $481,424,104,647,
+~$84M (0.02%) under the levy-report county TV sum — different table vintage.
 """
 import json
 import re
@@ -82,9 +91,19 @@ def parse_series(pdf: Path) -> list:
     return out
 
 
+def pdf_path(name: str) -> Path:
+    ref = HERE.parent / "reference" / name
+    if ref.exists():
+        return ref
+    local = HERE / name
+    if local.exists():
+        return local
+    raise SystemExit(f"missing {name}: download it to reference/ first (see ../reference/SOURCES.md)")
+
+
 def main() -> None:
-    levy_pdf = HERE / "mi-2024-ad-valorem-levy-report.pdf"
-    stc_pdf = HERE / "mi-stc-annual-report-2024.pdf"
+    levy_pdf = pdf_path("mi-2024-ad-valorem-levy-report.pdf")
+    stc_pdf = pdf_path("mi-stc-annual-report-2024.pdf")
     tv, sev = parse_county_tv(levy_pdf), parse_county_sev(stc_pdf)
     counties = []
     for name in sorted(sev):

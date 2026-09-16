@@ -4,8 +4,8 @@ Serverless Cloudflare Worker that models the counterfactual: **what if every
 Michigan parcel were taxed on state equalized value instead of
 Proposal-A-capped taxable value?** Answers three questions from the
 [analysis](ANALYSIS.md): uncap revenue (~+$8.3B), whether it could replace the
-income tax (~72% — no), housing turnover (+5–12k sales/yr), and the honest price
-effect (−1.5–3.1% via supply/carrying-cost, not direct capitalization).
+income tax (~72% — no), housing turnover (+4.8–11.9k sales/yr), and the honest price
+effect (−1.6–3.3% via supply/carrying-cost, not direct capitalization).
 
 ## Stack
 
@@ -63,7 +63,10 @@ done
 npm run deploy
 ```
 
-`scripts/parse_treasury_pdfs.py` regenerates `data/*.json` from the source PDFs.
+`scripts/parse_treasury_pdfs.py` regenerates `data/county_2024.json` and
+`data/state_series.json` from the source PDFs (`pip install -r
+scripts/requirements.txt` first). `data/class_values.json` is transcribed from
+STC Appendix 4 / the 2025 report — see the script docstring for cross-checks.
 
 ## Caveats
 
