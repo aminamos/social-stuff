@@ -1,0 +1,832 @@
+[
+ {
+  "county": "Alcona",
+  "tv": 947718319,
+  "sev": 1330988600,
+  "sev_res": 1191305700,
+  "gap": 383270281,
+  "total_tax": 28803143.39,
+  "avg_rate": 30.39,
+  "uncap_uplift": 11647584.0
+ },
+ {
+  "county": "Alger",
+  "tv": 498297624,
+  "sev": 726305744,
+  "sev_res": 600252392,
+  "gap": 228008120,
+  "total_tax": 19175481.83,
+  "avg_rate": 38.48,
+  "uncap_uplift": 8773752.0
+ },
+ {
+  "county": "Allegan",
+  "tv": 6942075811,
+  "sev": 10744141340,
+  "sev_res": 7999807488,
+  "gap": 3802065529,
+  "total_tax": 277521472.94,
+  "avg_rate": 39.98,
+  "uncap_uplift": 152006580.0
+ },
+ {
+  "county": "Alpena",
+  "tv": 1186627704,
+  "sev": 1658518724,
+  "sev_res": 1258176100,
+  "gap": 471891020,
+  "total_tax": 41016773.64,
+  "avg_rate": 34.57,
+  "uncap_uplift": 16313273.0
+ },
+ {
+  "county": "Antrim",
+  "tv": 2619852984,
+  "sev": 4459169833,
+  "sev_res": 4069318400,
+  "gap": 1839316849,
+  "total_tax": 86459272.63,
+  "avg_rate": 33.0,
+  "uncap_uplift": 60697456.0
+ },
+ {
+  "county": "Arenac",
+  "tv": 742298656,
+  "sev": 1093671900,
+  "sev_res": 822636800,
+  "gap": 351373244,
+  "total_tax": 29198663.5,
+  "avg_rate": 39.34,
+  "uncap_uplift": 13823023.0
+ },
+ {
+  "county": "Baraga",
+  "tv": 367189267,
+  "sev": 507548579,
+  "sev_res": 358852522,
+  "gap": 140359312,
+  "total_tax": 13816985.14,
+  "avg_rate": 37.63,
+  "uncap_uplift": 5281721.0
+ },
+ {
+  "county": "Barry",
+  "tv": 3068121702,
+  "sev": 4762558177,
+  "sev_res": 3862344600,
+  "gap": 1694436475,
+  "total_tax": 106884579.43,
+  "avg_rate": 34.84,
+  "uncap_uplift": 59034167.0
+ },
+ {
+  "county": "Bay",
+  "tv": 3559698950,
+  "sev": 4882960853,
+  "sev_res": 3232477298,
+  "gap": 1323261903,
+  "total_tax": 153510493.13,
+  "avg_rate": 43.12,
+  "uncap_uplift": 57059053.0
+ },
+ {
+  "county": "Benzie",
+  "tv": 1796697216,
+  "sev": 3050217674,
+  "sev_res": 2795264374,
+  "gap": 1253520458,
+  "total_tax": 61931251.05,
+  "avg_rate": 34.47,
+  "uncap_uplift": 43208850.0
+ },
+ {
+  "county": "Berrien",
+  "tv": 10299919167,
+  "sev": 14618469626,
+  "sev_res": 10716860718,
+  "gap": 4318550459,
+  "total_tax": 353458753.44,
+  "avg_rate": 34.32,
+  "uncap_uplift": 148212652.0
+ },
+ {
+  "county": "Branch",
+  "tv": 2002635327,
+  "sev": 3153055746,
+  "sev_res": 1838020493,
+  "gap": 1150420419,
+  "total_tax": 74144613.59,
+  "avg_rate": 37.02,
+  "uncap_uplift": 42588564.0
+ },
+ {
+  "county": "Calhoun",
+  "tv": 4905201345,
+  "sev": 6617118217,
+  "sev_res": 4214139073,
+  "gap": 1711916872,
+  "total_tax": 234333796.67,
+  "avg_rate": 47.77,
+  "uncap_uplift": 81778269.0
+ },
+ {
+  "county": "Cass",
+  "tv": 3000938102,
+  "sev": 4621088055,
+  "sev_res": 3514678510,
+  "gap": 1620149953,
+  "total_tax": 100282326.91,
+  "avg_rate": 33.42,
+  "uncap_uplift": 54145411.0
+ },
+ {
+  "county": "Charlevoix",
+  "tv": 2968453761,
+  "sev": 4935018669,
+  "sev_res": 4371315819,
+  "gap": 1966564908,
+  "total_tax": 114383233.5,
+  "avg_rate": 38.53,
+  "uncap_uplift": 75771746.0
+ },
+ {
+  "county": "Cheboygan",
+  "tv": 1907037420,
+  "sev": 2995482302,
+  "sev_res": 2626605261,
+  "gap": 1088444882,
+  "total_tax": 62703121.48,
+  "avg_rate": 32.88,
+  "uncap_uplift": 35788068.0
+ },
+ {
+  "county": "Chippewa",
+  "tv": 1435180871,
+  "sev": 1929385900,
+  "sev_res": 1514133917,
+  "gap": 494205029,
+  "total_tax": 56506168.44,
+  "avg_rate": 39.37,
+  "uncap_uplift": 19456852.0
+ },
+ {
+  "county": "Clare",
+  "tv": 1476346341,
+  "sev": 2111542390,
+  "sev_res": 1620394242,
+  "gap": 635196049,
+  "total_tax": 52371178.41,
+  "avg_rate": 35.47,
+  "uncap_uplift": 22530404.0
+ },
+ {
+  "county": "Clinton",
+  "tv": 3827271278,
+  "sev": 5371944619,
+  "sev_res": 3606505326,
+  "gap": 1544673341,
+  "total_tax": 151735547.83,
+  "avg_rate": 39.65,
+  "uncap_uplift": 61246298.0
+ },
+ {
+  "county": "Crawford",
+  "tv": 826099740,
+  "sev": 1171556800,
+  "sev_res": 920403900,
+  "gap": 345457060,
+  "total_tax": 28558890.52,
+  "avg_rate": 34.57,
+  "uncap_uplift": 11942451.0
+ },
+ {
+  "county": "Delta",
+  "tv": 1500276156,
+  "sev": 1988738697,
+  "sev_res": 1528019580,
+  "gap": 488462541,
+  "total_tax": 56098538.88,
+  "avg_rate": 37.39,
+  "uncap_uplift": 18263614.0
+ },
+ {
+  "county": "Dickinson",
+  "tv": 1110235652,
+  "sev": 1447271087,
+  "sev_res": 1045912380,
+  "gap": 337035435,
+  "total_tax": 44685331.41,
+  "avg_rate": 40.25,
+  "uncap_uplift": 13565676.0
+ },
+ {
+  "county": "Eaton",
+  "tv": 4821905506,
+  "sev": 6351590503,
+  "sev_res": 4132588870,
+  "gap": 1529684997,
+  "total_tax": 212810280.67,
+  "avg_rate": 44.13,
+  "uncap_uplift": 67504999.0
+ },
+ {
+  "county": "Emmet",
+  "tv": 4111135824,
+  "sev": 6597648270,
+  "sev_res": 5771050138,
+  "gap": 2486512446,
+  "total_tax": 147939261.51,
+  "avg_rate": 35.99,
+  "uncap_uplift": 89489583.0
+ },
+ {
+  "county": "Genesee",
+  "tv": 12888215651,
+  "sev": 17848969842,
+  "sev_res": 13444606640,
+  "gap": 4960754191,
+  "total_tax": 576584275.16,
+  "avg_rate": 44.74,
+  "uncap_uplift": 221944143.0
+ },
+ {
+  "county": "Gladwin",
+  "tv": 1320502059,
+  "sev": 1855002489,
+  "sev_res": 1531755339,
+  "gap": 534500430,
+  "total_tax": 47900114.93,
+  "avg_rate": 36.27,
+  "uncap_uplift": 19386331.0
+ },
+ {
+  "county": "Gogebic",
+  "tv": 697992220,
+  "sev": 970549059,
+  "sev_res": 743942673,
+  "gap": 272556839,
+  "total_tax": 31200538.09,
+  "avg_rate": 44.7,
+  "uncap_uplift": 12183291.0
+ },
+ {
+  "county": "Grand Traverse",
+  "tv": 7667775947,
+  "sev": 11705229491,
+  "sev_res": 9118918080,
+  "gap": 4037453544,
+  "total_tax": 264121727.77,
+  "avg_rate": 34.45,
+  "uncap_uplift": 139090275.0
+ },
+ {
+  "county": "Gratiot",
+  "tv": 1991558998,
+  "sev": 3054903920,
+  "sev_res": 1016250784,
+  "gap": 1063344922,
+  "total_tax": 67261492.86,
+  "avg_rate": 33.77,
+  "uncap_uplift": 35909158.0
+ },
+ {
+  "county": "Hillsdale",
+  "tv": 1882222667,
+  "sev": 2967848803,
+  "sev_res": 1841097370,
+  "gap": 1085626136,
+  "total_tax": 61189910.96,
+  "avg_rate": 32.51,
+  "uncap_uplift": 35293706.0
+ },
+ {
+  "county": "Houghton",
+  "tv": 1251088366,
+  "sev": 1823610232,
+  "sev_res": 1434925040,
+  "gap": 572521866,
+  "total_tax": 53006773.4,
+  "avg_rate": 42.37,
+  "uncap_uplift": 24257751.0
+ },
+ {
+  "county": "Huron",
+  "tv": 2845291949,
+  "sev": 4832334911,
+  "sev_res": 1821438996,
+  "gap": 1987042962,
+  "total_tax": 94271336.68,
+  "avg_rate": 33.13,
+  "uncap_uplift": 65830733.0
+ },
+ {
+  "county": "Ingham",
+  "tv": 10586393531,
+  "sev": 13579695680,
+  "sev_res": 8820949547,
+  "gap": 2993302149,
+  "total_tax": 645883022.64,
+  "avg_rate": 61.01,
+  "uncap_uplift": 182621364.0
+ },
+ {
+  "county": "Ionia",
+  "tv": 2232322527,
+  "sev": 3496896992,
+  "sev_res": 2290904100,
+  "gap": 1264574465,
+  "total_tax": 77976420.94,
+  "avg_rate": 34.93,
+  "uncap_uplift": 44171586.0
+ },
+ {
+  "county": "Iosco",
+  "tv": 1488651589,
+  "sev": 2073641739,
+  "sev_res": 1697996550,
+  "gap": 584990150,
+  "total_tax": 54053699.96,
+  "avg_rate": 36.31,
+  "uncap_uplift": 21240992.0
+ },
+ {
+  "county": "Iron",
+  "tv": 691188342,
+  "sev": 1017189645,
+  "sev_res": 753462185,
+  "gap": 326001303,
+  "total_tax": 28036773.04,
+  "avg_rate": 40.56,
+  "uncap_uplift": 13222613.0
+ },
+ {
+  "county": "Isabella",
+  "tv": 2578046055,
+  "sev": 3505214598,
+  "sev_res": 1848837005,
+  "gap": 927168543,
+  "total_tax": 102572736.49,
+  "avg_rate": 39.79,
+  "uncap_uplift": 36892036.0
+ },
+ {
+  "county": "Jackson",
+  "tv": 6086744341,
+  "sev": 8509436673,
+  "sev_res": 6247855975,
+  "gap": 2422692332,
+  "total_tax": 248964291.44,
+  "avg_rate": 40.9,
+  "uncap_uplift": 99088116.0
+ },
+ {
+  "county": "Kalamazoo",
+  "tv": 11564846170,
+  "sev": 15426616689,
+  "sev_res": 11017868872,
+  "gap": 3861770519,
+  "total_tax": 544769695.55,
+  "avg_rate": 47.11,
+  "uncap_uplift": 181928009.0
+ },
+ {
+  "county": "Kalkaska",
+  "tv": 1064823641,
+  "sev": 1697160006,
+  "sev_res": 1411228554,
+  "gap": 632336365,
+  "total_tax": 38928924.0,
+  "avg_rate": 36.56,
+  "uncap_uplift": 23118218.0
+ },
+ {
+  "county": "Kent",
+  "tv": 33663337200,
+  "sev": 47555098428,
+  "sev_res": 33344334095,
+  "gap": 13891761228,
+  "total_tax": 1355344636.49,
+  "avg_rate": 40.26,
+  "uncap_uplift": 559282307.0
+ },
+ {
+  "county": "Keweenaw",
+  "tv": 205391359,
+  "sev": 319583660,
+  "sev_res": 291615994,
+  "gap": 114192301,
+  "total_tax": 7414150.43,
+  "avg_rate": 36.1,
+  "uncap_uplift": 4122342.0
+ },
+ {
+  "county": "Lake",
+  "tv": 783410787,
+  "sev": 1247723085,
+  "sev_res": 1101923535,
+  "gap": 464312298,
+  "total_tax": 31437826.99,
+  "avg_rate": 40.13,
+  "uncap_uplift": 18632853.0
+ },
+ {
+  "county": "Lapeer",
+  "tv": 4112491024,
+  "sev": 6110667907,
+  "sev_res": 4711622436,
+  "gap": 1998176883,
+  "total_tax": 121350558.99,
+  "avg_rate": 29.51,
+  "uncap_uplift": 58966200.0
+ },
+ {
+  "county": "Leelanau",
+  "tv": 3945944457,
+  "sev": 6789447360,
+  "sev_res": 6160790680,
+  "gap": 2843502903,
+  "total_tax": 107600405.83,
+  "avg_rate": 27.27,
+  "uncap_uplift": 77542324.0
+ },
+ {
+  "county": "Lenawee",
+  "tv": 4486947547,
+  "sev": 6383296192,
+  "sev_res": 4215576158,
+  "gap": 1896348645,
+  "total_tax": 164757518.6,
+  "avg_rate": 36.72,
+  "uncap_uplift": 69633922.0
+ },
+ {
+  "county": "Livingston",
+  "tv": 12678262760,
+  "sev": 17318552123,
+  "sev_res": 14077886308,
+  "gap": 4640289363,
+  "total_tax": 396396437.74,
+  "avg_rate": 31.27,
+  "uncap_uplift": 145101848.0
+ },
+ {
+  "county": "Luce",
+  "tv": 229450928,
+  "sev": 330966795,
+  "sev_res": 286564900,
+  "gap": 101515867,
+  "total_tax": 8688365.64,
+  "avg_rate": 37.87,
+  "uncap_uplift": 3844406.0
+ },
+ {
+  "county": "Mackinac",
+  "tv": 1340164969,
+  "sev": 1793906376,
+  "sev_res": 1257956022,
+  "gap": 453741407,
+  "total_tax": 44746287.57,
+  "avg_rate": 33.39,
+  "uncap_uplift": 15150426.0
+ },
+ {
+  "county": "Macomb",
+  "tv": 38008978600,
+  "sev": 52614895296,
+  "sev_res": 40458580358,
+  "gap": 14605916696,
+  "total_tax": 1641750829.31,
+  "avg_rate": 43.19,
+  "uncap_uplift": 630829542.0
+ },
+ {
+  "county": "Manistee",
+  "tv": 1507177979,
+  "sev": 2294032650,
+  "sev_res": 1950692497,
+  "gap": 786854671,
+  "total_tax": 61097126.01,
+  "avg_rate": 40.54,
+  "uncap_uplift": 31899088.0
+ },
+ {
+  "county": "Marquette",
+  "tv": 3433695259,
+  "sev": 4745625374,
+  "sev_res": 3380346403,
+  "gap": 1311930115,
+  "total_tax": 136205685.1,
+  "avg_rate": 39.67,
+  "uncap_uplift": 52044268.0
+ },
+ {
+  "county": "Mason",
+  "tv": 2483326602,
+  "sev": 3371498740,
+  "sev_res": 2165859740,
+  "gap": 888172138,
+  "total_tax": 95637698.91,
+  "avg_rate": 38.51,
+  "uncap_uplift": 34203509.0
+ },
+ {
+  "county": "Mecosta",
+  "tv": 1815220700,
+  "sev": 2722766483,
+  "sev_res": 2037102783,
+  "gap": 907545783,
+  "total_tax": 61984954.44,
+  "avg_rate": 34.15,
+  "uncap_uplift": 30992688.0
+ },
+ {
+  "county": "Menominee",
+  "tv": 1011176031,
+  "sev": 1458554691,
+  "sev_res": 1071058650,
+  "gap": 447378660,
+  "total_tax": 37135539.68,
+  "avg_rate": 36.73,
+  "uncap_uplift": 16432218.0
+ },
+ {
+  "county": "Midland",
+  "tv": 4227185372,
+  "sev": 5349193962,
+  "sev_res": 3540579726,
+  "gap": 1122008590,
+  "total_tax": 174368562.07,
+  "avg_rate": 41.25,
+  "uncap_uplift": 46282854.0
+ },
+ {
+  "county": "Missaukee",
+  "tv": 850026332,
+  "sev": 1306076250,
+  "sev_res": 920024500,
+  "gap": 456049918,
+  "total_tax": 29555546.22,
+  "avg_rate": 34.77,
+  "uncap_uplift": 15856856.0
+ },
+ {
+  "county": "Monroe",
+  "tv": 7635041940,
+  "sev": 9823891990,
+  "sev_res": 6608758098,
+  "gap": 2188850050,
+  "total_tax": 265751303.58,
+  "avg_rate": 34.81,
+  "uncap_uplift": 76193870.0
+ },
+ {
+  "county": "Montcalm",
+  "tv": 2582855777,
+  "sev": 3917658900,
+  "sev_res": 2760310000,
+  "gap": 1334803123,
+  "total_tax": 89406536.22,
+  "avg_rate": 34.62,
+  "uncap_uplift": 46210884.0
+ },
+ {
+  "county": "Montmorency",
+  "tv": 620838439,
+  "sev": 960035900,
+  "sev_res": 844137200,
+  "gap": 339197461,
+  "total_tax": 20452513.2,
+  "avg_rate": 32.94,
+  "uncap_uplift": 11173164.0
+ },
+ {
+  "county": "Muskegon",
+  "tv": 6277919793,
+  "sev": 9160011825,
+  "sev_res": 7414542025,
+  "gap": 2882092032,
+  "total_tax": 268716090.62,
+  "avg_rate": 42.8,
+  "uncap_uplift": 123353539.0
+ },
+ {
+  "county": "Newaygo",
+  "tv": 2119469934,
+  "sev": 3261936155,
+  "sev_res": 2589214394,
+  "gap": 1142466221,
+  "total_tax": 79872849.15,
+  "avg_rate": 37.69,
+  "uncap_uplift": 43059552.0
+ },
+ {
+  "county": "Oakland",
+  "tv": 80356053875,
+  "sev": 106649985614,
+  "sev_res": 82339613068,
+  "gap": 26293931739,
+  "total_tax": 3374120867.7,
+  "avg_rate": 41.99,
+  "uncap_uplift": 1104082194.0
+ },
+ {
+  "county": "Oceana",
+  "tv": 1612157463,
+  "sev": 2588942132,
+  "sev_res": 2078797659,
+  "gap": 976784669,
+  "total_tax": 64431161.45,
+  "avg_rate": 39.97,
+  "uncap_uplift": 39042083.0
+ },
+ {
+  "county": "Ogemaw",
+  "tv": 1119839842,
+  "sev": 1631554922,
+  "sev_res": 1285697307,
+  "gap": 511715080,
+  "total_tax": 39361929.79,
+  "avg_rate": 35.15,
+  "uncap_uplift": 17986785.0
+ },
+ {
+  "county": "Ontonagon",
+  "tv": 343628511,
+  "sev": 498425923,
+  "sev_res": 368359136,
+  "gap": 154797412,
+  "total_tax": 15429991.21,
+  "avg_rate": 44.9,
+  "uncap_uplift": 6950404.0
+ },
+ {
+  "county": "Osceola",
+  "tv": 979400840,
+  "sev": 1495689699,
+  "sev_res": 1092021264,
+  "gap": 516288859,
+  "total_tax": 37626224.96,
+  "avg_rate": 38.42,
+  "uncap_uplift": 19835818.0
+ },
+ {
+  "county": "Oscoda",
+  "tv": 509552967,
+  "sev": 739332928,
+  "sev_res": 610553500,
+  "gap": 229779961,
+  "total_tax": 17221584.05,
+  "avg_rate": 33.8,
+  "uncap_uplift": 7766563.0
+ },
+ {
+  "county": "Otsego",
+  "tv": 1679296510,
+  "sev": 2388868835,
+  "sev_res": 1690002838,
+  "gap": 709572325,
+  "total_tax": 53192335.74,
+  "avg_rate": 31.68,
+  "uncap_uplift": 22479251.0
+ },
+ {
+  "county": "Ottawa",
+  "tv": 16569764018,
+  "sev": 23924059045,
+  "sev_res": 17998784695,
+  "gap": 7354295027,
+  "total_tax": 596151438.81,
+  "avg_rate": 35.98,
+  "uncap_uplift": 264607535.0
+ },
+ {
+  "county": "Presque Isle",
+  "tv": 892565555,
+  "sev": 1270705981,
+  "sev_res": 1045993431,
+  "gap": 378140426,
+  "total_tax": 27964531.05,
+  "avg_rate": 31.33,
+  "uncap_uplift": 11847140.0
+ },
+ {
+  "county": "Roscommon",
+  "tv": 1791879024,
+  "sev": 2797171600,
+  "sev_res": 2575500600,
+  "gap": 1005292576,
+  "total_tax": 62315047.75,
+  "avg_rate": 34.78,
+  "uncap_uplift": 34964076.0
+ },
+ {
+  "county": "Saginaw",
+  "tv": 6602674758,
+  "sev": 8723762504,
+  "sev_res": 5473431602,
+  "gap": 2121087746,
+  "total_tax": 283080456.91,
+  "avg_rate": 42.87,
+  "uncap_uplift": 90931032.0
+ },
+ {
+  "county": "Saint Clair",
+  "tv": 7959049568,
+  "sev": 11029732207,
+  "sev_res": 7679422046,
+  "gap": 3070682639,
+  "total_tax": 285531234.28,
+  "avg_rate": 35.88,
+  "uncap_uplift": 110176093.0
+ },
+ {
+  "county": "Saint Joseph",
+  "tv": 2658956909,
+  "sev": 4252980363,
+  "sev_res": 2638304405,
+  "gap": 1594023454,
+  "total_tax": 103549529.84,
+  "avg_rate": 38.94,
+  "uncap_uplift": 62071273.0
+ },
+ {
+  "county": "Sanilac",
+  "tv": 1993047325,
+  "sev": 3673340569,
+  "sev_res": 1798057057,
+  "gap": 1680293244,
+  "total_tax": 63435089.54,
+  "avg_rate": 31.83,
+  "uncap_uplift": 53483734.0
+ },
+ {
+  "county": "Schoolcraft",
+  "tv": 460372892,
+  "sev": 642864056,
+  "sev_res": 525590750,
+  "gap": 182491164,
+  "total_tax": 16632763.58,
+  "avg_rate": 36.13,
+  "uncap_uplift": 6593406.0
+ },
+ {
+  "county": "Shiawassee",
+  "tv": 2564068659,
+  "sev": 3651038640,
+  "sev_res": 2324395566,
+  "gap": 1086969981,
+  "total_tax": 92834949.14,
+  "avg_rate": 36.21,
+  "uncap_uplift": 39359183.0
+ },
+ {
+  "county": "Tuscola",
+  "tv": 2295591905,
+  "sev": 3739115272,
+  "sev_res": 1895095999,
+  "gap": 1443523367,
+  "total_tax": 74051869.2,
+  "avg_rate": 32.26,
+  "uncap_uplift": 46568064.0
+ },
+ {
+  "county": "Van Buren",
+  "tv": 4270909358,
+  "sev": 6250368907,
+  "sev_res": 4630615441,
+  "gap": 1979459549,
+  "total_tax": 180850928.6,
+  "avg_rate": 42.34,
+  "uncap_uplift": 83810317.0
+ },
+ {
+  "county": "Washtenaw",
+  "tv": 23168061361,
+  "sev": 30617226289,
+  "sev_res": 21747497694,
+  "gap": 7449164928,
+  "total_tax": 1169057549.94,
+  "avg_rate": 50.46,
+  "uncap_uplift": 375884862.0
+ },
+ {
+  "county": "Wayne",
+  "tv": 55562674558,
+  "sev": 80249486950,
+  "sev_res": 56013386894,
+  "gap": 24686812392,
+  "total_tax": 3068048640.63,
+  "avg_rate": 55.22,
+  "uncap_uplift": 1363205780.0
+ },
+ {
+  "county": "Wexford",
+  "tv": 1341780099,
+  "sev": 2033062300,
+  "sev_res": 1575219100,
+  "gap": 691282201,
+  "total_tax": 55070386.71,
+  "avg_rate": 41.04,
+  "uncap_uplift": 28370222.0
+ }
+]
