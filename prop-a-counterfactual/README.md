@@ -40,9 +40,27 @@ npm run dev       # wrangler dev (local D1 via migrations)
 ### Data layer
 
 ```bash
-npx wrangler d1 create prop-a-db            # then paste database_id into wrangler.jsonc
+npx wrangler login                          # or CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID
+npx wrangler d1 create prop-a-db            # paste database_id into wrangler.jsonc
 npx wrangler d1 migrations apply prop-a-db --remote
-# R2: create prop-a-docs bucket, upload the 3 PDFs listed in reference/SOURCES.md
+npx wrangler r2 bucket create prop-a-docs
+```
+
+Source PDFs are gitignored — fetch them into `reference/` first (URLs also in
+`reference/SOURCES.md`):
+
+```bash
+UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+curl -sL -A "$UA" -o reference/mi-2024-ad-valorem-levy-report.pdf \
+  "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Tax-Levy-Reports/2024-Ad-Valorem-Tax-Levy-Report.pdf"
+curl -sL -A "$UA" -o reference/mi-stc-annual-report-2024.pdf \
+  "https://www.michigan.gov/mdhhs/-/media/Project/Websites/treasury/STC/2024/2024-Annual-Report.pdf"
+curl -sL -A "$UA" -o reference/mi-property-tax-report-2022.pdf \
+  "https://www.michigan.gov/treasury/-/media/Project/Websites/treasury/ORTA/Economic-Reports-Notices/FY-2025/PropTaxReport_2022.pdf"
+for f in reference/*.pdf; do
+  npx wrangler r2 object put "prop-a-docs/$(basename "$f")" --file "$f" --content-type application/pdf --remote
+done
+npm run deploy
 ```
 
 `scripts/parse_treasury_pdfs.py` regenerates `data/*.json` from the source PDFs.
