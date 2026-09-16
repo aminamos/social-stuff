@@ -5,7 +5,7 @@
   "description": "Deterministic federal individual income tax engine (TY2025, Form 1040 + schedules) on Cloudflare Workers",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --remote",
     "deploy": "wrangler deploy",
     "test": "tsx test/engine.test.ts",
     "check": "tsc --noEmit",

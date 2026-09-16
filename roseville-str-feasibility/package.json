@@ -4,7 +4,7 @@
   "private": true,
   "description": "Roseville, MN short-term rental & duplex regulatory feasibility engine (City Code Ch. 907/908/909) on Cloudflare Workers",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --remote",
     "deploy": "wrangler deploy",
     "test": "tsx test/engine.test.ts",
     "check": "tsc --noEmit",

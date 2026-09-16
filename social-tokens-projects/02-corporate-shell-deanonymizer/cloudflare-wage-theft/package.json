@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --remote",
     "test": "deno test src/ui.test.ts && deno test --no-check --sloppy-imports src/docs-route.test.ts",
     "docs:upload": "bash scripts/publish-docs.sh",
     "docs:generate": ".venv/bin/python scripts/generate-case-pdfs.py",

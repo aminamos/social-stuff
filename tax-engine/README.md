@@ -14,7 +14,7 @@ pure library (`compute(input)`) and a CLI.
 npm install
 npm test          # known-answer tests (tsx, no framework)
 npm run check     # tsc --noEmit
-npx wrangler dev  # worker on :8787
+npm run dev       # wrangler dev --remote: worker on :8787, D1/R2 hit production
 echo '{"filingStatus":"single","taxpayer":{"ageAtEndOfYear":35},"wages":60000,"federalWithholding":7000}' \
   | curl -s -X POST localhost:8787/compute -H 'content-type: application/json' -d @-
 npx tsx src/cli.ts some-return.json   # CLI, prints form lines

@@ -35,6 +35,9 @@ CACHE = ROOT / "data" / "cache" / "city-code"
 DOCS_SQL = ROOT / "data" / "city_code_docs.sql"
 BUCKET = "rural-planning-bot-data"
 DB = "rural-planning-bot"
+# All wrangler data-plane calls go through scripts/wr, which refuses to run
+# without an explicit --local/--remote (wrangler defaults to the simulator).
+WR = str(ROOT / "scripts" / "wr")
 
 TIMEOUT = 60
 UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
@@ -68,7 +71,7 @@ def remote_size_matches(r2_key: str, want: int) -> bool:
     with tempfile.NamedTemporaryFile(delete=True) as tmp:
         try:
             subprocess.run(
-                ["wrangler", "r2", "object", "get", f"{BUCKET}/{r2_key}",
+                [WR, "r2", "object", "get", f"{BUCKET}/{r2_key}",
                  "--remote", "--file", tmp.name],
                 check=True, cwd=ROOT, capture_output=True,
             )
@@ -110,7 +113,7 @@ def main() -> int:
             for attempt in range(4):
                 try:
                     subprocess.run(
-                        ["wrangler", "r2", "object", "put", f"{BUCKET}/{r2_key}",
+                        [WR, "r2", "object", "put", f"{BUCKET}/{r2_key}",
                          "--file", str(local), "--content-type", ctype,
                          "--remote"], check=True, cwd=ROOT,
                     )
@@ -141,7 +144,7 @@ def main() -> int:
     print(f"wrote {len(docs)} statements -> {DOCS_SQL.relative_to(ROOT)}")
     if args.push and docs:
         subprocess.run(
-            ["wrangler", "d1", "execute", DB, "--remote", "--file", str(DOCS_SQL)],
+            [WR, "d1", "execute", DB, "--remote", "--file", str(DOCS_SQL)],
             check=True, cwd=ROOT,
         )
     elif not args.push:

@@ -4,7 +4,7 @@
   "private": true,
   "description": "Michigan Proposal A taxable-value uncapping counterfactual on Cloudflare Workers (D1 + R2)",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --remote",
     "deploy": "wrangler deploy",
     "test": "tsx test/model.test.ts",
     "check": "tsc --noEmit",

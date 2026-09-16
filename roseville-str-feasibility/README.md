@@ -82,7 +82,7 @@ transfer on sale**.
 npm install
 npm test          # engine unit tests (tsx, no CF needed)
 npm run check     # tsc --noEmit
-npm run dev       # wrangler dev (AI binding runs remote, may incur usage)
+npm run dev       # wrangler dev --remote (D1/R2/AI all hit production; may incur usage)
 npm run deploy
 ```
 
