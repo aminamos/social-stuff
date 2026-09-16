@@ -23,6 +23,8 @@ export interface ClassRow {
 export interface ModelParams {
   /** Fraction of the SEV-TV gap actually taxed (1 = full uncap to SEV). */
   uncapShare: number;
+  /** Millage multiplier — scales each county's average rate (1 = rates as-is). */
+  millMult: number;
   /** 1 = uncap only the residential class. */
   residentialOnly: number;
   /** Net MI individual income tax baseline to replace (dollars). */
@@ -47,6 +49,7 @@ export interface ModelParams {
 export function defaultParams(): ModelParams {
   return {
     uncapShare: 1.0,
+    millMult: 1.0,
     residentialOnly: 0,
     incomeTaxRevenue: 11_400_000_000,
     baseAnnualSales: 105_862,
@@ -117,7 +120,7 @@ export function runModel(
     const gap = params.residentialOnly
       ? c.gap * Math.min(1, c.sev_res / c.sev)
       : c.gap;
-    const uplift = (gap * c.avg_rate * params.uncapShare) / 1000;
+    const uplift = (gap * c.avg_rate * params.uncapShare * params.millMult) / 1000;
     return { ...c, uncapped_levy: c.total_tax + uplift, uplift_applied: uplift };
   });
 
@@ -127,7 +130,7 @@ export function runModel(
   const levy = counties.reduce((a, c) => a + c.total_tax, 0);
   const uplift = res.reduce((a, c) => a + c.uplift_applied, 0);
   const avgRate = (levy / tv) * 1000;
-  const residentialUplift = (residentialGap * avgRate * params.uncapShare) / 1000;
+  const residentialUplift = (residentialGap * avgRate * params.uncapShare * params.millMult) / 1000;
 
   const coverage = params.incomeTaxRevenue > 0 ? uplift / params.incomeTaxRevenue : 0;
 
