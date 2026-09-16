@@ -1,4 +1,4 @@
-# Twin Cities Housing & Labor Unified Registry (4th worker)
+# US Housing & Labor Unified Registry (4th worker)
 
 One site to browse all cities/areas for **bad landlords**, **wage theft**, and
 **landlords who do both**. Merges the three standalone workers; those three stay

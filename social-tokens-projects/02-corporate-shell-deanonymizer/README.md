@@ -4,6 +4,15 @@
 
 ---
 
+## Live Sites
+
+* **[Landlord De-anonymizer](https://mpls-rental-sync-worker.a-8c6.workers.dev)** — ownership graphs for Twin Cities rental properties, reconstructing corporate landlord networks from tax rolls, SOS filings, violations, and mortgage deeds.
+* **[Wage Theft & Labor Standards Registry](https://twin-cities-wage-theft-worker.a-8c6.workers.dev)** — searchable registry of wage theft and labor standards violations across the Twin Cities.
+* **[Slumlord & Wage Theft Crossover Matrix](https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev)** — the matrix/sync layer for both registries: cross-index of corporate syndicates cited for both slumlord code violations and wage theft, with a crossover API and in-browser AI assistant.
+* **[Housing & Labor Unified Registry](https://national-housing-labor-registry.a-8c6.workers.dev)** — the national, non-MN-specific site: generic Socrata/ArcGIS/Carto platform adapters scrape rental-registry and violation feeds from cities across the country (NYC, Seattle, Philadelphia, Detroit, Austin, San Francisco, Denver, Nashville, Cincinnati, Buffalo, + Twin Cities; Milwaukee, Pittsburgh, and NJ via ingest scripts) into the same D1 (`social-housing-db`) + R2 (`landlord-directory-data`) store as the three registries above. Adding a city = one adapter file. Unified city browser, `/api/*` endpoints, and the dual-offender crossover join.
+
+---
+
 ## 1. The Material Problem
 
 Corporate landlords, predatory syndicates, and private equity platforms deliberately fragment property ownership across dozens or hundreds of discrete, single-property LLCs:

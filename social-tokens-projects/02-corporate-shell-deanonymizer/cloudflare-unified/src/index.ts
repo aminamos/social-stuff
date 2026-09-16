@@ -99,6 +99,26 @@ export default {
     if (url.pathname === "/housing") return html(renderHousingUI());
     if (url.pathname === "/labor") return html(renderWageTheftUI());
     if (url.pathname === "/crossover") return html(renderCrossoverUI());
+
+    // Worker-hosted primary source documents (R2): one quick excerpt PDF per
+    // case, so readers never have to scroll a full-length agency report.
+    if (url.pathname.startsWith("/docs/")) {
+      const key = url.pathname.slice(1);
+      if (!/^docs\/[A-Za-z0-9][A-Za-z0-9._-]*\.pdf$/.test(key)) {
+        return new Response("Not found", { status: 404 });
+      }
+      const obj = await env.R2_BUCKET.get(key);
+      if (!obj) {
+        return new Response("Not found", { status: 404 });
+      }
+      return new Response(obj.body, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `inline; filename="${key.split("/").pop()}"`,
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      });
+    }
     // -------------------------------------------------- housing ingest
     if (url.pathname === "/sync" && request.method === "POST") {
       if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
@@ -542,21 +562,30 @@ export default {
           "Industry", "Violation Type", "Back Wages ($)", "Civil Penalties ($)", "Settlement Amount ($)",
           "Workers Affected", "Repeat Violator", "Status", "Findings Date", "Description", "Data Provenance", "Docket URL",
         ];
+        const csvCell = (v: unknown): string => `"${String(v ?? "").replace(/"/g, '""')}"`;
         let csv = headers.join(",") + "\n";
         for (const row of allCases.results as any[]) {
           const vals = [
-            row.case_id, row.source_agency,
-            `"${(row.respondent_legal_name || "").replace(/"/g, '""')}"`,
-            `"${(row.trade_name || "").replace(/"/g, '""')}"`,
-            `"${(row.address || "").replace(/"/g, '""')}"`,
-            row.city, row.state, row.zip_code,
-            `"${(row.industry_description || "").replace(/"/g, '""')}"`,
-            row.violation_type, row.back_wages_recovered, row.civil_penalties_assessed,
-            row.settlement_amount, row.workers_affected,
-            row.repeat_violator ? "YES" : "NO", row.status, row.findings_date,
-            `"${(row.description || "").replace(/"/g, '""')}"`,
-            row.provenance_type === "VERIFIED_PUBLIC_ACTION" ? "VERIFIED_PUBLIC_ACTION" : "PROTOTYPE_SEED_PENDING_FOIA",
-            `"${(row.source_docket_url || "").replace(/"/g, '""')}"`,
+            csvCell(row.case_id),
+            csvCell(row.source_agency),
+            csvCell(row.respondent_legal_name),
+            csvCell(row.trade_name),
+            csvCell(row.address),
+            csvCell(row.city),
+            csvCell(row.state),
+            csvCell(row.zip_code),
+            csvCell(row.industry_description),
+            csvCell(row.violation_type),
+            csvCell(row.back_wages_recovered),
+            csvCell(row.civil_penalties_assessed),
+            csvCell(row.settlement_amount),
+            csvCell(row.workers_affected),
+            csvCell(row.repeat_violator ? "YES" : "NO"),
+            csvCell(row.status),
+            csvCell(row.findings_date),
+            csvCell(row.description),
+            csvCell(row.provenance_type === "VERIFIED_PUBLIC_ACTION" ? "VERIFIED_PUBLIC_ACTION" : "PROTOTYPE_SEED_PENDING_FOIA"),
+            csvCell(row.source_docket_url),
           ];
           csv += vals.join(",") + "\n";
         }
@@ -969,7 +998,7 @@ export default {
     }
 
     return new Response(
-      "Twin Cities Housing & Labor Standards Unified Registry. " +
+      "US Housing & Labor Standards Unified Registry. " +
         "UIs: / (unified), /housing, /labor, /crossover. " +
         "Housing: /search /cities /violations /feeds /sync /sync/status /wage-theft. " +
         "Labor: /cases /offenders/top /labor/stats /export.csv /export.md /seed /sync/live /labor/sync/status. " +

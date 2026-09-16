@@ -1,4 +1,4 @@
-name = "twin-cities-housing-labor-registry"
+name = "national-housing-labor-registry"
 main = "src/index.ts"
 compatibility_date = "2024-09-01"
 

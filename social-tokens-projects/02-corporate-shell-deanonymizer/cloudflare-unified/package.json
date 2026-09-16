@@ -1,7 +1,7 @@
 {
-  "name": "twin-cities-housing-labor-registry",
+  "name": "national-housing-labor-registry",
   "version": "1.0.0",
-  "description": "Unified Twin Cities housing + wage theft + crossover registry (4th worker; merges the three standalone workers; future routes land here)",
+  "description": "National US housing + wage theft + crossover registry (4th worker; merges the three standalone workers; future routes land here)",
   "main": "src/index.ts",
   "scripts": {
     "deploy": "wrangler deploy",

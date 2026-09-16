@@ -8,7 +8,7 @@ export function renderUnifiedUI(): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Twin Cities Housing & Labor Registry — Bad Landlords, Wage Theft, Dual Offenders</title>
+  <title>US Housing & Labor Registry — Bad Landlords, Wage Theft, Dual Offenders</title>
   <style>
     :root { --bg: #0b1220; --card: #111c33; --border: #22345c; --text: #e6edf7; --dim: #93a4c4; --accent: #38bdf8; --green: #34d399; --red: #f87171; --amber: #fbbf24; }
     * { box-sizing: border-box; }
@@ -41,7 +41,7 @@ export function renderUnifiedUI(): string {
 </head>
 <body>
   <header>
-    <h1>🏘️⚖️ Twin Cities Housing & Labor Registry</h1>
+    <h1>🏘️⚖️ US Housing & Labor Registry</h1>
     <p>Browse every city/area for bad landlords, wage theft, and landlords who do both. Data: D1 <code>social-housing-db</code> + R2 <code>landlord-directory-data</code>.</p>
   </header>
   <nav class="legacy">Full apps: <a href="/housing">Housing registry</a><a href="/labor">Wage theft registry</a><a href="/crossover">Crossover matrix</a></nav>
