@@ -4,19 +4,18 @@
   "compatibility_date": "2026-09-01",
   "observability": { "enabled": true },
 
-  // --- Deploy notes for the next model ---------------------------------
-  // The worker runs WITHOUT these bindings (compute endpoints work; the
-  // persistence endpoints return 501). To enable persistence:
-  //   1. wrangler d1 create tax-engine           -> paste real database_id
-  //   2. wrangler r2 bucket create tax-engine-artifacts
-  //   3. wrangler d1 migrations apply DB --remote   (real DB; without
-  //      --remote it hits the local simulator — see repo AGENTS.md)
-  // For local dev, any ID works: `wrangler d1 migrations apply DB --local`.
+  // --- Persistence (provisioned 2026-09-16) ------------------------------
+  // D1 `tax-engine` + R2 `tax-engine-artifacts` exist in the account.
+  // Schema changes: `wrangler d1 migrations apply DB --remote` (without
+  // --remote it hits the local simulator — see repo AGENTS.md).
+  // NOTE: RETURNS_BUCKET is bound but unused by src/index.ts — nothing
+  // reads/writes R2 yet; wire it up before relying on it.
+  // For local dev: `wrangler d1 migrations apply DB --local`.
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "tax-engine",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "be93127d-3edb-49a5-b01c-a7ee6368d744",
       "migrations_dir": "migrations"
     }
   ],
