@@ -15,10 +15,12 @@ This repo is also where I show how I use AI to help civic tech and social causes
 * **[Social Housing Info](https://social-housing-info.a-8c6.workers.dev/)** — public information resource on rent stabilization definitions, the NYC rent freeze, block-by-block housing development, community land trusts, and further reading.
 * **[Landlord De-anonymizer](https://mpls-rental-sync-worker.a-8c6.workers.dev)** — ownership graphs for Twin Cities rental properties, reconstructing corporate landlord networks from tax rolls, SOS filings, violations, and mortgage deeds.
 * **[Wage Theft & Labor Standards Registry](https://twin-cities-wage-theft-worker.a-8c6.workers.dev)** — searchable registry of wage theft and labor standards violations across the Twin Cities.
-* **[Slumlord & Wage Theft Crossover Matrix](https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev)** — cross-index of corporate syndicates cited for both slumlord code violations and wage theft, with a crossover API and in-browser AI assistant.
-* **[Housing & Labor Unified Registry](https://twin-cities-housing-labor-registry.a-8c6.workers.dev)** — one site browsing all cities/areas for bad landlords, wage theft, and dual offenders; merges the three registries above with a unified city browser and crossover API.
+* **[Slumlord & Wage Theft Crossover Matrix](https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev)** — the matrix/sync layer for both registries: cross-index of corporate syndicates cited for both slumlord code violations and wage theft, with a crossover API and in-browser AI assistant.
+* **[Housing & Labor Unified Registry](https://national-housing-labor-registry.a-8c6.workers.dev)** — the national, non-MN-specific site: generic Socrata/ArcGIS/Carto platform adapters scrape rental-registry and violation feeds from cities across the country (NYC, Seattle, Philadelphia, Detroit, Austin, San Francisco, Denver, Nashville, Cincinnati, Buffalo, + Twin Cities; Milwaukee, Pittsburgh, and NJ via ingest scripts) into the same D1/R2 store as the three registries above. Adding a city = one adapter file. Unified city browser, `/api/*` endpoints, and the dual-offender crossover join.
 * **[Field Notes: AI & Earth](https://field-notes.awdnowusaa.cc/)** ([source](field-notes/)) — evidence-first guide to AI energy, water, materials, and labor impacts, with an estimator converting everyday energy use into inference-token equivalents.
 * **[Decarb My State](https://decarb-my-state.a-8c6.workers.dev)** — state-by-state decarbonization progress for all 50 states + DC: emissions through 2022 (EPA), power generation through 2024 (EIA). Source: [aminamos/decarbonize-my-state](https://github.com/aminamos/decarbonize-my-state).
+* **[Roseville STR Feasibility Engine](https://roseville-str-feasibility.a-8c6.workers.dev)** ([source](roseville-str-feasibility/)) — models Roseville, MN City Code Ch. 907/908/909 for any address: seasonal STR frequency caps, 500-ft license spacing, occupancy ceilings, and real revenue limits vs. naive Airbnb pro-formas, backed by Ramsey County parcel data.
+* **[Michigan Prop A Uncap Counterfactual](https://prop-a-counterfactual.a-8c6.workers.dev)** ([source](prop-a-counterfactual/)) — taxes every MI parcel at full SEV instead of Proposal-A-capped taxable value: ≈ +$8.3B/yr vs the $11.4B income tax (~72% coverage), +5–12k annual sales turnover, −1.6–3.3% residential price effect. County-level gap explorer (D1) + archived Treasury source PDFs (R2); see [ANALYSIS.md](prop-a-counterfactual/ANALYSIS.md).
 
 ---
 
@@ -55,22 +57,19 @@ High-leverage agent systems directing LLM tokens toward structural transparency 
 
 ---
 
-## Top 10 Quick Wins (Ranked by PR Acceptance Probability)
+## Top Quick Wins (Ranked by PR Acceptance Probability)
 
 These issues feature active maintainers, isolated diffs, and immediate social or accessibility value:
 
 | # | Organization / Project | Issue | Stack | Why It's a Great First PR |
 |---|---|---|---|---|
-| **1** | **Hennepin County** | [ed-hcds-components#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59) | CSS / a11y | **Add `:focus` ring to hyperlink elements**: Direct accessibility fix for county digital services. |
+| **1** | **Hennepin County** | [ed-hcds-components#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59) | CSS / a11y | **Add `:focus` ring to hyperlink elements**: Direct accessibility fix for county digital services. 🔄 **In review — [PR #69](https://github.com/HennepinCounty/ed-hcds-components/pull/69)** (also addresses [#57](https://github.com/HennepinCounty/ed-hcds-components/issues/57)) |
 | **2** | **Science Museum of MN** | [laparoscopy-camera#5](https://github.com/scimusmn/laparoscopy-camera/issues/5) | C++ / Arduino | **Invert `digitalRead` logic**: One-line boolean fix (`!digitalRead(button_pin)`) on museum interactive. |
 | **3** | **OneBusAway** | [watchdog#147](https://github.com/OneBusAway/watchdog/issues/147) | Python / GTFS | **Precision rounding fix**: Stop treating micro-coordinate shifts as transit stop relocations. (`good first issue`) |
-| **4** | **DataMade** | [usaddress#410](https://github.com/datamade/usaddress/issues/410) | Python / Regex | **Precompile regular expressions**: Performance optimization on nationwide address parser. |
-| **5** | **OneBusAway** | [onebusaway-ios#1412](https://github.com/OneBusAway/onebusaway-ios/issues/1412) | SwiftUI / a11y | **VoiceOver accessibility fix**: Fix misleading button narration for the map settings sheet. |
-| **6** | **NYC Planning** | [equity-tool#303](https://github.com/NYCPlanning/equity-tool/issues/303) | React / TS | **Remove deprecated props**: Clean up `react-map-gl` deprecation warnings on public zoning tool. |
-| **7** | **Chi Hack Night** | [govbot#30](https://github.com/chihacknight/govbot/issues/30) | Python / APIs | **Councilmatic Catalog Entry**: Add Chicago City Council feed to public discovery tool. (`good first issue`) |
-| **8** | **Bay Area Metro** | [travel-model-one#113](https://github.com/BayAreaMetro/travel-model-one/issues/113) | Python | **Typo in truck trip distribution**: Fix formula variable typo in regional transit model. |
-| **9** | **Northern Widget** | [Margay_Library#28](https://github.com/NorthernWidget/Margay_Library/issues/28) | Jekyll / Actions | **GitHub Pages API docs**: Setup Doxygen + Jekyll automated doc deployment for civic sensors. |
-| **10** | **OpenOakland** | [openoakland.org#295](https://github.com/openoakland/openoakland.org/issues/295) | Jekyll / JS | **Markdown rendering fix**: Convert raw meetup descriptions to formatted HTML. (`good first issue`) |
+| **4** | **NYC Planning** | [equity-tool#303](https://github.com/NYCPlanning/equity-tool/issues/303) | React / TS | **Remove deprecated props**: Clean up `react-map-gl` deprecation warnings on public zoning tool. |
+| **5** | **Chi Hack Night** | [govbot#30](https://github.com/chihacknight/govbot/issues/30) | Python / APIs | **Councilmatic Catalog Entry**: Add Chicago City Council feed to public discovery tool. (`good first issue`) |
+| **6** | **Northern Widget** | [Margay_Library#28](https://github.com/NorthernWidget/Margay_Library/issues/28) | Jekyll / Actions | **GitHub Pages API docs**: Setup Doxygen + Jekyll automated doc deployment for civic sensors. |
+| **7** | **OpenOakland** | [openoakland.org#295](https://github.com/openoakland/openoakland.org/issues/295) | Jekyll / JS | **Markdown rendering fix**: Convert raw meetup descriptions to formatted HTML. (`good first issue`) |
 
 ---
 
@@ -89,7 +88,7 @@ These issues feature active maintainers, isolated diffs, and immediate social or
 * **UMN Libraries** ([`racial_covenants_processor`](https://github.com/UMNLibraries/racial_covenants_processor)): Multi-workflow parcel count rollup for Mapping Prejudice ([#151](https://github.com/UMNLibraries/racial_covenants_processor/issues/151)).
 * **Chi Hack Night** ([`govbot`](https://github.com/chihacknight/govbot)): Scraper organization reference fix ([#78](https://github.com/chihacknight/govbot/issues/78)), executive actions parser ([#28](https://github.com/chihacknight/govbot/issues/28)).
 
-### Mobile & Transit (iOS / Android)
+### Mobile & Transit
 * **OneBusAway** ([`onebusaway-ios`](https://github.com/OneBusAway/onebusaway-ios), [`onebusaway-android`](https://github.com/OneBusAway/onebusaway-android)): VoiceOver accessibility fix ([#1412](https://github.com/OneBusAway/onebusaway-ios/issues/1412)), offline banner ([#2301](https://github.com/OneBusAway/onebusaway-android/issues/2301)).
 * **Code for San Francisco** ([`resource-binder-app`](https://github.com/sfbrigade/resource-binder-app)): Android onboarding screen ([#5](https://github.com/sfbrigade/resource-binder-app/issues/5)).
 * **aminamos** ([`transit-alert-mirror`](https://github.com/aminamos/transit-alert-mirror)): Plain-English transit alert, detour, and service advisory enrichment engine.
@@ -120,6 +119,18 @@ Opened PRs awaiting maintainer review. Move to Done once merged.
 
 | Project | Issue | PR | Status |
 |---|---|---|---|
+| Hennepin County `ed-hcds-components` | [#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59) (also [#57](https://github.com/HennepinCounty/ed-hcds-components/issues/57)) | [#69](https://github.com/HennepinCounty/ed-hcds-components/pull/69) | 🔄 In review |
+| Chi Hack Night `govbot` | [#27](https://github.com/chihacknight/govbot/issues/27) | [#143](https://github.com/chihacknight/govbot/pull/143) | 🔄 In review |
+| Chi Hack Night `govbot` | [#24](https://github.com/chihacknight/govbot/issues/24) | [#144](https://github.com/chihacknight/govbot/pull/144) | 🔄 In review |
+| Chi Hack Night `govbot` | [#25](https://github.com/chihacknight/govbot/issues/25) | [#145](https://github.com/chihacknight/govbot/pull/145) | 🔄 In review |
+| Chi Hack Night `govbot` | [#19](https://github.com/chihacknight/govbot/issues/19) | [#146](https://github.com/chihacknight/govbot/pull/146) | 🔄 In review |
+| Chi Hack Night `govbot` | [#20](https://github.com/chihacknight/govbot/issues/20) | [#147](https://github.com/chihacknight/govbot/pull/147) | 🔄 In review |
+| Chi Hack Night `govbot` | [#26](https://github.com/chihacknight/govbot/issues/26) | [#148](https://github.com/chihacknight/govbot/pull/148) | 🔄 In review |
+| DataMade `la-metro-translations` | [#84](https://github.com/datamade/la-metro-translations/issues/84) | [#93](https://github.com/datamade/la-metro-translations/pull/93) | 🔄 In review |
+| Mia `collection-elasticsearch` | [#10](https://github.com/artsmia/collection-elasticsearch/issues/10) | [#11](https://github.com/artsmia/collection-elasticsearch/pull/11) | 🔄 In review |
+| Mia `collection` | [#10](https://github.com/artsmia/collection/issues/10), [#7](https://github.com/artsmia/collection/issues/7) | [#11](https://github.com/artsmia/collection/pull/11) | 🔄 In review |
+| Mia `art` | — | [#109](https://github.com/artsmia/art/pull/109) | 🔄 In review |
+| MobilityData `transit-operational-data-standard` | — | [#161](https://github.com/MobilityData/transit-operational-data-standard/pull/161), [#162](https://github.com/MobilityData/transit-operational-data-standard/pull/162), [#163](https://github.com/MobilityData/transit-operational-data-standard/pull/163), [#164](https://github.com/MobilityData/transit-operational-data-standard/pull/164) | 🔄 In review |
 
 ---
 

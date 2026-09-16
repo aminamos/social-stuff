@@ -24,7 +24,7 @@ A common pitfall in civic tech is investing effort into dormant repositories whe
 
 ### 🌲 Minnesota (Twin Cities)
 * **Hennepin County (`HennepinCounty/ed-hcds-components`)**: HTML/SCSS/JS. Actively maintained Design System used across county public services. Target issues include focus ring accessibility ([#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59)), mobile header search button ([#66](https://github.com/HennepinCounty/ed-hcds-components/issues/66)), and flex/grid gap utility classes ([#61](https://github.com/HennepinCounty/ed-hcds-components/issues/61)).
-* **Minneapolis Institute of Art (`artsmia/collection-elasticsearch`)**: Python/Elasticsearch. 403 rendition error on public domain records ([#10](https://github.com/artsmia/collection-elasticsearch/issues/10)).
+* **Minneapolis Institute of Art (`artsmia/collection-elasticsearch`)**: Python/Elasticsearch. 403 rendition error on public domain records ([#10](https://github.com/artsmia/collection-elasticsearch/issues/10) - 🔄 [PR #11](https://github.com/artsmia/collection-elasticsearch/pull/11) in review).
 * **UMN Libraries (`UMNLibraries/racial_covenants_processor`)**: Python/Django. Data pipeline for the Mapping Prejudice project; parcel count rollups across child workflows ([#151](https://github.com/UMNLibraries/racial_covenants_processor/issues/151)).
 * **Science Museum of Minnesota (`scimusmn/laparoscopy-camera`)**: C++/Arduino. Interactive hardware inverted digitalRead bug ([#5](https://github.com/scimusmn/laparoscopy-camera/issues/5)).
 * **Northern Widget (`NorthernWidget/Margay_Library`)**: C++/Jekyll. Environmental sensor documentation pipeline via GitHub Actions ([#28](https://github.com/NorthernWidget/Margay_Library/issues/28)).
@@ -45,7 +45,7 @@ A common pitfall in civic tech is investing effort into dormant repositories whe
 
 ### 🏙️ Chicago & Cook County
 * **Chi Hack Night (`chihacknight/govbot`)**: Python/FastAPI. Chicago City Council Councilmatic catalog ([#30](https://github.com/chihacknight/govbot/issues/30) - `good first issue`), executive actions data item ([#28](https://github.com/chihacknight/govbot/issues/28) - `good first issue`), scraper regression ([#78](https://github.com/chihacknight/govbot/issues/78)).
-* **DataMade (`datamade`)**: Python/Django. Regex compilation caching on `usaddress` ([#410](https://github.com/datamade/usaddress/issues/410)), accessible language download links ([la-metro-translations#84](https://github.com/datamade/la-metro-translations/issues/84)).
+* **DataMade (`datamade`)**: Python/Django. Regex compilation caching on `usaddress` ([#410](https://github.com/datamade/usaddress/issues/410)), accessible language download links ([la-metro-translations#84](https://github.com/datamade/la-metro-translations/issues/84) - 🔄 [PR #93](https://github.com/datamade/la-metro-translations/pull/93) in review).
 * **Bike Lane Uprising (BLU)**: Chicago-born benchmark of crowdsourced spatial data influencing municipal protected bike infrastructure across 100+ cities.
 
 ### 🌳 Oakland & East Bay
@@ -55,20 +55,17 @@ A common pitfall in civic tech is investing effort into dormant repositories whe
 
 ---
 
-## 3. Top 10 Ranked "Quick Win" PR Targets
+## 3. Ranked "Quick Win" PR Targets
 
 | Rank | Organization | Repo & Issue | Technology | Effort | Impact |
 |:---:|:---|:---|:---:|:---:|:---|
-| **1** | Hennepin County | [`ed-hcds-components#59`](https://github.com/HennepinCounty/ed-hcds-components/issues/59) | CSS / a11y | 15 mins | Adds `:focus` visible indicator to hyperlinks across all Hennepin County web apps. |
+| **1** | Hennepin County | [`ed-hcds-components#59`](https://github.com/HennepinCounty/ed-hcds-components/issues/59) | CSS / a11y | 15 mins | Adds `:focus` visible indicator to hyperlinks across all Hennepin County web apps. 🔄 **In review: [PR #69](https://github.com/HennepinCounty/ed-hcds-components/pull/69)** |
 | **2** | Science Museum of MN | [`laparoscopy-camera#5`](https://github.com/scimusmn/laparoscopy-camera/issues/5) | C++ / Arduino | 5 mins | Inverts `digitalRead` boolean logic (`!digitalRead`) for kiosk controller. |
 | **3** | OneBusAway | [`watchdog#147`](https://github.com/OneBusAway/watchdog/issues/147) | Python / GTFS | 30 mins | Prevents floating-point coordinate precision rounding from triggering false stop moves. |
-| **4** | DataMade | [`usaddress#410`](https://github.com/datamade/usaddress/issues/410) | Python / Regex | 20 mins | Precompiles regexes once to eliminate overhead during batch address standardization. |
-| **5** | OneBusAway | [`onebusaway-ios#1412`](https://github.com/OneBusAway/onebusaway-ios/issues/1412) | SwiftUI / a11y | 20 mins | Corrects VoiceOver narration on map settings sheet trigger button. |
-| **6** | NYC Planning | [`equity-tool#303`](https://github.com/NYCPlanning/equity-tool/issues/303) | React / TS | 20 mins | Removes deprecated `react-map-gl` properties on public planning dashboard. |
-| **7** | Chi Hack Night | [`govbot#30`](https://github.com/chihacknight/govbot/issues/30) | Python / APIs | 45 mins | Connects Chicago City Council legislative feeds into Govbot discovery catalog. |
-| **8** | Bay Area Metro | [`travel-model-one#113`](https://github.com/BayAreaMetro/travel-model-one/issues/113) | Python | 10 mins | Fixes formula calculation typo in regional truck trip distribution code. |
-| **9** | Northern Widget | [`Margay_Library#28`](https://github.com/NorthernWidget/Margay_Library/issues/28) | Jekyll / Actions | 45 mins | Establishes automated Doxygen-to-GitHub-Pages pipeline for open civic sensors. |
-| **10** | OpenOakland | [`openoakland.org#295`](https://github.com/openoakland/openoakland.org/issues/295) | Jekyll / Liquid | 20 mins | Fixes markdown rendering for community meetup descriptions. |
+| **4** | NYC Planning | [`equity-tool#303`](https://github.com/NYCPlanning/equity-tool/issues/303) | React / TS | 20 mins | Removes deprecated `react-map-gl` properties on public planning dashboard. |
+| **5** | Chi Hack Night | [`govbot#30`](https://github.com/chihacknight/govbot/issues/30) | Python / APIs | 45 mins | Connects Chicago City Council legislative feeds into Govbot discovery catalog. |
+| **6** | Northern Widget | [`Margay_Library#28`](https://github.com/NorthernWidget/Margay_Library/issues/28) | Jekyll / Actions | 45 mins | Establishes automated Doxygen-to-GitHub-Pages pipeline for open civic sensors. |
+| **7** | OpenOakland | [`openoakland.org#295`](https://github.com/openoakland/openoakland.org/issues/295) | Jekyll / Liquid | 20 mins | Fixes markdown rendering for community meetup descriptions. |
 
 ---
 

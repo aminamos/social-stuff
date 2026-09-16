@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "roseville-str-feasibility",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "ai": { "binding": "AI" },
+  "r2_buckets": [
+    { "binding": "DOCS", "bucket_name": "roseville-str-docs" }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "roseville-str-db",
+      "database_id": "577dfc35-40ee-4a4d-8d3f-c723e0d21104",
+      "migrations_dir": "./migrations"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

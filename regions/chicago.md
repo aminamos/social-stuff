@@ -24,7 +24,8 @@ Chicago has arguably the most vibrant and longest-running weekly civic tech comm
     * *Label*: `good first issue`
     * *Why solve*: Expand civic data tracking to include executive orders alongside municipal bills.
     * *Skills*: Python.
-  * **[#27](https://github.com/chihacknight/govbot/issues/27) — `Overhaul README and docs for clarity, marketing, and use cases`**
+  * **[#27](https://github.com/chihacknight/govbot/issues/27) — `Overhaul README and docs for clarity, marketing, and use cases`** 🔄 *In review*
+    * *Status*: [PR #143](https://github.com/chihacknight/govbot/pull/143) open.
     * *Why solve*: Excellent onboarding task to help new community volunteers get running.
     * *Skills*: Markdown, documentation.
   * **[#78](https://github.com/chihacknight/govbot/issues/78) — `Scraper regression: from_organization / organization_id emitted as unresolved "~{...}" reference`**
@@ -46,7 +47,8 @@ Chicago has arguably the most vibrant and longest-running weekly civic tech comm
     * *Label*: `features`
     * *Why solve*: Performance optimization: precompiling regexes avoids recompilation overhead during high-volume batch address standardization.
     * *Skills*: Python, Regular Expressions.
-  * **[#84](https://github.com/datamade/la-metro-translations/issues/84) — `Make download link text unique per language`**
+  * **[#84](https://github.com/datamade/la-metro-translations/issues/84) — `Make download link text unique per language`** 🔄 *In review*
+    * *Status*: [PR #93](https://github.com/datamade/la-metro-translations/pull/93) open.
     * *Why solve*: Accessibility (WCAG) fix ensuring screen reader users know which translation language link they are clicking.
     * *Skills*: Django, HTML/templates, Accessibility.
   * **[#92](https://github.com/datamade/la-metro-translations/issues/92) — `Add tests for DocumentFiles API view`**

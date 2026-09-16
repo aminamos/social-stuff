@@ -8,8 +8,13 @@ CREATE TABLE IF NOT EXISTS counties (
   definition TEXT,                       -- 'nonmetro county (USDA ERS MN rural definitions PDF, p.3)'
   omb_vintage TEXT,                      -- OMB delineation bulletin vintage
   county_seat TEXT,                      -- filled by human review pass
-  gis_portal_url TEXT,                   -- verified HTTP 200 ArcGIS Hub site
-  gis_parcels_service_url TEXT,          -- verified HTTP 200 parcel Feature Service
+  gis_portal_url TEXT,                   -- verified HTTP 200 public GIS portal/viewer
+                                         -- (any vendor: ArcGIS Hub/Online, county ArcGIS
+                                         -- Server, Pro-West Link, Beacon/qPublic, GeoMoose.
+                                         -- NOTE: beacon.schneidercorp.com 403s non-browser
+                                         -- clients — that is bot protection, not a dead link)
+  gis_parcels_service_url TEXT,          -- verified HTTP 200 parcel Feature Service or
+                                         -- parcel search/viewer URL
   zoning_ordinance_url TEXT,             -- verified HTTP 200 county zoning page
   city_code_url TEXT,                    -- verified HTTP 200 municipal code (county seat)
   assessor_url TEXT,                     -- verified HTTP 200 county assessor / property-tax records page

@@ -59,8 +59,11 @@ export async function fetchUSDOLOpenData(apiKey?: string): Promise<WageTheftSeed
         const isRelevantIndustry = relevantNaics.some(code => naics.startsWith(code));
 
         if (isRelevantIndustry || (item.state && item.state.toUpperCase() === "MN")) {
+          const rawId = caseId.startsWith("WHD-") ? caseId : `WHD-DOL-${caseId}`;
+          // R2-hosted case file key must satisfy the /docs/ route: [A-Za-z0-9][A-Za-z0-9._-]*
+          const docId = (rawId.replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^[^A-Za-z0-9]+/, "") || "WHD-UNKNOWN");
           records.push({
-            case_id: caseId.startsWith("WHD-") ? caseId : `WHD-DOL-${caseId}`,
+            case_id: rawId,
             source_agency: "US_DOL_WHD",
             respondent_legal_name: (item.legal_name || item.trade_nm || "Unspecified Employer").toUpperCase(),
             trade_name: item.trade_nm || item.legal_name || "",
@@ -80,7 +83,7 @@ export async function fetchUSDOLOpenData(apiKey?: string): Promise<WageTheftSeed
             settlement_amount: parseFloat(item.bw_amt || 0) + parseFloat(item.cmp_asssd_amt || 0),
             description: item.violation_summary || `Official US Department of Labor Wage & Hour Division civil enforcement action in Minnesota.`,
             provenance_type: "VERIFIED_PUBLIC_ACTION",
-            source_docket_url: `https://enforcement.dol.gov`
+            source_docket_url: `https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/${docId}.pdf`
           });
         }
       }

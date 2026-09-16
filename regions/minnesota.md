@@ -15,7 +15,8 @@ Minnesota has a rich ecosystem of civic tech, cultural institutions, and public 
   * **[#66](https://github.com/HennepinCounty/ed-hcds-components/issues/66) — `[header] [search] Add button to header search component, remove placeholder text`**
     * *Why solve*: Usability testing on mobile identified need for an explicit search button.
     * *Skills*: SCSS, responsive HTML layout.
-  * **[#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59) — `Create focus state for <a> hyperlink elements`**
+  * **[#59](https://github.com/HennepinCounty/ed-hcds-components/issues/59) — `Create focus state for <a> hyperlink elements`** 🔄 *In review*
+    * *Status*: [PR #69](https://github.com/HennepinCounty/ed-hcds-components/pull/69) open (also addresses [#57](https://github.com/HennepinCounty/ed-hcds-components/issues/57)).
     * *Why solve*: Adds custom, accessible `:focus` ring styling to links instead of browser defaults.
     * *Skills*: CSS / Accessibility (WCAG 2.1 Focus Visible).
   * **[#58](https://github.com/HennepinCounty/ed-hcds-components/issues/58) — `Create link styling for links on dark background`**
@@ -31,10 +32,12 @@ Minnesota has a rich ecosystem of civic tech, cultural institutions, and public 
 * **Stack**: Python, Elasticsearch, JSON REST APIs
 * **Activity**: Active collection API updates in 2026.
 * **Target Issues**:
-  * **[#10](https://github.com/artsmia/collection-elasticsearch/issues/10) — `Records flagged image: valid whose image renditions return 403 on all sizes`**
+  * **[#10](https://github.com/artsmia/collection-elasticsearch/issues/10) — `Records flagged image: valid whose image renditions return 403 on all sizes`** 🔄 *In review*
+    * *Status*: [PR #11](https://github.com/artsmia/collection-elasticsearch/pull/11) open.
     * *Why solve*: Integrators building digital frames and public displays hit 403 errors on certain public domain artwork IDs.
     * *Skills*: Python, Elasticsearch queries, API verification.
-  * **[#10](https://github.com/artsmia/collection/issues/10) — `broken link for image rights`**
+  * **[#10](https://github.com/artsmia/collection/issues/10) — `broken link for image rights`** 🔄 *In review*
+    * *Status*: [PR #11](https://github.com/artsmia/collection/pull/11) open (also fixes [#7](https://github.com/artsmia/collection/issues/7)).
     * *Skills*: Markdown / link verification.
 
 ---

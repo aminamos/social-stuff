@@ -1019,26 +1019,28 @@ export function renderUI(): string {
           const isTier3 = (item.tier || '').includes('Tier 3') || (item.tier || '').includes('Grade C');
 
           let wageTheftHTML = '';
+          let wageCaseId = '';
           if (item.wage_theft_match) {
             const parts = item.wage_theft_match.split('::');
+            wageCaseId = parts[0] || '';
             const isVerifiedWage = parts[4] === 'VERIFIED_PUBLIC_ACTION';
-            const wageBadge = isVerifiedWage 
+            const wageBadge = isVerifiedWage
               ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9999px;font-size:0.68rem;font-weight:700;background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.35);">🟢 VERIFIED PUBLIC ENFORCEMENT ACTION</span>'
               : '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9999px;font-size:0.68rem;font-weight:700;background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.35);" title="Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.">🟡 PROTOTYPE SEED MATCH (Pending FOIA Sync)</span>';
 
+            // One compact citation line per card; full case detail lives on the
+            // wage registry behind the link (same citation repeats across a
+            // network, so the card never reprints the whole narrative).
             wageTheftHTML = \`
               <div class="wage-theft-banner">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
-                  <span class="wage-theft-title">⚠️ LABOR VIOLATION CITATION ON RECORD</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                  <span class="wage-theft-title">⚠️ Labor citation: \${parts[0]} (\${parts[1]}) — $\${parseFloat(parts[2] || 0).toLocaleString()} / \${parts[3]} workers</span>
                   \${wageBadge}
                   <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=\${encodeURIComponent(parts[0])}" target="_blank" style="color: #fca5a5; font-size: 0.72rem; font-weight: 700; text-decoration: underline;">
                     View Labor Docket ↗
                   </a>
                 </div>
-                <div class="wage-theft-desc">
-                  Case \${parts[0]} (\${parts[1]}): $\${parseFloat(parts[2] || 0).toLocaleString()} recovered for \${parts[3]} affected caretakers/workers.
-                  \${!isVerifiedWage ? '<div style="font-size:0.68rem;color:#fca5a5;margin-top:2px;font-style:italic;">Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24.</div>' : ''}
-                </div>
+                \${!isVerifiedWage ? '<div style="font-size:0.68rem;color:#fca5a5;margin-top:2px;font-style:italic;">Demonstration fixture — see docket for sources.</div>' : ''}
               </div>
             \`;
           }
@@ -1097,17 +1099,18 @@ export function renderUI(): string {
                 <div class="source-docs-box">
                   <div class="source-docs-title">📄 Source Documents & Public Records:</div>
                   <div class="source-docs-links">
-                    <a href="https://www.hennepin.us/residents/property/property-information-search" target="_blank" style="color:#38bdf8; text-decoration:underline;">
-                      County Property Tax / Parcel PDF ↗
+                    \${/hennepin/i.test(item.county || '') ? \`
+                    <a href="https://www.hennepincounty.gov/services/property/property-information-search" target="_blank" style="color:#38bdf8; text-decoration:underline;">
+                      Hennepin Co. parcel search ↗
                     </a>
-                    <span>•</span>
+                    <span>•</span>\` : ''}
                     <a href="https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0" target="_blank" style="color:#38bdf8; text-decoration:underline;">
-                      Municipal Licensing Docket ↗
+                      Licensing map data (ArcGIS service) ↗
                     </a>
-                    \${item.wage_theft_match ? \`
+                    \${wageCaseId ? \`
                     <span>•</span>
-                    <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=\${encodeURIComponent(item.owner_name)}" target="_blank" style="color:#f87171; font-weight:700; text-decoration:underline;">
-                      Labor Docket / Consent Decree ↗
+                    <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=\${encodeURIComponent(wageCaseId)}" target="_blank" style="color:#f87171; font-weight:700; text-decoration:underline;">
+                      Labor citation \${wageCaseId} ↗
                     </a>\` : ''}
                   </div>
                 </div>
@@ -1242,16 +1245,19 @@ export function renderUI(): string {
       const isTier3 = (item.tier || '').includes('Tier 3') || (item.tier || '').includes('Grade C');
 
       let wageTheftText = 'None on record';
+      let wageCaseId = '';
       if (item.wage_theft_match) {
         const parts = item.wage_theft_match.split('::');
+        wageCaseId = parts[0] || '';
         const isVerifiedWage = parts[4] === 'VERIFIED_PUBLIC_ACTION';
         const provTag = isVerifiedWage ? '🟢 VERIFIED PUBLIC ENFORCEMENT ACTION' : '🟡 PROTOTYPE SEED MATCH (Pending FOIA Sync)';
         wageTheftText = 'Case ' + parts[0] + ' (' + parts[1] + '): $' + parseFloat(parts[2] || 0).toLocaleString() + ' recovered for ' + parts[3] + ' workers [' + provTag + ']';
       }
+      const isHennepin = /hennepin/i.test(item.county || '');
 
       const md = [
         '### Property Dossier: ' + (item.address || 'Unknown Address') + ', ' + (item.city || 'Unknown City') + ', ' + (item.county || 'MN'),
-        '- **Housing Data Provenance**: 🟢 VERIFIED MUNICIPAL GIS RECORD (Minneapolis Open Data / Hennepin County Assessor)',
+        '- **Housing Data Provenance**: 🟢 VERIFIED MUNICIPAL GIS RECORD (' + (item.city || item.county || 'Municipal') + ' GIS / county assessor)',
         '- **APN / Parcel ID**: \`' + (item.apn || 'N/A') + '\`',
         '- **Units**: ' + (item.units || 1),
         '- **Habitability Tier**: ' + (item.tier || 'Not published') + ' (' + (item.status || 'Active') + ')' + (isTier3 ? ' ⚠️ CHRONIC SLUMLORD LIST' : ''),
@@ -1262,10 +1268,14 @@ export function renderUI(): string {
         '  - ' + deanon.desc,
         '- **Sister Properties Unmasked**: ' + (item.sister_properties_count || 1) + ' properties sharing common management (' + (item.total_syndicate_units || 'N/A') + ' total units)',
         '- **Labor Standards & Wage Theft Record**: ' + wageTheftText,
-        '- **Official Source Records & PDFs**:',
-        '  - County Parcel & Property Tax Assessment: https://www.hennepin.us/residents/property/property-information-search',
-        '  - Municipal Rental Licensing Feature Docket: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0',
-        '  - Official Labor Standards Registry Docket: https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(item.owner_name || '')
+        '- **Official Source Records**:',
+        isHennepin
+          ? '  - Hennepin Co. parcel search: https://www.hennepincounty.gov/services/property/property-information-search'
+          : '  - County parcel search: see the ' + (item.county || 'county') + ' assessor (no verified deep link on file)',
+        '  - Licensing map data (ArcGIS service): https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0',
+        wageCaseId
+          ? '  - Labor citation ' + wageCaseId + ': https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(wageCaseId)
+          : '  - Labor citation: none on record'
       ].join('\\n');
 
       navigator.clipboard.writeText(md).then(() => {
@@ -1297,7 +1307,7 @@ export function renderUI(): string {
         '**Source**: https://mpls-rental-sync-worker.a-8c6.workers.dev',
         '',
         '> **Data Provenance Notice**:',
-        '> - **Housing Records**: 🟢 VERIFIED MUNICIPAL GIS RECORD (Direct from Minneapolis Open Data ArcGIS Feature Service & Hennepin County Assessor).',
+        '> - **Housing Records**: 🟢 VERIFIED MUNICIPAL GIS RECORD (Direct from municipal GIS / county assessor sources for each listed jurisdiction).',
         '> - **Labor Records**: Official US DOL, MN DLI, and Court records badged as 🟢 VERIFIED PUBLIC ENFORCEMENT ACTION or 🟡 PROTOTYPE SEED MATCH (Pending FOIA Sync).',
         '',
         '---',
@@ -1328,9 +1338,18 @@ export function renderUI(): string {
         lines.push('- **Sister Properties**: ' + (item.sister_properties_count || 1) + ' properties (' + (item.total_syndicate_units || 'N/A') + ' units)');
         lines.push('- **Wage Theft / Labor Citation**: ' + wageTheftText);
         lines.push('- **Primary Document Links**:');
-        lines.push('  - County Property Tax / Parcel PDF: https://www.hennepin.us/residents/property/property-information-search');
-        lines.push('  - Municipal Rental Licensing Registry: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0');
-        lines.push('  - Labor Standards Registry: https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(item.owner_name || ''));
+        if (/hennepin/i.test(item.county || '')) {
+          lines.push('  - Hennepin Co. parcel search: https://www.hennepincounty.gov/services/property/property-information-search');
+        } else {
+          lines.push('  - County parcel search: see the ' + (item.county || 'county') + ' assessor (no verified deep link on file)');
+        }
+        lines.push('  - Licensing map data (ArcGIS service): https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0');
+        if (item.wage_theft_match) {
+          const caseId = item.wage_theft_match.split('::')[0];
+          lines.push('  - Labor citation ' + caseId + ': https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(caseId));
+        } else {
+          lines.push('  - Labor citation: none on record');
+        }
         lines.push('');
       });
 

@@ -14,9 +14,9 @@ export const AGENCY_SOURCE_LABELS: Record<string, string> = {
   STPAUL_HREEO: "St. Paul HREEO Finding",
 };
 
-/** Fallback portal per agency when a record has no direct docket URL. */
+/** Fallback per agency when a record has no direct docket URL. Docs live on R2; interactive portals are last resort. */
 export const AGENCY_PORTAL_URLS: Record<string, string> = {
-  MN_AG_OFFICE: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2025.pdf",
+  MN_AG_OFFICE: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/mn-ag-2025-labor-report-p5.pdf",
   COURT_JUDGMENT: "https://publicaccess.courts.state.mn.us",
   US_DOL_WHD: "https://enforcement.dol.gov",
   MN_DLI: "https://www.dli.mn.gov",
@@ -26,8 +26,8 @@ export const AGENCY_PORTAL_URLS: Record<string, string> = {
 
 /** Agency portals rendered ONCE in a global strip — never repeated per case card. */
 export const GLOBAL_PORTALS: Array<{ href: string; title: string; sub: string }> = [
-  { href: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2025.pdf", title: "MN AG Labor Report 2025 (PDF)", sub: "State wage-theft enforcement findings" },
-  { href: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2024.pdf", title: "MN AG Labor Report 2024 (PDF)", sub: "State wage-theft enforcement findings" },
+  { href: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/mn-ag-2025-labor-report-p5.pdf", title: "MN AG Labor Report 2025 (PDF, p.5 excerpt)", sub: "State wage-theft enforcement findings — hosted copy" },
+  { href: "https://twin-cities-wage-theft-worker.a-8c6.workers.dev/docs/mn-ag-2024-labor-report-p6.pdf", title: "MN AG Labor Report 2024 (PDF, p.6 excerpt)", sub: "State wage-theft enforcement findings — hosted copy" },
   { href: "https://enforcement.dol.gov", title: "US DOL Enforcement Database", sub: "Federal WHD case search" },
   { href: "https://publicaccess.courts.state.mn.us", title: "MN Court Records (MCRO)", sub: "District court case search" },
   { href: "https://www.dli.mn.gov", title: "MN Dept. of Labor & Industry", sub: "State orders & wage claims" },

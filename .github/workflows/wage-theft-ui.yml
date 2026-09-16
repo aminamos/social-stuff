@@ -3,11 +3,11 @@ name: wage-theft-ui
 on:
   push:
     paths:
-      - "02-corporate-shell-deanonymizer/cloudflare-wage-theft/**"
+      - "social-tokens-projects/02-corporate-shell-deanonymizer/cloudflare-wage-theft/**"
       - ".github/workflows/wage-theft-ui.yml"
   pull_request:
     paths:
-      - "02-corporate-shell-deanonymizer/cloudflare-wage-theft/**"
+      - "social-tokens-projects/02-corporate-shell-deanonymizer/cloudflare-wage-theft/**"
 
 jobs:
   test:
@@ -19,7 +19,13 @@ jobs:
           deno-version: v2.x
       - name: Typecheck
         run: deno check src/ui.ts src/ui.test.ts src/data.ts
-        working-directory: 02-corporate-shell-deanonymizer/cloudflare-wage-theft
+        working-directory: social-tokens-projects/02-corporate-shell-deanonymizer/cloudflare-wage-theft
       - name: Unit tests
         run: deno test src/ui.test.ts
-        working-directory: 02-corporate-shell-deanonymizer/cloudflare-wage-theft
+        working-directory: social-tokens-projects/02-corporate-shell-deanonymizer/cloudflare-wage-theft
+      - name: Docs route tests
+        run: deno test --no-check --sloppy-imports src/docs-route.test.ts
+        working-directory: social-tokens-projects/02-corporate-shell-deanonymizer/cloudflare-wage-theft
+      - name: CSV export tests
+        run: deno test --no-check --sloppy-imports src/csv-export.test.ts
+        working-directory: social-tokens-projects/02-corporate-shell-deanonymizer/cloudflare-wage-theft
