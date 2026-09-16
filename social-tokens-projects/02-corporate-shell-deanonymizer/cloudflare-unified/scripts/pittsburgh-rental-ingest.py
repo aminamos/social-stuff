@@ -14,7 +14,8 @@ Row mapping (rental_licenses columns per schema.sql):
   owner_name <- business_name, address/address fields, city 'Pittsburgh',
   county 'Allegheny', state 'PA', status <- license_state.
 
-Emits a single .sql file runnable by `wrangler d1 execute --file`.
+Emits a single .sql file runnable by `wrangler d1 execute <db> --remote --file`
+(`--remote` required: without it wrangler writes to the local simulator).
 Idempotent: INSERT ... ON CONFLICT(parcel_id) DO UPDATE.
 """
 

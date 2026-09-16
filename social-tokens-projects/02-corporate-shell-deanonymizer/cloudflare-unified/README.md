@@ -7,7 +7,8 @@ deployed and untouched — all future routes land here.
 - Same D1 (`social-housing-db`) and R2 (`landlord-directory-data`) bindings as the other three.
 - Crons merged: housing `0 4 * * *` + `*/15 * * * *`, labor `0 5 * * *`, crossover `0 6 * * *`.
 - Deploy: `npm run deploy` (or `wrangler deploy`) from this directory.
-- Init/upgrade D1: `wrangler d1 execute social-housing-db --file=schema.sql`
+- Init/upgrade D1: `wrangler d1 execute social-housing-db --remote --file=schema.sql`
+  (`--remote` required: without it wrangler writes to the local simulator)
   (adds `provenance_type`/`source_docket_url` on `wage_theft_records`, plus
   `worker_reports` and `sync_logs` — the base schema lacked them even though the
   standalone workers query them).

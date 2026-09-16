@@ -4,3 +4,14 @@
 - If there is an obvious bug, fix it.
 - If there is an uncovered test area, write the test.
 - Only ask when a choice would change scope, cost, or shape and cannot be reasonably defaulted or reversed.
+
+# Cloudflare guardrails (learned from a real incident)
+
+- Wrangler 4 `r2 object`, `d1 execute`, and `d1 migrations apply` default to the
+  LOCAL simulator. Any command meant to touch real data MUST pass `--remote`
+  explicitly, and R2 uploads MUST be verified with a `--remote` read
+  (byte-size check) before declaring success. Never drop a `--remote` flag.
+- `.wrangler/` is gitignored local simulator state. Never `rm -rf .wrangler`
+  from the repo root — scope any cleanup to the specific project dir
+  (e.g. `rm -rf <project>/.wrangler`), and prefer leaving it alone since it
+  regenerates on next `wrangler dev`.

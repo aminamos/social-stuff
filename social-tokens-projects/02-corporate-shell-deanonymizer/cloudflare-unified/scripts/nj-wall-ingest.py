@@ -17,7 +17,8 @@ Row mapping (wage_theft_records columns per schema.sql):
   Industry Type -> industry_description, Violation Type -> violation_type.
 
 Emits chunked .sql files (<=5000 upserts each) runnable by
-`wrangler d1 execute --file`. Idempotent: INSERT ... ON CONFLICT(case_id) DO UPDATE.
+`wrangler d1 execute <db> --remote --file`. Idempotent: INSERT ... ON CONFLICT(case_id) DO UPDATE.
+(`--remote` required: without it wrangler writes to the local simulator.)
 """
 
 import argparse

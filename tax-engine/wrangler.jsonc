@@ -9,7 +9,8 @@
   // persistence endpoints return 501). To enable persistence:
   //   1. wrangler d1 create tax-engine           -> paste real database_id
   //   2. wrangler r2 bucket create tax-engine-artifacts
-  //   3. wrangler d1 migrations apply DB         (remote)
+  //   3. wrangler d1 migrations apply DB --remote   (real DB; without
+  //      --remote it hits the local simulator — see repo AGENTS.md)
   // For local dev, any ID works: `wrangler d1 migrations apply DB --local`.
   "d1_databases": [
     {

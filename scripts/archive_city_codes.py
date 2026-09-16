@@ -23,6 +23,7 @@ import argparse
 import json
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -58,6 +59,24 @@ def fetch(url: str) -> tuple[bytes, str] | None:
         return None
 
 
+def remote_size_matches(r2_key: str, want: int) -> bool:
+    """Fetch the just-uploaded key from REMOTE R2 and compare byte size.
+
+    This is the guard against wrangler's local-simulator default: a `put`
+    without `--remote` reports success while landing in `.wrangler/state`.
+    """
+    with tempfile.NamedTemporaryFile(delete=True) as tmp:
+        try:
+            subprocess.run(
+                ["wrangler", "r2", "object", "get", f"{BUCKET}/{r2_key}",
+                 "--remote", "--file", tmp.name],
+                check=True, cwd=ROOT, capture_output=True,
+            )
+        except subprocess.CalledProcessError:
+            return False
+        return Path(tmp.name).stat().st_size == want
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--push", action="store_true",
@@ -70,6 +89,7 @@ def main() -> int:
 
     CACHE.mkdir(parents=True, exist_ok=True)
     docs = []
+    failures: list[str] = []
     for i, (county, url) in enumerate(targets, 1):
         print(f"[{i}/{len(targets)}] {county}...", flush=True)
         got = fetch(url)
@@ -82,18 +102,31 @@ def main() -> int:
         r2_key = f"city-code/{county}{ext}"
         print(f"  saved {len(content)} bytes -> {r2_key}")
         if args.push:
+            # NOTE: `wrangler r2 object` defaults to a LOCAL simulator.
+            # --remote is required below; remote_size_matches verifies the
+            # bytes actually reached the real bucket. Never drop either.
+            ctype = "application/pdf" if ext == ".pdf" else "text/html"
+            ok = False
             for attempt in range(4):
                 try:
                     subprocess.run(
                         ["wrangler", "r2", "object", "put", f"{BUCKET}/{r2_key}",
-                         "--file", str(local), "--remote"], check=True, cwd=ROOT,
+                         "--file", str(local), "--content-type", ctype,
+                         "--remote"], check=True, cwd=ROOT,
                     )
-                    break
-                except subprocess.CalledProcessError:
-                    if attempt == 3:
-                        print(f"  UPLOAD FAILED after retries, skipping: {r2_key}")
+                    if remote_size_matches(r2_key, len(content)):
+                        print(f"  verified {len(content)} bytes in remote bucket")
+                        ok = True
                         break
+                    print(f"  VERIFY MISMATCH (remote size != {len(content)}), "
+                          f"retrying: {r2_key}")
+                except subprocess.CalledProcessError:
+                    print(f"  attempt {attempt + 1} failed, retrying: {r2_key}")
+                if attempt < 3:
                     time.sleep(5 * (attempt + 1))
+            if not ok:
+                print(f"  UPLOAD FAILED after retries, skipping: {r2_key}")
+                failures.append(r2_key)
         docs.append({"county": county, "kind": "city_code",
                      "source_url": url, "r2_key": r2_key})
 
@@ -113,6 +146,11 @@ def main() -> int:
         )
     elif not args.push:
         print("re-run with --push to upload to R2 and insert into D1")
+    if failures:
+        print(f"{len(failures)} R2 upload(s) FAILED verification against the "
+              f"remote bucket (see above); D1 rows for these keys were still "
+              f"written — re-run with --push to retry: {failures}")
+        return 1
     return 0
 
 

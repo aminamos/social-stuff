@@ -18,7 +18,8 @@ Address is composed from HOUSE_NR_LO/HI + SDIR + STREET + STTYPE (+ GEO_ZIP_CODE
 Owner mailing address from OWNER_MAIL_ADDR / OWNER_CITY_STATE / OWNER_ZIP.
 
 Emits chunked .sql files (<=5000 upserts each) runnable by
-`wrangler d1 execute --file`. Idempotent: INSERT ... ON CONFLICT(parcel_id) DO UPDATE.
+`wrangler d1 execute <db> --remote --file`. Idempotent: INSERT ... ON CONFLICT(parcel_id) DO UPDATE.
+(`--remote` required: without it wrangler writes to the local simulator.)
 """
 
 import argparse
