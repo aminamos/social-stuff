@@ -1,57 +1,62 @@
-# IRS Approval Path for Tax Software (e-file)
+# IRS Approval Checklist for Tax Software
 
-Recreated from the original research notes. Authoritative sources are the
-IRS publications and irs.gov pages linked below — recheck them each year.
+IRS charges no fee for this process. Time + rework is the cost.
 
-## Steps
+## 1. Become an Authorized IRS e-file Provider
+- Apply through IRS e-Services (Form 8633 process, Pub 3112).
+- Get an **EFIN** (Electronic Filing Identification Number).
+- Pass suitability check on principals (background, tax compliance, criminal history; fines/debts can disqualify).
+- Choose provider role(s): software developer, transmitter, ERO — can be the same company or split (many startups outsource transmitting first).
+- Allow 4–8 weeks; this is a human legal process — budget weeks, not days.
+- Source: https://www.irs.gov/e-file-providers/information-and-technical-guidance-for-software-developers-and-transmitters
 
-1. **Apply to be an Authorized e-file Provider** (IRS e-services).
-   - Get an **EFIN** (Electronic Filing Identification Number).
-   - Pass a **suitability check** on principals (background, tax compliance,
-     criminal history; fines/debts can disqualify).
-   - Choose provider role(s): software developer, transmitter, ERO.
-   - https://www.irs.gov/e-file-providers
+## 2. Build to spec
+- **Pub 4163** — Information for Authorized IRS e-file Providers.
+- **Pub 4164** — Modernized e-File Guide for Software Developers and Transmitters (schemas, business rules, XML).
+- **Pub 1346** — Electronic Return File Specifications for Individual Returns.
+- MeF Submission Composition Guide + State schema guides.
+- Form schemas + business rules are published each fall for the coming season; individual 1040-series is one MeF package, states have their own.
 
-2. **Build to MeF (Modernized e-File) specs.**
-   - Form schemas + business rules published each fall for the coming season.
-   - Individual 1040-series MeF package; states have their own schemas.
-   - Publications: **Pub. 4163** (MeF schemas for Form 1040 software
-     developers), **Pub. 4164** (MeF guide for software developers and
-     transmitters), **Pub. 1346** (electronic return file specs).
+## 3. Pass ATS (Assurance Testing System)
+How it works (per IRS "How tax preparation software is approved"):
+1. IRS publishes test tax returns + instructions (MeF User Guides page; see Pub 1436 test package).
+2. You generate the returns in your software and transmit as MeF XML.
+3. e-help Desk checks: (a) calculations match IRS answers, (b) XML formats/transmits/receives/views correctly.
+4. On pass, IRS approves that software for e-filing that return type.
+5. You may then market it as approved for e-filing.
 
-3. **Pass ATS (Assurance Testing System).**
-   - Free IRS-run testing: submit a battery of test returns via the same MeF
-     pipeline used in production.
-   - IRS checks: valid XML against the schema, correct business-rule
-     application, and **calculated amounts matching IRS answers**.
-   - Repeat per form/schedule set supported and **every tax year**.
+Must repeat **per supported form (1040, 1120, 990, 1042, etc.) and every tax year**.
 
-4. **Compliance obligations after approval.**
-   - Safeguarding: **Pub. 4557** (Safeguarding Taxpayer Data), GLBA Safeguards
-     Rule, IRS Security Summit requirements; TIGTA/GAO reviews possible.
-   - Record retention, rejection monitoring, refund/acknowledgment handling,
-     fraud detection duties (suspicious returns, IP PIN).
-   - Annual e-file provider responsibilities (Pub. 3112, Application and
-     Participation).
+Source: https://www.irs.gov/e-file-providers/how-tax-preparation-software-is-approved-for-electronic-filing
 
-5. **States**: each state has its own MeF package + approval/ATS testing;
-   some piggyback federal status, some don't.
+## 4. States (separate)
+- Most states ride Fed/State MeF but require their own registration + testing.
+- Budget per-state QA every year; some states lag IRS schema releases.
+
+## 5. Security / data protection + ongoing compliance
+- Written Information Security Plan (WISP) — IRS now expects this from preparers/providers.
+- Safeguarding: **Pub 4557** (Safeguarding Taxpayer Data), GLBA Safeguards Rule, IRS Security Summit requirements; TIGTA/GAO reviews possible.
+- Encrypt PII at rest + in transit, least-privilege access, logging, MFA.
+- Pub 1075 safeguards mindset if handling return data; state breach-notification laws apply.
+- Record retention, rejection monitoring, refund/acknowledgment handling, fraud detection duties (suspicious returns, IP PIN).
+- Annual e-file provider responsibilities per Pub 3112.
+- SOC 2 Type II + annual pen test strongly recommended for any SaaS handling SSNs: ~$25k–$100k/yr.
+
+## 6. Yearly recertification rhythm
+- Fall (~November): new schemas + ATS test cases drop → update engine → internal QA → ATS submit → fix → pass. Budgets must assume this annual rebuild cycle forever.
+- Winter: filing season support surge.
+- Spring/summer: law changes for next year + tech debt.
 
 ## Key publications
-
-- Pub. 3112 — IRS e-file Application and Participation
-- Pub. 4163 — Modernized e-File (MeF) Information for Authorized IRS
-  e-file Providers / 1040 schema package
-- Pub. 4164 — MeF Guide for Software Developers and Transmitters
-- Pub. 1346 — Electronic Return File Specifications for Individual Returns
-- Pub. 4557 — Safeguarding Taxpayer Data
-- Pub. 1436 — Test Package for electronic filers (ATS scenarios)
+- Pub 3112 — IRS e-file Application and Participation
+- Pub 4163 — MeF Information for Authorized IRS e-file Providers / 1040 schema package
+- Pub 4164 — MeF Guide for Software Developers and Transmitters
+- Pub 1346 — Electronic Return File Specifications for Individual Returns
+- Pub 4557 — Safeguarding Taxpayer Data
+- Pub 1436 — Test Package for electronic filers (ATS scenarios)
 - irs.gov/e-file-providers — portal + updates
 
-## Gotchas
-
-- EFIN suitability is a human legal process — budget weeks, not days.
-- ATS answer mismatches on the core 1040 are the most common blocker; a
-  rigorous known-answer test harness pays for itself here.
-- Every November-ish, new schema packages drop; budgets must assume an
-  annual rebuild cycle forever.
+## Practical tips
+- Build an ATS harness early: scripted test returns with expected refunds/AGI so calc regressions show instantly. ATS answer mismatches on the core 1040 are the most common blocker — a rigorous known-answer harness pays for itself.
+- Log every MeF acknowledgement + error code; retransmit logic is where MVPs fail.
+- Keep a tax analyst in the loop — devs alone misread worksheets.

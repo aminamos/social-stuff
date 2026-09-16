@@ -2,3 +2,6 @@
 .venv/
 data/cache/
 node_modules/
+.firecrawl/
+tax-software-irs-cost/irs-docs-2025/
+tax-software-irs-cost/mn-docs-2025/
