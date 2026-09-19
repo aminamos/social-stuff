@@ -21,6 +21,26 @@ This repo is also where I show how I use AI to help civic tech and social causes
 * **[Decarb My State](https://decarb-my-state.a-8c6.workers.dev)** — state-by-state decarbonization progress for all 50 states + DC: emissions through 2022 (EPA), power generation through 2024 (EIA). Source: [aminamos/decarbonize-my-state](https://github.com/aminamos/decarbonize-my-state).
 * **[Roseville STR Feasibility Engine](https://roseville-str-feasibility.a-8c6.workers.dev)** ([source](roseville-str-feasibility/)) — models Roseville, MN City Code Ch. 907/908/909 for any address: seasonal STR frequency caps, 500-ft license spacing, occupancy ceilings, and real revenue limits vs. naive Airbnb pro-formas, backed by Ramsey County parcel data.
 * **[Michigan Prop A Uncap Counterfactual](https://prop-a-counterfactual.a-8c6.workers.dev)** ([source](prop-a-counterfactual/)) — taxes every MI parcel at full SEV instead of Proposal-A-capped taxable value: ≈ +$8.3B/yr vs the $11.4B income tax (~72% coverage), +5–12k annual sales turnover, −1.6–3.3% residential price effect. County-level gap explorer (D1) + archived Treasury source PDFs (R2); see [ANALYSIS.md](prop-a-counterfactual/ANALYSIS.md).
+* **[Rural MN Planning Bot](https://rural-planning-bot.a-8c6.workers.dev)** ([source](workers/planning-bot/)) — "Can I Build / Do This?" source coverage for all 60 nonmetro Minnesota counties: verified GIS portals, parcel services, zoning ordinances, city codes, and assessor links in D1, archived code documents in R2, and a monthly cron that re-checks tracked URLs so ordinance changes get detected. Source material is collected by the [rural county sweep pipeline](#rural-county-data-pipeline-data--scripts).
+
+---
+
+## Repo Map
+
+| Path | What it is |
+|---|---|
+| [`regions/`](regions/) | Per-region civic tech directories (see below) |
+| [`social-tokens-projects/`](social-tokens-projects/README.md) | Agent systems + Cloudflare Workers for eviction defense, landlord de-anonymization, SSDI hearings |
+| [`social-housing-info/`](social-housing-info/) | Social housing info site (Astro 7 + Cloudflare adapter) |
+| [`tax-engine/`](tax-engine/) | Deterministic TY2025 federal 1040 tax engine + Cloudflare Worker |
+| [`tax-software-irs-cost/`](tax-software-irs-cost/) | Cost model, IRS approval checklist, and TY2025 doc corpus |
+| [`roseville-str-feasibility/`](roseville-str-feasibility/) | Roseville STR feasibility worker (rules engine, D1 rule params, archived ordinances) |
+| [`prop-a-counterfactual/`](prop-a-counterfactual/) | Michigan Prop A uncapping model (Worker + D1 + R2) |
+| [`census-data/`](census-data/) | Census P60-291 health insurance coverage report and tables |
+| [`workers/planning-bot/`](workers/planning-bot/) | Rural MN Planning Bot worker (D1 + R2 + scheduled URL re-checks) |
+| [`data/`](data/), [`scripts/`](scripts/) | Rural county source discovery pipeline feeding the Planning Bot |
+| [`field-notes/`](field-notes/) | Field Notes: AI & Earth site (Vite + Cloudflare) |
+| [`.github/workflows/`](.github/workflows/) | Deploys for the de-anonymizer, wage theft, and unified registry workers |
 
 ---
 
@@ -51,9 +71,22 @@ High-leverage agent systems directing LLM tokens toward structural transparency 
 
 ---
 
-## Ideas
+## Rural County Data Pipeline ([`data/`](data/) + [`scripts/`](scripts/))
 
-* **[Rural Areas: AI Force-Multiplier Ideas](rural-ideas.md)**: solo-build concepts for small towns, farms, rural clinics, and local businesses — Buffalo, Hennepin suburbs, Anoka/Ramsey/Washington counties, Menomonie WI, and Roseville MN.
+Source material for the Planning Bot, built only from URLs that actually return HTTP 200 — nothing guessed:
+
+1. [`scripts/parse_usda_rural.py`](scripts/parse_usda_rural.py) — derives the 60 nonmetro MN counties from the USDA ERS rural definition ([`data/ERS_MN_rural.pdf`](data/ERS_MN_rural.pdf)) and OMB metro delineations → [`data/mn_rural_counties.json`](data/mn_rural_counties.json).
+2. [`scripts/rural_county_sweep.py`](scripts/rural_county_sweep.py) — discovers public ArcGIS portal/parcel endpoints per county via the ArcGIS Online search API → [`data/county_sources.csv`](data/county_sources.csv) / [`.json`](data/county_sources.json); anything unverified is left null with `needs_review=true`.
+3. [`scripts/merge_review_batches.py`](scripts/merge_review_batches.py) — folds human-researched zoning ordinance, city code, and assessor URLs from [`data/review_batches/`](data/review_batches/) into the source records, re-verifying every URL with an independent request; open gaps are tracked in [`data/county_review.md`](data/county_review.md).
+4. [`scripts/archive_city_codes.py`](scripts/archive_city_codes.py) + [`scripts/load_to_d1.py`](scripts/load_to_d1.py) — snapshot code documents to R2 and load county records into the `rural-planning-bot` D1 database ([`data/seed_counties.sql`](data/seed_counties.sql), [`data/city_code_docs.sql`](data/city_code_docs.sql)).
+
+---
+
+## Ideas & Research
+
+* **[Rural Areas: AI Force-Multiplier Ideas](rural-ideas.md)**: solo-build concepts for small towns, farms, rural clinics, and local businesses — Buffalo, Hennepin suburbs, Anoka/Ramsey/Washington counties, Menomonie WI, and Roseville MN. Idea #1 (the Planning Bot) is now live above.
+* **[Estimating AI Models' Environmental Footprint Without Lab Disclosures](ai-model-environmental-estimation.md)**: what Meta, OpenAI, Anthropic, and Google actually publish about training/inference energy, carbon, and water; compute → energy → emissions → water estimation methods; per-lab supply-chain anchors; and a BCC-able disclosure-request email. Companion research to [Field Notes: AI & Earth](https://field-notes.awdnowusaa.cc/).
+* **[Full Session Notes](FULL_SESSION_NOTES.md)**: the research dossier behind this directory — the Minnesota grassroots nonprofit audit, maintenance-gap findings, and CDP expansion notes.
 
 ---
 
@@ -115,7 +148,7 @@ These issues feature active maintainers, isolated diffs, and immediate social or
 
 ## In Review
 
-Opened PRs awaiting maintainer review. Move to Done once merged.
+Opened PRs awaiting maintainer review (all re-checked open as of 2026-09-16). Move to Done once merged.
 
 | Project | Issue | PR | Status |
 |---|---|---|---|
