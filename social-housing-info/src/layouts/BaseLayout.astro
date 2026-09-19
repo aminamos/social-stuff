@@ -1,0 +1,40 @@
+---
+import Navigation from "../components/Navigation.astro";
+import "../styles/global.css";
+
+export interface Props {
+  title?: string;
+  description?: string;
+  frontmatter?: { title?: string; description?: string };
+  content?: { title?: string; description?: string };
+}
+const fm = Astro.props.frontmatter ?? Astro.props.content ?? {};
+const title = Astro.props.title ?? fm.title ?? "Untitled";
+const description = Astro.props.description ?? fm.description;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — Social Housing Info</title>
+    {description && <meta name="description" content={description} />}
+    <meta name="og:title" content={`${title} — Social Housing Info`} />
+    {description && <meta name="og:description" content={description} />}
+    <meta name="og:type" content="website" />
+  </head>
+  <body>
+    <div class="site-wrapper">
+      <Navigation />
+      <main>
+        <slot />
+      </main>
+      <footer class="site-footer">
+        <p>
+          A public information resource. Not legal advice.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

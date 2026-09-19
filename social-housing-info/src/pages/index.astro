@@ -1,0 +1,76 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Home"
+  description="A clear, evidence-based guide to rent control, rent stabilization, and how they work — with a focus on New York and global examples."
+>
+  <section class="hero">
+    <p class="tagline">Housing policy, explained</p>
+    <h1>Rent control doesn't have to be confusing.</h1>
+    <p>
+      Politicians, landlords, and pundits talk past each other on rent regulation.
+      This site cuts through the noise: what the terms actually mean, how the
+      policies work in practice, and what the evidence really says.
+    </p>
+  </section>
+
+  <div class="card-grid">
+    <a href="/definitions" class="card">
+      <h2>Definitions</h2>
+      <p>Rent control, rent stabilization, vacancy control — what each term means and why the difference matters.</p>
+    </a>
+    <a href="/mamdani-plan" class="card">
+      <h2>NYC Rent Freeze</h2>
+      <p>How Zohran Mamdani's 2026 freeze works — coverage, exceptions, what happens after, and the de Blasio precedent.</p>
+    </a>
+    <a href="/block-by-block" class="card">
+      <h2>NYC Block by Block</h2>
+      <p>Mamdani's $28 billion housing development plan — 200,000 new affordable homes, municipal developer, and the Construction Justice Act.</p>
+    </a>
+    <a href="/everywhere-else" class="card">
+      <h2>Everywhere Else</h2>
+      <p>Community land trusts, social housing, and public development from Hawaii to Seattle and across the country.</p>
+    </a>
+    <a href="/new-york" class="card">
+      <h2>NYC History</h2>
+      <p>How rent stabilization works in NYC: the Rent Guidelines Board, the 2019 reforms, and decades of history.</p>
+    </a>
+    <a href="/resources" class="card">
+      <h2>Resources</h2>
+      <p>Academic papers, policy organizations, data sources, and further reading.</p>
+    </a>
+  </div>
+
+  <hr />
+
+  <section>
+    <h2>Fact Check: Common claims about rent regulation</h2>
+
+    <div class="callout">
+      <h3>"Rent control always reduces housing supply."</h3>
+      <p><strong>Not the modern kind.</strong> The University of Minnesota's 2021 <a href="https://www.cura.umn.edu/sites/cura.umn.edu/files/2021-08/Minneapolis-Rent-Stabilization-Study-web.pdf">Minneapolis Rent Stabilization Study</a> found <em>"little empirical evidence that rent control policies negatively impact new construction."</em> Most programs exempt new buildings, and construction depends far more on credit markets and local cycles than on rent caps. A CPI + 3% cap still lets landlords earn 90th-percentile returns. See <a href="/everywhere-else">Everywhere Else</a> for examples.</p>
+    </div>
+
+    <div class="callout">
+      <h3>"Rent control is the same as a rent freeze."</h3>
+      <p><strong>No.</strong> A rent <em>freeze</em> (0% increases for a set period) is one specific policy. Modern rent <em>stabilization</em> allows annual increases tied to inflation or operating costs — typically 3–7%. Zohran Mamdani's 2026 freeze is the first-ever two-year freeze in NYC history. See the <a href="/mamdani-plan">NYC Rent Freeze</a> page for the full details.</p>
+    </div>
+
+    <div class="callout">
+      <h3>"What about San Francisco? Didn't rent control backfire there?"</h3>
+      <p><strong>That study studied a different policy.</strong> The 2019 Diamond/McQuade/Qian paper looked at San Francisco's 1994 expansion of a <em>first-generation hard-cap</em> system that applied to all units, including new construction. No modern proposal replicates that design. The paper itself notes its findings don't generalize to second-generation rent stabilization.</p>
+    </div>
+
+    <div class="callout">
+      <h3>"Won't this hurt small landlords?"</h3>
+      <p><strong>Most programs exempt small buildings.</strong> California's AB 1482 exempts single-family homes and owner-occupied duplexes. Many local ordinances have owner-occupancy carve-outs. The regulations are designed to target corporate landlords and large portfolios, not mom-and-pop owners.</p>
+    </div>
+
+    <div class="callout">
+      <h3>"If the private market won't build affordable housing, what's the alternative?"</h3>
+      <p><strong>Public and community development.</strong> Mamdani's <a href="/block-by-block">Block by Block</a> plan creates a municipal development corporation to build directly on city-owned land. Community land trusts in <a href="/everywhere-else">Hawaii, Seattle, and across the country</a> have been building permanently affordable homes for decades — outside the private market entirely. When private developers won't deliver, public institutions can.</p>
+    </div>
+  </section>
+</BaseLayout>

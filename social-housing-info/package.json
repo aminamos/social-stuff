@@ -1,0 +1,19 @@
+{
+  "name": "social-housing-info",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "deploy": "astro build && wrangler deploy"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^14.0.1",
+    "astro": "^7.0.3"
+  },
+  "devDependencies": {
+    "vite": "^8.0.13"
+  }
+}
