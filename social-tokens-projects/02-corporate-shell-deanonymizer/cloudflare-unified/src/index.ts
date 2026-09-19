@@ -1,4 +1,4 @@
-// Unified Twin Cities Housing + Labor Standards Registry (4th worker).
+// Unified US Housing + Labor Standards Registry (4th worker).
 //
 // Merges the three standalone workers without changing their behavior:
 //   - housing registry  (mpls-rental-sync-worker):  /search /cities /sync/* ...
