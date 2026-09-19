@@ -25,9 +25,8 @@ npm run build      # vite build
 npm run deploy     # build + wrangler deploy
 npm run typecheck  # tsc --noEmit
 npm run cf-typegen # wrangler types
+npm test           # vitest run (equivalence math unit tests)
 ```
-
-No test script is defined.
 
 ## Configuration
 
@@ -41,7 +40,7 @@ No test script is defined.
 
 ## Notes
 
-- No tests; verify UI changes by running the dev server.
+- Tests: `npm test` runs the vitest suite for the equivalence math (`src/lib/equivalence.test.ts`). Verify UI changes by running the dev server.
 - Generated or build output present locally: `dist/`, `.tanstack/`, `.wrangler/`, and `node_modules/`.
 - When every provider fails, the answer endpoint reports each provider's status and error message instead of a generic failure. The curated evidence library is still shown in the UI.
 

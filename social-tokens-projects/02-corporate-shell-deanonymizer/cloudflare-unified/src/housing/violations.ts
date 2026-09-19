@@ -126,13 +126,13 @@ export const seattleViolations: ViolationAdapter = {
     pageSize: 1000,
     orderBy: ":id",
   },
-  violationIdField: "violationid",
-  classField: "class",
-  statusField: "status",
-  openField: "status",
-  openValues: ["Open"],
+  violationIdField: "recordnum",
+  classField: "recordtype",
+  statusField: "statuscurrent",
+  openField: "statuscurrent",
+  openValues: ["Awaiting Information", "Citation Issued", "EO Repair Restore Issued", "EO Vacate Close Issued", "Hazard Correction Order Issued", "Initiated", "Issued", "NOV Issued", "Open Duplicate", "Referred to Law", "Reviews In Process", "Stop Work Issued", "Under Investigation"],
   enabled: false,
-  note: "Declared but disabled: schema unverified, no fill. Flip enabled after verifying id/class/status fields.",
+  note: "Schema verified 2026-09-18 against live data.seattle.gov (recordnum/recordtype/statuscurrent; recordtype in {Complaint, Citation, Notice of Violation, Tenant Relocation, Unfit Building}). Open values are the non-terminal statuscurrent values; terminal: Completed/Closed/Compliance Achieved/Reviews Completed/Application Completed/Withdrawn/Warning. Ready to flip enabled.",
 };
 
 /** Chicago violations (dataset 22u3-xenr). Declared behind enabled=false. */
@@ -148,13 +148,15 @@ export const chicagoViolations: ViolationAdapter = {
     pageSize: 1000,
     orderBy: ":id",
   },
-  violationIdField: "violationid",
-  classField: "class",
-  statusField: "status",
-  openField: "status",
-  openValues: ["Open"],
+  violationIdField: "id",
+  classField: "violation_code",
+  statusField: "violation_status",
+  openField: "violation_status",
+  openValues: ["OPEN"],
+  addressField: "address",
+  descriptionField: "violation_description",
   enabled: false,
-  note: "Declared but disabled: schema unverified, no fill. Flip enabled after verifying id/class/status fields.",
+  note: "Schema verified 2026-09-18 against live data.cityofchicago.org (id/violation_code/violation_status; status in {OPEN, COMPLIED, NO ENTRY}). No severity-class letter published; violation_code (e.g. CN194039) stored as class. Ready to flip enabled.",
 };
 
 /**
