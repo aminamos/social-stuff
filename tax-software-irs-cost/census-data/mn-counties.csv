@@ -1,0 +1,88 @@
+state_abbr,state_name,state_fips,county_fips,geoid,county_name,class_fp
+MN,Minnesota,27,001,27001,Aitkin County,H1
+MN,Minnesota,27,003,27003,Anoka County,H1
+MN,Minnesota,27,005,27005,Becker County,H1
+MN,Minnesota,27,007,27007,Beltrami County,H1
+MN,Minnesota,27,009,27009,Benton County,H1
+MN,Minnesota,27,011,27011,Big Stone County,H1
+MN,Minnesota,27,013,27013,Blue Earth County,H1
+MN,Minnesota,27,015,27015,Brown County,H1
+MN,Minnesota,27,017,27017,Carlton County,H1
+MN,Minnesota,27,019,27019,Carver County,H1
+MN,Minnesota,27,021,27021,Cass County,H1
+MN,Minnesota,27,023,27023,Chippewa County,H1
+MN,Minnesota,27,025,27025,Chisago County,H1
+MN,Minnesota,27,027,27027,Clay County,H1
+MN,Minnesota,27,029,27029,Clearwater County,H1
+MN,Minnesota,27,031,27031,Cook County,H1
+MN,Minnesota,27,033,27033,Cottonwood County,H1
+MN,Minnesota,27,035,27035,Crow Wing County,H1
+MN,Minnesota,27,037,27037,Dakota County,H1
+MN,Minnesota,27,039,27039,Dodge County,H1
+MN,Minnesota,27,041,27041,Douglas County,H1
+MN,Minnesota,27,043,27043,Faribault County,H1
+MN,Minnesota,27,045,27045,Fillmore County,H1
+MN,Minnesota,27,047,27047,Freeborn County,H1
+MN,Minnesota,27,049,27049,Goodhue County,H1
+MN,Minnesota,27,051,27051,Grant County,H1
+MN,Minnesota,27,053,27053,Hennepin County,H1
+MN,Minnesota,27,055,27055,Houston County,H1
+MN,Minnesota,27,057,27057,Hubbard County,H1
+MN,Minnesota,27,059,27059,Isanti County,H1
+MN,Minnesota,27,061,27061,Itasca County,H1
+MN,Minnesota,27,063,27063,Jackson County,H1
+MN,Minnesota,27,065,27065,Kanabec County,H1
+MN,Minnesota,27,067,27067,Kandiyohi County,H1
+MN,Minnesota,27,069,27069,Kittson County,H1
+MN,Minnesota,27,071,27071,Koochiching County,H1
+MN,Minnesota,27,073,27073,Lac qui Parle County,H1
+MN,Minnesota,27,075,27075,Lake County,H1
+MN,Minnesota,27,077,27077,Lake of the Woods County,H1
+MN,Minnesota,27,079,27079,Le Sueur County,H1
+MN,Minnesota,27,081,27081,Lincoln County,H1
+MN,Minnesota,27,083,27083,Lyon County,H1
+MN,Minnesota,27,085,27085,McLeod County,H1
+MN,Minnesota,27,087,27087,Mahnomen County,H1
+MN,Minnesota,27,089,27089,Marshall County,H1
+MN,Minnesota,27,091,27091,Martin County,H1
+MN,Minnesota,27,093,27093,Meeker County,H1
+MN,Minnesota,27,095,27095,Mille Lacs County,H1
+MN,Minnesota,27,097,27097,Morrison County,H1
+MN,Minnesota,27,099,27099,Mower County,H1
+MN,Minnesota,27,101,27101,Murray County,H1
+MN,Minnesota,27,103,27103,Nicollet County,H1
+MN,Minnesota,27,105,27105,Nobles County,H1
+MN,Minnesota,27,107,27107,Norman County,H1
+MN,Minnesota,27,109,27109,Olmsted County,H1
+MN,Minnesota,27,111,27111,Otter Tail County,H1
+MN,Minnesota,27,113,27113,Pennington County,H1
+MN,Minnesota,27,115,27115,Pine County,H1
+MN,Minnesota,27,117,27117,Pipestone County,H1
+MN,Minnesota,27,119,27119,Polk County,H1
+MN,Minnesota,27,121,27121,Pope County,H1
+MN,Minnesota,27,123,27123,Ramsey County,H1
+MN,Minnesota,27,125,27125,Red Lake County,H1
+MN,Minnesota,27,127,27127,Redwood County,H1
+MN,Minnesota,27,129,27129,Renville County,H1
+MN,Minnesota,27,131,27131,Rice County,H1
+MN,Minnesota,27,133,27133,Rock County,H1
+MN,Minnesota,27,135,27135,Roseau County,H1
+MN,Minnesota,27,137,27137,St. Louis County,H1
+MN,Minnesota,27,139,27139,Scott County,H1
+MN,Minnesota,27,141,27141,Sherburne County,H1
+MN,Minnesota,27,143,27143,Sibley County,H1
+MN,Minnesota,27,145,27145,Stearns County,H1
+MN,Minnesota,27,147,27147,Steele County,H1
+MN,Minnesota,27,149,27149,Stevens County,H1
+MN,Minnesota,27,151,27151,Swift County,H1
+MN,Minnesota,27,153,27153,Todd County,H1
+MN,Minnesota,27,155,27155,Traverse County,H1
+MN,Minnesota,27,157,27157,Wabasha County,H1
+MN,Minnesota,27,159,27159,Wadena County,H1
+MN,Minnesota,27,161,27161,Waseca County,H1
+MN,Minnesota,27,163,27163,Washington County,H1
+MN,Minnesota,27,165,27165,Watonwan County,H1
+MN,Minnesota,27,167,27167,Wilkin County,H1
+MN,Minnesota,27,169,27169,Winona County,H1
+MN,Minnesota,27,171,27171,Wright County,H1
+MN,Minnesota,27,173,27173,Yellow Medicine County,H1

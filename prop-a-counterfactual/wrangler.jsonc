@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "prop-a-counterfactual",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "r2_buckets": [
+    { "binding": "DOCS", "bucket_name": "prop-a-docs" }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "prop-a-db",
+      "database_id": "42d222ca-9774-4ec6-9fb2-4de6eafef793",
+      "migrations_dir": "./migrations"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

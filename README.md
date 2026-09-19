@@ -12,7 +12,7 @@ This repo is also where I show how I use AI to help civic tech and social causes
 
 ## Live Sites
 
-* **[Social Housing Info](https://social-housing-info.a-8c6.workers.dev/)** — public information resource on rent stabilization definitions, the NYC rent freeze, block-by-block housing development, community land trusts, and further reading.
+* **[Social Housing Info](https://social-housing-info.a-8c6.workers.dev/)** ([source](social-housing-info/)) — public information resource on rent stabilization definitions, the NYC rent freeze, block-by-block housing development, community land trusts, and further reading.
 * **[Landlord De-anonymizer](https://mpls-rental-sync-worker.a-8c6.workers.dev)** — ownership graphs for Twin Cities rental properties, reconstructing corporate landlord networks from tax rolls, SOS filings, violations, and mortgage deeds.
 * **[Wage Theft & Labor Standards Registry](https://twin-cities-wage-theft-worker.a-8c6.workers.dev)** — searchable registry of wage theft and labor standards violations across the Twin Cities.
 * **[Slumlord & Wage Theft Crossover Matrix](https://twin-cities-slumlord-labor-matrix.a-8c6.workers.dev)** — the matrix/sync layer for both registries: cross-index of corporate syndicates cited for both slumlord code violations and wage theft, with a crossover API and in-browser AI assistant.
@@ -20,6 +20,7 @@ This repo is also where I show how I use AI to help civic tech and social causes
 * **[Field Notes: AI & Earth](https://field-notes.awdnowusaa.cc/)** ([source](field-notes/)) — evidence-first guide to AI energy, water, materials, and labor impacts, with an estimator converting everyday energy use into inference-token equivalents.
 * **[Decarb My State](https://decarb-my-state.a-8c6.workers.dev)** — state-by-state decarbonization progress for all 50 states + DC: emissions through 2022 (EPA), power generation through 2024 (EIA). Source: [aminamos/decarbonize-my-state](https://github.com/aminamos/decarbonize-my-state).
 * **[Roseville STR Feasibility Engine](https://roseville-str-feasibility.a-8c6.workers.dev)** ([source](roseville-str-feasibility/)) — models Roseville, MN City Code Ch. 907/908/909 for any address: seasonal STR frequency caps, 500-ft license spacing, occupancy ceilings, and real revenue limits vs. naive Airbnb pro-formas, backed by Ramsey County parcel data.
+* **[Michigan Prop A Uncap Counterfactual](https://prop-a-counterfactual.a-8c6.workers.dev)** ([source](prop-a-counterfactual/)) — taxes every MI parcel at full SEV instead of Proposal-A-capped taxable value: ≈ +$8.3B/yr vs the $11.4B income tax (~72% coverage), +5–12k annual sales turnover, −1.6–3.3% residential price effect. County-level gap explorer (D1) + archived Treasury source PDFs (R2); see [ANALYSIS.md](prop-a-counterfactual/ANALYSIS.md).
 * **[Rural MN Planning Bot](https://rural-planning-bot.a-8c6.workers.dev)** ([source](workers/planning-bot/)) — "Can I Build / Do This?" source coverage for all 60 nonmetro Minnesota counties: verified GIS portals, parcel services, zoning ordinances, city codes, and assessor links in D1, archived code documents in R2, and a monthly cron that re-checks tracked URLs so ordinance changes get detected. Source material is collected by the [rural county sweep pipeline](#rural-county-data-pipeline-data--scripts).
 
 ---
@@ -30,7 +31,12 @@ This repo is also where I show how I use AI to help civic tech and social causes
 |---|---|
 | [`regions/`](regions/) | Per-region civic tech directories (see below) |
 | [`social-tokens-projects/`](social-tokens-projects/README.md) | Agent systems + Cloudflare Workers for eviction defense, landlord de-anonymization, SSDI hearings |
+| [`social-housing-info/`](social-housing-info/) | Social housing info site (Astro 7 + Cloudflare adapter) |
+| [`tax-engine/`](tax-engine/) | Deterministic TY2025 federal 1040 tax engine + Cloudflare Worker |
+| [`tax-software-irs-cost/`](tax-software-irs-cost/) | Cost model, IRS approval checklist, and TY2025 doc corpus |
 | [`roseville-str-feasibility/`](roseville-str-feasibility/) | Roseville STR feasibility worker (rules engine, D1 rule params, archived ordinances) |
+| [`prop-a-counterfactual/`](prop-a-counterfactual/) | Michigan Prop A uncapping model (Worker + D1 + R2) |
+| [`census-data/`](census-data/) | Census P60-291 health insurance coverage report and tables |
 | [`workers/planning-bot/`](workers/planning-bot/) | Rural MN Planning Bot worker (D1 + R2 + scheduled URL re-checks) |
 | [`data/`](data/), [`scripts/`](scripts/) | Rural county source discovery pipeline feeding the Planning Bot |
 | [`field-notes/`](field-notes/) | Field Notes: AI & Earth site (Vite + Cloudflare) |
