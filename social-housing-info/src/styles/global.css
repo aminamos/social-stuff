@@ -1,0 +1,278 @@
+/* global.css — social-housing-info */
+
+:root {
+  --color-bg: #fefdfb;
+  --color-text: #1a1a1a;
+  --color-muted: #5c5c5c;
+  --color-accent: #1b4f72;
+  --color-accent-light: #2980b9;
+  --color-border: #e0dcd5;
+  --color-surface: #f7f5f0;
+  --color-highlight: #fef9e7;
+  --font-body: Georgia, "Times New Roman", serif;
+  --font-heading: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Fira Mono", monospace;
+  --max-width: 42rem;
+  --radius: 0.375rem;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  color-scheme: light;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+/* ---- Layout ---- */
+
+.site-wrapper {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+/* ---- Navigation ---- */
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-nav a {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  text-decoration: none;
+  padding: 0.25rem 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+/* ---- Typography ---- */
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-accent);
+}
+
+h1 { font-size: 2.25rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.5rem;  margin-top: 2.5rem; margin-bottom: 0.75rem; }
+h3 { font-size: 1.2rem;  margin-top: 1.75rem; margin-bottom: 0.5rem; }
+
+p { margin-bottom: 1.25rem; }
+
+a {
+  color: var(--color-accent-light);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+a:hover { text-decoration-thickness: 2px; }
+
+ul, ol {
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+
+li { margin-bottom: 0.4rem; }
+
+blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  background: var(--color-highlight);
+  border-left: 4px solid var(--color-border);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-style: italic;
+}
+
+blockquote p:last-child { margin-bottom: 0; }
+
+strong { font-weight: 600; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--color-surface);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+
+hr {
+  margin: 2rem 0;
+  border: none;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ---- Homepage hero ---- */
+
+.hero {
+  margin-bottom: 2.5rem;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: var(--color-muted);
+  max-width: 36rem;
+}
+
+.tagline {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-accent-light);
+  margin-bottom: 0.5rem;
+}
+
+/* ---- Cards (homepage) ---- */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1.25rem;
+  margin: 2rem 0;
+}
+
+.card {
+  display: block;
+  padding: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--color-text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.card:hover {
+  border-color: var(--color-accent-light);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.card h2 {
+  font-size: 1.15rem;
+  margin: 0 0 0.5rem;
+  color: var(--color-accent);
+}
+
+.card p {
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+/* ---- Callout boxes ---- */
+
+.callout {
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.callout h3 {
+  margin-top: 0;
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---- Definition list ---- */
+
+.def-list {
+  margin: 1.5rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.def-list li {
+  margin-bottom: 1.5rem;
+  padding-left: 0;
+}
+
+.def-term {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-accent);
+  margin-bottom: 0.25rem;
+}
+
+/* ---- Footer ---- */
+
+.site-footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.site-footer a {
+  color: var(--color-muted);
+}
+
+/* ---- Geo-block notice ---- */
+
+.geo-notice {
+  max-width: var(--max-width);
+  margin: 4rem auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.geo-notice h1 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+/* ---- Utilities ---- */
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 480px) {
+  html { font-size: 1rem; }
+  .site-wrapper { padding: 1.25rem 1rem 2.5rem; }
+  .hero h1 { font-size: 1.75rem; }
+}
