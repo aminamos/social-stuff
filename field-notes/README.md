@@ -28,6 +28,24 @@ npm run cf-typegen # wrangler types
 npm test           # vitest run (equivalence math unit tests)
 ```
 
+## Canonical source & deploys
+
+`aminamos/social-stuff` → `field-notes/` is the **only** source of truth.
+Deploy from any up-to-date clone of this repo:
+
+```sh
+git pull
+cd field-notes
+npm install          # first time / lockfile changes
+npm run deploy       # vite build + wrangler deploy (needs .env / .dev.vars)
+```
+
+The standalone `E:\development\ai-environment-research` checkout on the
+Windows machine is **archived** (renamed `ai-environment-research.ARCHIVED`
+2026-09-21) — it stopped receiving commits at `ee9d540` (2026-09-10) and
+must never be deployed from. If a stale checkout reappears, delete it
+rather than merging forward.
+
 ## Configuration
 
 `.env.example` documents the core variables:
@@ -47,8 +65,10 @@ npm test           # vitest run (equivalence math unit tests)
 ## Provenance
 
 Housed here from `E:\development\ai-environment-research` on the Windows
-machine (source of the `field-notes-ai-earth` worker deploys, last deploy
+machine (source of the `field-notes-ai-earth` worker deploys through
 2026-09-10). Transferred 2026-09-14 at upstream commit `ee9d540` plus
 uncommitted working-tree edits (`.env.example`, `README.md`,
-`src/lib/research.ts`, `tsconfig.json`). Secrets (`.env`, `.dev.vars`) were
-not transferred — copy `.env.example` to `.env` and fill in keys locally.
+`src/lib/research.ts`, `tsconfig.json`). The standalone checkout was
+archived 2026-09-21; see "Canonical source & deploys" above. Secrets
+(`.env`, `.dev.vars`) were not transferred — copy `.env.example` to `.env`
+and fill in keys locally.
