@@ -16,6 +16,15 @@ export interface CrossoverSyndicate {
   labor_narrative: string;
   labor_provenance: string;
   source_docket_url: string;
+  source_pages?: string;
+  source_doc_title?: string;
+  source_excerpt_file?: string;
+  source_full_file?: string;
+  source_quote?: string;
+  housing_source_url?: string;
+  housing_source_pages?: string;
+  housing_source_doc_title?: string;
+  housing_source_excerpt_file?: string;
   composite_score: number;
   risk_tier: string;
   organizing_playbook: string;
@@ -30,19 +39,24 @@ export const VERIFIED_CROSSOVER_SYNDICATES: CrossoverSyndicate[] = [
     properties_count: 6,
     total_units: 85,
     has_tier3: true,
-    housing_narrative: "Stearns County District Court consent decree prosecuted by Minnesota AG Keith Ellison: Severe habitability violations, uninhabitable employee trailer housing, and unlawful housing deductions.",
+    housing_narrative: "MN AG lawsuit (Stearns County, filed 2024): alleged systematic wage theft and substandard employee housing; the court issued a temporary injunction.",
     housing_provenance: "🟢 VERIFIED COURT / DISTRICT RECORD",
     case_id: "STEARNS-CV-24-0012",
     source_agency: "MN_AG_OFFICE",
     violation_type: "WAGE_THEFT & SUBSTANDARD_HOUSING",
-    total_wage_theft_recovered: 250000.00,
-    workers_affected: 45,
-    labor_narrative: "Confirmed $250,000 court restitution for overtime wage theft, unauthorized paycheck deductions, and substandard worker living facilities.",
+    total_wage_theft_recovered: 0,
+    workers_affected: 0,
+    labor_narrative: "MN AG lawsuit against Evergreen Acres Dairy, Evergreen Estates, Morgan Feedlots and the dairy operations owners, alleging systematic wage theft via shaved hours and unlawful deductions for substandard onsite housing; temporary injunction issued. No judgment or recovery amount is stated on the cited page. (2024 MN AG Labor Report, p. 7)",
     labor_provenance: "🟢 VERIFIED PUBLIC ENFORCEMENT ACTION",
     source_docket_url: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2024.pdf",
+    source_pages: "p. 7",
+    source_doc_title: "2024 MN Attorney General Labor Report",
+    source_excerpt_file: "STEARNS-CV-24-0012.pdf",
+    source_full_file: "ag-labor-report-2024.pdf",
+    source_quote: "We filed a lawsuit against Evergreen Acres Dairy, Evergreen Estates, Morgan Feedlots, and the dairy operations' owners alleging systematic wage theft via shaved hours and unlawful deductions for substandard onsite housing.",
     composite_score: 98,
     risk_tier: "CRITICAL DUAL OFFENDER",
-    organizing_playbook: "Direct coalition between Centro de Trabajadores Unidos en la Lucha (CTUL) and rural housing organizers to enforce court compliance and restitution distribution."
+    organizing_playbook: "Direct coalition between Centro de Trabajadores Unidos en la Lucha (CTUL) and rural housing organizers to enforce court compliance and restitution distribution.",
   },
   {
     entity_name: "Property Maintenance & Construction LLC (PMC)",
@@ -57,14 +71,19 @@ export const VERIFIED_CROSSOVER_SYNDICATES: CrossoverSyndicate[] = [
     case_id: "MNAG-PMC-2023",
     source_agency: "MN_AG_OFFICE & MN_DLI",
     violation_type: "WORKER_INTIMIDATION & WAGE_THEFT",
-    total_wage_theft_recovered: 160000.00,
-    workers_affected: 28,
-    labor_narrative: "Joint MN AG and MN DLI enforcement settlement: Multi-family renovation contractor investigated for worker intimidation, nonpayment of overtime, and obstruction of wage theft inquiry.",
+    total_wage_theft_recovered: 0,
+    workers_affected: 0,
+    labor_narrative: "MN AG settlement with Property Maintenance & Construction LLC/Inc. (PMC) and owner Leo Pimentel, following a suit over obstruction of a DLI wage-theft investigation and intimidation of workers. The settlement terms were cooperation and injunctive relief — no dollar recovery is stated on the cited page. (2024 MN AG Labor Report, p. 6)",
     labor_provenance: "🟢 VERIFIED PUBLIC ENFORCEMENT ACTION",
     source_docket_url: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2024.pdf",
+    source_pages: "p. 6",
+    source_doc_title: "2024 MN Attorney General Labor Report",
+    source_excerpt_file: "MNAG-PMC-2023.pdf",
+    source_full_file: "ag-labor-report-2024.pdf",
+    source_quote: "We agreed to a settlement with Property Maintenance & Construction LLC and Inc. (PMC) after suing PMC and its owner Leo Pimentel for obstructing DLI's wage theft investigation and intimidating workers.",
     composite_score: 91,
     risk_tier: "CRITICAL DUAL OFFENDER",
-    organizing_playbook: "Enforce Minn. Stat. § 181.165 joint liability holding commercial apartment owners directly liable for contractor PMC's wage violations."
+    organizing_playbook: "Enforce Minn. Stat. § 181.165 joint liability holding commercial apartment owners directly liable for contractor PMC's wage violations.",
   },
   {
     entity_name: "Julius De Roma (Club Jäger Commercial & Residential Holdings)",
@@ -79,14 +98,14 @@ export const VERIFIED_CROSSOVER_SYNDICATES: CrossoverSyndicate[] = [
     case_id: "FEC-MN-DUKE-2017",
     source_agency: "FEC_PUBLIC_RECORDS & COMMUNITY_BOYCOTT",
     violation_type: "EXTREMIST_DONATION & TOTAL_WORKER_WALKOUT",
-    total_wage_theft_recovered: 0.00,
+    total_wage_theft_recovered: 0,
     workers_affected: 18,
     labor_narrative: "Federal Election Commission public filings revealed De Roma was a maximum donor to former Ku Klux Klan Grand Wizard David Duke. Prompted unanimous worker walkout, total service staff resignation, widespread community boycott, and permanent closure of Club Jäger.",
     labor_provenance: "🟢 VERIFIED PUBLIC ENFORCEMENT ACTION",
-    source_docket_url: "https://www.fec.gov",
+    source_docket_url: "",
     composite_score: 96,
     risk_tier: "CRITICAL ETHICAL & REPUTATIONAL RISK",
-    organizing_playbook: "Coordinate tenant union councils across all 5 Minneapolis properties; leverage unmasked beneficial ownership (4133 Dupont Ave S) and historical labor solidarity from the Club Jäger worker walkout."
+    organizing_playbook: "Coordinate tenant union councils across all 5 Minneapolis properties; leverage unmasked beneficial ownership (4133 Dupont Ave S) and historical labor solidarity from the Club Jäger worker walkout.",
   },
   {
     entity_name: "Brian Fitterer / Investment Property Group (IPG Living)",
@@ -101,14 +120,14 @@ export const VERIFIED_CROSSOVER_SYNDICATES: CrossoverSyndicate[] = [
     case_id: "MPLS-LS-2023-0082",
     source_agency: "MINNEAPOLIS_CIVIL_RIGHTS",
     violation_type: "MINIMUM_WAGE & SICK TIME",
-    total_wage_theft_recovered: 49750.00,
+    total_wage_theft_recovered: 49750,
     workers_affected: 14,
     labor_narrative: "Demonstration fixture modeled on municipal labor standards audits: Misclassified building janitors as independent contractors; failed to pay Minneapolis Municipal Minimum Wage and Sick & Safe Time.",
     labor_provenance: "🟡 PROTOTYPE SEED / PENDING FOIA SYNC",
-    source_docket_url: "https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards",
+    source_docket_url: "",
     composite_score: 94,
     risk_tier: "CRITICAL DUAL OFFENDER",
-    organizing_playbook: "Joint tenant strike at 2312 Blaisdell paired with CTUL janitorial direct action. Escrow rent while placing municipal wage liens against shell entities."
+    organizing_playbook: "Joint tenant strike at 2312 Blaisdell paired with CTUL janitorial direct action. Escrow rent while placing municipal wage liens against shell entities.",
   },
   {
     entity_name: "Dominium Management Services LLC",
@@ -123,14 +142,14 @@ export const VERIFIED_CROSSOVER_SYNDICATES: CrossoverSyndicate[] = [
     case_id: "WHD-MN-1892014",
     source_agency: "US_DOL_WHD",
     violation_type: "FLSA_OVERTIME",
-    total_wage_theft_recovered: 96920.00,
+    total_wage_theft_recovered: 96920,
     workers_affected: 38,
     labor_narrative: "Demonstration fixture modeled on property management overtime audits: Excluded mandatory on-call emergency stipends and milestone bonuses from regular rate when calculating overtime under Minn. Stat. § 177.24.",
     labor_provenance: "🟡 PROTOTYPE SEED / PENDING FOIA SYNC",
-    source_docket_url: "https://enforcement.dol.gov",
+    source_docket_url: "",
     composite_score: 88,
     risk_tier: "HIGH DUAL RISK",
-    organizing_playbook: "Coordinate with SEIU Local 26 maintenance techs; file joint federal HUD civil rights complaints alongside state tax-credit compliance audits."
+    organizing_playbook: "Coordinate with SEIU Local 26 maintenance techs; file joint federal HUD civil rights complaints alongside state tax-credit compliance audits.",
   },
   {
     entity_name: "Property Solutions & Services LLC (PSS Living)",
@@ -145,14 +164,14 @@ export const VERIFIED_CROSSOVER_SYNDICATES: CrossoverSyndicate[] = [
     case_id: "MNDLI-WH-2022-049",
     source_agency: "MN_DLI",
     violation_type: "UNPAID_HOURS & CARETAKER TRAP",
-    total_wage_theft_recovered: 77400.00,
+    total_wage_theft_recovered: 77400,
     workers_affected: 24,
     labor_narrative: "Demonstration fixture modeled on caretaker rent-offset audits: Unlawful wage deductions for resident caretaker apartment units below statutory minimum wage in violation of Minn. Stat. § 177.24.",
     labor_provenance: "🟡 PROTOTYPE SEED / PENDING FOIA SYNC",
-    source_docket_url: "https://www.dli.mn.gov",
+    source_docket_url: "",
     composite_score: 86,
     risk_tier: "HIGH DUAL RISK",
-    organizing_playbook: "Form on-site caretaker-tenant alliances. Block retaliatory evictions by invoking Minnesota statutory protections for wage whistleblowers."
+    organizing_playbook: "Form on-site caretaker-tenant alliances. Block retaliatory evictions by invoking Minnesota statutory protections for wage whistleblowers.",
   },
   {
     entity_name: "Twin Cities Residential Cleaning & Maintenance Inc",
@@ -167,14 +186,14 @@ export const VERIFIED_CROSSOVER_SYNDICATES: CrossoverSyndicate[] = [
     case_id: "WHD-MN-1945112",
     source_agency: "US_DOL_WHD",
     violation_type: "FLSA_OVERTIME & TIMECARD SHAVING",
-    total_wage_theft_recovered: 140400.00,
+    total_wage_theft_recovered: 140400,
     workers_affected: 52,
     labor_narrative: "Demonstration fixture modeled on turnover cleaning audits: Altered electronic timecards to erase turnover overtime hours; mandated off-the-clock emergency weekend cleaning.",
     labor_provenance: "🟡 PROTOTYPE SEED / PENDING FOIA SYNC",
-    source_docket_url: "https://enforcement.dol.gov",
+    source_docket_url: "",
     composite_score: 84,
     risk_tier: "HIGH DUAL RISK",
-    organizing_playbook: "Enforce Minnesota's 2023 Joint Liability statute (Minn. Stat. § 181.165) to hold primary landlords and building owners directly liable for contractor wage theft."
+    organizing_playbook: "Enforce Minnesota's 2023 Joint Liability statute (Minn. Stat. § 181.165) to hold primary landlords and building owners directly liable for contractor wage theft.",
   },
   {
     entity_name: "Timberland Property Management Inc",
@@ -189,14 +208,14 @@ export const VERIFIED_CROSSOVER_SYNDICATES: CrossoverSyndicate[] = [
     case_id: "MNDLI-WH-2023-102",
     source_agency: "MN_DLI",
     violation_type: "UNPAID_TRAVEL_HOURS",
-    total_wage_theft_recovered: 43300.00,
+    total_wage_theft_recovered: 43300,
     workers_affected: 19,
     labor_narrative: "Demonstration fixture modeled on technician travel audits: Failed to compensate technicians for inter-property travel time across Hennepin and Ramsey counties under Minn. Rule 5200.0120.",
     labor_provenance: "🟡 PROTOTYPE SEED / PENDING FOIA SYNC",
-    source_docket_url: "https://www.dli.mn.gov",
+    source_docket_url: "",
     composite_score: 79,
     risk_tier: "MODERATE-HIGH RISK",
-    organizing_playbook: "Synchronize tenant petitions on delayed repair tickets with technician travel time audits across properties."
+    organizing_playbook: "Synchronize tenant petitions on delayed repair tickets with technician travel time audits across properties.",
   },
   {
     entity_name: "Kleinman Commercial Real Estate & Housing LLC",
@@ -211,13 +230,13 @@ export const VERIFIED_CROSSOVER_SYNDICATES: CrossoverSyndicate[] = [
     case_id: "WHD-MN-2001884",
     source_agency: "US_DOL_WHD",
     violation_type: "FLSA_OVERTIME",
-    total_wage_theft_recovered: 22650.00,
+    total_wage_theft_recovered: 22650,
     workers_affected: 8,
     labor_narrative: "Demonstration fixture modeled on comp-time audits: Improper comp-time bank calculations in lieu of statutory 1.5x cash overtime for groundskeepers and building engineers.",
     labor_provenance: "🟡 PROTOTYPE SEED / PENDING FOIA SYNC",
-    source_docket_url: "https://enforcement.dol.gov",
+    source_docket_url: "",
     composite_score: 74,
     risk_tier: "MODERATE RISK",
-    organizing_playbook: "Tenant council demands cash restitution and transparent maintenance scheduling as conditions for lease renewals."
-  }
+    organizing_playbook: "Tenant council demands cash restitution and transparent maintenance scheduling as conditions for lease renewals.",
+  },
 ];

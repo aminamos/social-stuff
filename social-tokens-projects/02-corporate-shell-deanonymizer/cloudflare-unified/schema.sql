@@ -140,6 +140,35 @@ CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_trade ON wage_theft_records(trade_n
 CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_city ON wage_theft_records(city);
 CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_agency ON wage_theft_records(source_agency);
 
+-- Materialized landlord × wage-theft join. The instr() substring join over
+-- rental_licenses × wage_theft_records exceeds D1's per-query CPU limit at
+-- request time, so the 06:00 cron (or POST /crossover/rebuild) rebuilds this
+-- table one wage_theft_records row at a time; /api/crossover reads it.
+-- Rebuild progress resumes via sync_state.feed_id = 'dual_matches'.
+CREATE TABLE IF NOT EXISTS dual_matches (
+    landlord_name TEXT NOT NULL,
+    landlord_city TEXT,
+    landlord_county TEXT,
+    landlord_state TEXT,
+    properties_count INTEGER DEFAULT 0,
+    total_units INTEGER DEFAULT 0,
+    tier3_properties INTEGER DEFAULT 0,
+    case_id TEXT NOT NULL,
+    source_agency TEXT,
+    respondent_legal_name TEXT,
+    trade_name TEXT,
+    violation_type TEXT,
+    back_wages_recovered REAL DEFAULT 0.0,
+    workers_affected INTEGER DEFAULT 0,
+    provenance_type TEXT,
+    source_docket_url TEXT DEFAULT '',
+    matched_at TEXT,
+    PRIMARY KEY (landlord_name, case_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_dual_matches_case ON dual_matches(case_id);
+CREATE INDEX IF NOT EXISTS idx_dual_matches_city ON dual_matches(landlord_city);
+
 -- Confidential whistleblower / worker incident intake.
 -- Written by POST /api/reports (unified) and the legacy POST /report.
 CREATE TABLE IF NOT EXISTS worker_reports (

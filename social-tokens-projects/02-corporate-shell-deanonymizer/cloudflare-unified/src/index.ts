@@ -75,7 +75,16 @@ export default {
     if (event.cron === "0 5 * * *") {
       ctx.waitUntil(runLiveEnforcementSync(env));
     } else if (event.cron === "0 6 * * *") {
-      ctx.waitUntil(backupMatrixSnapshot(env));
+      ctx.waitUntil((async () => {
+        await backupMatrixSnapshot(env);
+        // Rebuild the materialized dual-match table; the live instr() join is
+        // too large for request-time queries. Chunks resume via sync_state if
+        // the event dies before finishing.
+        for (let guard = 0; guard < 60; guard++) {
+          const r = await rebuildDualMatches(env, 25);
+          if (r.done) break;
+        }
+      })());
     } else {
       const isDaily = event.cron === "0 4 * * *";
       ctx.waitUntil(runSyncTick(env, { reset: isDaily }));
@@ -792,31 +801,16 @@ export default {
         const pattern = `%${q}%`;
         const live = await env.DB.prepare(`
           SELECT
-            r.owner_name as landlord_name,
-            r.city as landlord_city,
-            r.county as landlord_county,
-            r.state as landlord_state,
-            COUNT(DISTINCT r.apn) as properties_count,
-            SUM(r.units) as total_units,
-            SUM(CASE WHEN r.severity_class = 'C' THEN 1 ELSE 0 END) as tier3_properties,
-            w.case_id, w.source_agency, w.respondent_legal_name, w.trade_name,
-            w.violation_type, w.back_wages_recovered, w.workers_affected,
-            COALESCE(w.provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA') as provenance_type
-          FROM rental_licenses r
-          JOIN wage_theft_records w ON (
-            (w.trade_name != '' AND (
-              instr(lower(r.owner_name), lower(w.trade_name)) > 0
-              OR instr(lower(r.applicant_name), lower(w.trade_name)) > 0
-            ))
-            OR (w.respondent_legal_name != '' AND (
-              instr(lower(r.owner_name), lower(w.respondent_legal_name)) > 0
-              OR instr(lower(r.applicant_name), lower(w.respondent_legal_name)) > 0
-            ))
-          )
-          WHERE (?1 = '%%' OR r.owner_name LIKE ?1 OR r.applicant_name LIKE ?1 OR w.trade_name LIKE ?1 OR w.respondent_legal_name LIKE ?1)
-            AND (?2 = '' OR r.city = ?2)
-          GROUP BY r.owner_name, w.case_id
-          ORDER BY w.back_wages_recovered DESC
+            landlord_name, landlord_city, landlord_county, landlord_state,
+            properties_count, total_units, tier3_properties,
+            case_id, source_agency, respondent_legal_name, trade_name,
+            violation_type, back_wages_recovered, workers_affected,
+            COALESCE(provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA') as provenance_type,
+            COALESCE(source_docket_url, '') as source_docket_url
+          FROM dual_matches
+          WHERE (?1 = '%%' OR landlord_name LIKE ?1 OR trade_name LIKE ?1 OR respondent_legal_name LIKE ?1)
+            AND (?2 = '' OR landlord_city = ?2)
+          ORDER BY back_wages_recovered DESC
           LIMIT 50
         `).bind(pattern, cityFilter).all();
         const ql = q.toLowerCase();
@@ -826,6 +820,16 @@ export default {
           (!cityFilter || s.city.toLowerCase().includes(cityFilter.toLowerCase())),
         );
         return json({ query: q, city: cityFilter, live_matches: live.results, curated });
+      } catch (err: any) {
+        return json({ error: err.message }, { status: 500 });
+      }
+    }
+    // Manual dual-match rebuild, one chunk per call. Repeat until done:true —
+    // progress resumes via sync_state.feed_id = 'dual_matches'.
+    if (url.pathname === "/crossover/rebuild" && request.method === "POST") {
+      if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
+      try {
+        return json(await rebuildDualMatches(env, 25));
       } catch (err: any) {
         return json({ error: err.message }, { status: 500 });
       }
@@ -1008,6 +1012,108 @@ export default {
     );
   },
 };
+
+const DUAL_MATCH_FEED = "dual_matches";
+
+// Rebuilds dual_matches one wage_theft_records chunk at a time (each row is a
+// full-scan instr() match against rental_licenses). Progress persists in
+// sync_state so cron and manual calls resume where the last run stopped.
+// Rows written carry matched_at; stale rows from the previous cycle are
+// deleted only once a full pass completes.
+async function rebuildDualMatches(
+  env: Env,
+  maxRows: number,
+): Promise<{ done: boolean; processed: number; total: number }> {
+  const now = new Date().toISOString();
+  const state = await env.DB.prepare(
+    `SELECT * FROM sync_state WHERE feed_id = ?`,
+  ).bind(DUAL_MATCH_FEED).first<any>();
+  const offset: number = state?.offset ?? 0;
+  const cycleStart: string = state?.started_at ?? now;
+
+  const totalRes = await env.DB.prepare(
+    `SELECT COUNT(*) as n FROM wage_theft_records`,
+  ).first<any>();
+  const total: number = totalRes?.n ?? 0;
+
+  const chunk = await env.DB.prepare(
+    `SELECT case_id, source_agency, respondent_legal_name, trade_name, violation_type,
+            back_wages_recovered, workers_affected, provenance_type, source_docket_url
+     FROM wage_theft_records ORDER BY case_id LIMIT ? OFFSET ?`,
+  ).bind(maxRows, offset).all();
+
+  let processed = offset;
+  for (const w of chunk.results as any[]) {
+    const names = [w.trade_name, w.respondent_legal_name].filter(
+      (n) => n && String(n).trim(),
+    );
+    if (names.length) {
+      // Word-boundary containment: needle must start the field or follow a
+      // space/comma/dash/paren — plain instr() matches 'dominium' inside
+      // 'CONDOMINIUM'.
+      const cond = names
+        .map(
+          () =>
+            `((lower(r.owner_name) = lower(?) OR instr(lower(r.owner_name), ' ' || lower(?)) > 0 OR instr(lower(r.owner_name), ', ' || lower(?)) > 0 OR instr(lower(r.owner_name), '-' || lower(?)) > 0 OR instr(lower(r.owner_name), '(' || lower(?)) > 0)
+             OR (lower(r.applicant_name) = lower(?) OR instr(lower(r.applicant_name), ' ' || lower(?)) > 0 OR instr(lower(r.applicant_name), ', ' || lower(?)) > 0 OR instr(lower(r.applicant_name), '-' || lower(?)) > 0 OR instr(lower(r.applicant_name), '(' || lower(?)) > 0))`,
+        )
+        .join(" OR ");
+      const matches = await env.DB.prepare(
+        `SELECT r.owner_name as landlord_name, r.city as landlord_city,
+                r.county as landlord_county, r.state as landlord_state,
+                COUNT(DISTINCT r.apn) as properties_count,
+                SUM(r.units) as total_units,
+                SUM(CASE WHEN r.severity_class = 'C' THEN 1 ELSE 0 END) as tier3_properties
+         FROM rental_licenses r WHERE ${cond} GROUP BY r.owner_name LIMIT 200`,
+      )
+        .bind(...names.flatMap((n) => [n, n, n, n, n, n, n, n, n, n]))
+        .all();
+      for (const m of matches.results as any[]) {
+        await env.DB.prepare(
+          `INSERT OR REPLACE INTO dual_matches
+           (landlord_name, landlord_city, landlord_county, landlord_state,
+            properties_count, total_units, tier3_properties, case_id,
+            source_agency, respondent_legal_name, trade_name, violation_type,
+            back_wages_recovered, workers_affected, provenance_type,
+            source_docket_url, matched_at)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        )
+          .bind(
+            m.landlord_name, m.landlord_city, m.landlord_county, m.landlord_state,
+            m.properties_count ?? 0, m.total_units ?? 0, m.tier3_properties ?? 0,
+            w.case_id, w.source_agency, w.respondent_legal_name, w.trade_name,
+            w.violation_type, w.back_wages_recovered ?? 0, w.workers_affected ?? 0,
+            w.provenance_type ?? "PROTOTYPE_SEED_PENDING_FOIA",
+            w.source_docket_url ?? "", now,
+          )
+          .run();
+      }
+    }
+    processed++;
+  }
+
+  const done = processed >= total;
+  await env.DB.prepare(
+    `INSERT INTO sync_state (feed_id, offset, rows_total, started_at, updated_at, completed_at, last_error)
+     VALUES (?, ?, ?, ?, ?, ?, NULL)
+     ON CONFLICT(feed_id) DO UPDATE SET
+       offset = excluded.offset,
+       rows_total = excluded.rows_total,
+       started_at = CASE WHEN excluded.offset = 0 THEN excluded.started_at ELSE sync_state.started_at END,
+       updated_at = excluded.updated_at,
+       completed_at = excluded.completed_at`,
+  ).bind(DUAL_MATCH_FEED, done ? 0 : processed, total, offset === 0 ? now : cycleStart, now, done ? now : null).run();
+
+  if (done) {
+    await env.DB.prepare(
+      `DELETE FROM dual_matches WHERE matched_at < ?`,
+    ).bind(cycleStart).run();
+    await env.DB.prepare(
+      `INSERT INTO sync_logs (source, cases_synced, status, details) VALUES ('crossover-dual-matches', ?, 'SUCCESS', ?)`,
+    ).bind(total, `rebuilt dual_matches in chunks`).run();
+  }
+  return { done, processed, total };
+}
 
 async function backupMatrixSnapshot(env: Env): Promise<void> {
   try {

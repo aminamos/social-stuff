@@ -154,19 +154,35 @@ export function renderUnifiedUI(): string {
         '<div>' + (c.provenance_type === 'VERIFIED_PUBLIC_ACTION' ? '<span class="badge b-green">VERIFIED</span>' : '<span class="badge b-amber">SEED / PENDING FOIA</span>') +
         (c.repeat_violator ? '<span class="badge b-red">REPEAT OFFENDER</span>' : '') + '</div>' +
         '<div class="meta">' + esc(c.case_id || '') + ' · ' + esc(c.source_agency || '') + ' · ' + esc(c.city || '') + ', ' + esc(c.state || '') +
-        ' · $' + total + ' · ' + (c.workers_affected || 0) + ' workers</div></div>';
+        ' · $' + total + ' · ' + (c.workers_affected || 0) + ' workers' +
+        (c.source_docket_url ? ' · <a href="' + esc(c.source_docket_url) + '" target="_blank">docket ↗</a>' : '') + '</div></div>';
     }
     function cardDualLive(x) {
       return '<div class="card"><h3>' + esc(x.landlord_name) + ' <span class="meta">' + esc(x.landlord_city || '') + '</span></h3>' +
         '<div><span class="badge b-red">LIVE DUAL MATCH</span><span class="badge b-amber">' + (x.properties_count || 0) + ' properties · ' + (x.total_units || 0) + ' units</span></div>' +
         '<div class="meta">Case ' + esc(x.case_id || '') + ' (' + esc(x.source_agency || '') + ') · ' + esc(x.violation_type || '') +
-        ' · $' + Number(x.back_wages_recovered || 0).toLocaleString() + ' · ' + (x.workers_affected || 0) + ' workers</div></div>';
+        ' · $' + Number(x.back_wages_recovered || 0).toLocaleString() + ' · ' + (x.workers_affected || 0) + ' workers' +
+        (x.source_docket_url ? ' · <a href="' + esc(x.source_docket_url) + '" target="_blank">docket ↗</a>' : '') + '</div></div>';
+    }
+    function evLink(url, excerptFile, pages, docTitle, label) {
+      const pg = (String(pages || '').match(/[0-9]+/) || [])[0];
+      const txt = esc(label || docTitle || 'source') + (pages ? ' ' + esc(pages) : '') + ' ↗';
+      if (excerptFile) return '<a href="/docs/' + encodeURIComponent(excerptFile) + '" target="_blank">' + txt + '</a>';
+      if (url) return '<a href="' + esc(url + (pg ? '#page=' + pg : '')) + '" target="_blank">' + txt + '</a>';
+      return '';
     }
     function cardDualCurated(s) {
+      const labor = evLink(s.source_docket_url, s.source_excerpt_file, s.source_pages, s.source_doc_title);
+      const housing = (s.housing_source_url || s.housing_source_excerpt_file) &&
+        s.housing_source_url !== s.source_docket_url && s.housing_source_excerpt_file !== s.source_excerpt_file
+        ? evLink(s.housing_source_url, s.housing_source_excerpt_file, s.housing_source_pages, s.housing_source_doc_title, 'housing source')
+        : '';
+      const ev = labor && housing ? '📄 ' + labor + ' · 📄 ' + housing : (labor || housing ? '📄 ' + labor + housing : '');
       return '<div class="card"><h3>' + esc(s.entity_name) + '</h3>' +
         '<div><span class="badge b-red">' + esc(s.risk_tier) + '</span><span class="badge b-amber">score ' + s.composite_score + '/100</span></div>' +
         '<div class="meta">' + esc(s.city) + ' · ' + s.properties_count + ' properties · ' + s.total_units + ' units · $' +
-        Number(s.total_wage_theft_recovered || 0).toLocaleString() + ' recovered · ' + s.workers_affected + ' workers</div></div>';
+        Number(s.total_wage_theft_recovered || 0).toLocaleString() + ' recovered · ' + s.workers_affected + ' workers' +
+        (ev ? '<br>' + ev : '') + '</div></div>';
     }
     function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
     loadStats();

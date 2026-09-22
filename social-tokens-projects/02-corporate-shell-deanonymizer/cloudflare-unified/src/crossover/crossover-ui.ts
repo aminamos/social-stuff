@@ -1242,9 +1242,21 @@ export function renderCrossoverUI(): string {
                   📄 Source Documents & Legal Dockets:
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                  \${s.source_excerpt_file ? \`
+                    <a href="/docs/\${encodeURIComponent(s.source_excerpt_file)}" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
+                      📄 Evidence excerpt\${s.source_doc_title ? ' — ' + s.source_doc_title : ''}\${s.source_pages ? ' ' + s.source_pages : ''} ↗
+                    </a>
+                    <span style="color: var(--card-border);">•</span>
+                  \` : ''}
                   \${s.source_docket_url ? \`
-                    <a href="\${s.source_docket_url}" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
-                      Official Docket Document / Report PDF ↗
+                    <a href="\${s.source_docket_url}\${((s.source_pages || '').match(/[0-9]+/) || [])[0] ? '#page=' + ((s.source_pages || '').match(/[0-9]+/) || [])[0] : ''}" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
+                      \${s.source_doc_title ? s.source_doc_title + (s.source_pages ? ' ' + s.source_pages : '') : 'Official Docket Document / Report PDF'} ↗
+                    </a>
+                    <span style="color: var(--card-border);">•</span>
+                  \` : ''}
+                  \${(s.housing_source_url || s.housing_source_excerpt_file) && s.housing_source_url !== s.source_docket_url && s.housing_source_excerpt_file !== s.source_excerpt_file ? \`
+                    <a href="\${s.housing_source_excerpt_file ? '/docs/' + encodeURIComponent(s.housing_source_excerpt_file) : s.housing_source_url + (((s.housing_source_pages || '').match(/[0-9]+/) || [])[0] ? '#page=' + ((s.housing_source_pages || '').match(/[0-9]+/) || [])[0] : '')}" target="_blank" style="color: #38bdf8; font-weight: 700; text-decoration: underline;">
+                      Housing evidence\${s.housing_source_doc_title ? ' — ' + s.housing_source_doc_title : ''}\${s.housing_source_pages ? ' ' + s.housing_source_pages : ''} ↗
                     </a>
                     <span style="color: var(--card-border);">•</span>
                   \` : ''}
