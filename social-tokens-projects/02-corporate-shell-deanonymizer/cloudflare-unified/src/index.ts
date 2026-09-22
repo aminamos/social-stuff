@@ -334,31 +334,22 @@ export default {
              WHERE r.link_key IS NOT NULL AND r2.link_key = r.link_key) as sister_properties_count,
             (SELECT SUM(r3.units) FROM rental_licenses r3
              WHERE r.link_key IS NOT NULL AND r3.link_key = r.link_key) as total_syndicate_units,
-            (SELECT case_id || '::' || violation_type || '::' || back_wages_recovered || '::' || workers_affected || '::' || COALESCE(provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA')
-             FROM wage_theft_records w
-             WHERE (w.trade_name != '' AND (
-                 instr(lower(r.owner_name), lower(w.trade_name)) > 0
-                 OR instr(lower(r.applicant_name), lower(w.trade_name)) > 0
-                 OR instr(lower(r.applicant_email), lower(w.trade_name)) > 0
-             ))
-             OR (w.respondent_legal_name != '' AND (
-                 instr(lower(r.owner_name), lower(w.respondent_legal_name)) > 0
-                 OR instr(lower(r.applicant_name), lower(w.respondent_legal_name)) > 0
-             ))
-             OR (lower(w.trade_name) LIKE '%fitterer%' AND (
-                 instr(lower(r.owner_name), 'fitterer') > 0
-                 OR instr(lower(r.applicant_name), 'fitterer') > 0
-                 OR instr(lower(r.applicant_email), 'ipgliving') > 0
-             ))
-             OR ((lower(w.trade_name) LIKE '%jager%' OR lower(w.respondent_legal_name) LIKE '%deroma%') AND (
-                 instr(lower(r.owner_name), 'deroma') > 0
-                 OR instr(lower(r.owner_name), 'de roma') > 0
-                 OR instr(lower(r.applicant_name), 'deroma') > 0
-                 OR instr(lower(r.applicant_name), 'de roma') > 0
-                 OR instr(lower(r.owner_address), '4133 dupont') > 0
-                 OR r.apn = '2202924210384'
-             ))
-             LIMIT 1) as wage_theft_match
+            (SELECT COALESCE(
+               (SELECT dm.case_id || '::' || dm.violation_type || '::' || dm.back_wages_recovered || '::' || dm.workers_affected || '::' || COALESCE(dm.provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA')
+                FROM dual_matches dm
+                WHERE dm.landlord_name = r.owner_name LIMIT 1),
+               (SELECT w.case_id || '::' || w.violation_type || '::' || w.back_wages_recovered || '::' || w.workers_affected || '::' || COALESCE(w.provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA')
+                FROM wage_theft_records w
+                WHERE (lower(w.trade_name) LIKE '%jager%' OR lower(w.respondent_legal_name) LIKE '%deroma%') AND (
+                    instr(lower(r.owner_name), 'deroma') > 0
+                    OR instr(lower(r.owner_name), 'de roma') > 0
+                    OR instr(lower(r.applicant_name), 'deroma') > 0
+                    OR instr(lower(r.applicant_name), 'de roma') > 0
+                    OR instr(lower(r.owner_address), '4133 dupont') > 0
+                    OR r.apn = '2202924210384'
+                )
+                LIMIT 1)
+            )) as wage_theft_match
           FROM rental_licenses r
           WHERE (
               r.owner_name LIKE ?1
@@ -1042,8 +1033,11 @@ async function rebuildDualMatches(
      FROM wage_theft_records ORDER BY case_id LIMIT ? OFFSET ?`,
   ).bind(maxRows, offset).all();
 
-  let processed = offset;
-  for (const w of chunk.results as any[]) {
+  const rows = chunk.results as any[];
+  // Scans are independent I/O; run the chunk concurrently (~2s each, not ~35s
+  // sequential). Per-query D1 CPU stays bounded because each scan is its own
+  // statement.
+  await Promise.all(rows.map(async (w) => {
     const names = [w.trade_name, w.respondent_legal_name].filter(
       (n) => n && String(n).trim(),
     );
@@ -1089,9 +1083,9 @@ async function rebuildDualMatches(
           .run();
       }
     }
-    processed++;
-  }
+  }));
 
+  const processed = offset + rows.length;
   const done = processed >= total;
   await env.DB.prepare(
     `INSERT INTO sync_state (feed_id, offset, rows_total, started_at, updated_at, completed_at, last_error)
