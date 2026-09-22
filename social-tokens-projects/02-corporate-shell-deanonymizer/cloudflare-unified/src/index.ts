@@ -38,6 +38,13 @@ export interface Env {
   DOL_API_KEY?: string;
 }
 
+// Multi-hundred-page source reports mirrored in R2 under docs/; cards and
+// exports link the single-page case doc first, full report as context.
+const FULL_REPORT_MIRROR: Record<string, string> = {
+  "https://www.ag.state.mn.us/Office/Reports/LaborReport_2024.pdf": "ag-labor-report-2024.pdf",
+  "https://www.ag.state.mn.us/Office/Reports/LaborReport_2025.pdf": "ag-labor-report-2025.pdf",
+};
+
 function json(body: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(body, null, 2), {
     ...init,
@@ -638,6 +645,8 @@ export default {
           md.push(`- **Affected Workforce**: ${row.workers_affected || 0} workers`);
           md.push(`- **Official Findings Summary**: ${row.description || "Confirmed civil/administrative wage theft findings."}`);
           if (row.case_id) md.push(`- **Evidence Document (mirrored PDF)**: ${url.origin}/docs/${encodeURIComponent(row.case_id)}.pdf`);
+          const fullFile = FULL_REPORT_MIRROR[row.source_docket_url];
+          if (fullFile) md.push(`- **Full Source Report (mirrored PDF)**: ${url.origin}/docs/${fullFile}`);
           md.push("");
         }
         return new Response(md.join("\n"), {
@@ -773,6 +782,7 @@ export default {
         md.push(`- **Joint Organizing Playbook**: ${s.organizing_playbook}`);
         if (s.source_excerpt_file || s.case_id) md.push(`- **Evidence Excerpt (mirrored PDF)**: ${url.origin}/docs/${encodeURIComponent(s.source_excerpt_file || s.case_id + ".pdf")}${s.source_pages ? ` (${s.source_pages}${s.source_doc_title ? ", " + s.source_doc_title : ""})` : ""}`);
         if (s.housing_source_excerpt_file && s.housing_source_excerpt_file !== s.source_excerpt_file) md.push(`- **Housing Evidence Excerpt (mirrored PDF)**: ${url.origin}/docs/${encodeURIComponent(s.housing_source_excerpt_file)}${s.housing_source_pages ? ` (${s.housing_source_pages}${s.housing_source_doc_title ? ", " + s.housing_source_doc_title : ""})` : ""}`);
+        if (s.source_full_file && s.source_full_file !== s.source_excerpt_file) md.push(`- **Full Source Report (mirrored PDF)**: ${url.origin}/docs/${encodeURIComponent(s.source_full_file)}`);
         md.push("");
       }
       return new Response(md.join("\n"), {

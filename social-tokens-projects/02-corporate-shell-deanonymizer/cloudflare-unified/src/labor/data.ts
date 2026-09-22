@@ -107,14 +107,14 @@ export const WAGE_THEFT_SEED_DATA: WageTheftSeedRecord[] = [
     violation_type: "TIME_ROUNDING_THEFT",
     back_wages_recovered: 256814.14,
     civil_penalties_assessed: 20000.00,
-    workers_affected: 142,
+    workers_affected: 500,
     repeat_violator: 0,
     status: "SETTLEMENT_REACHED",
     findings_date: "2024-05-18",
     settlement_amount: 276814.14,
-    description: "MN Attorney General Wage Theft investigation settlement recovering $256,814.14 for 142 Twin Cities workers for improper time-clock rounding deductions.",
+    description: "MN Attorney General settlement with Spectrum Plastics Group, Inc. over time-rounding practices that shaved regular and overtime pay, recovering $256,814.14 in unpaid wages for roughly 500 current and former hourly employees (Jan 2018 – Mar 2023). (2024 MN AG Labor Report, p. 6)",
     provenance_type: "VERIFIED_PUBLIC_ACTION",
-    source_docket_url: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2025.pdf"
+    source_docket_url: "https://www.ag.state.mn.us/Office/Reports/LaborReport_2024.pdf"
   },
   {
     case_id: "HENNEPIN-CV-22-16162",

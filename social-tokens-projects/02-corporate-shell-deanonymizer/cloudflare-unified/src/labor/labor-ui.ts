@@ -1011,6 +1011,13 @@ export function renderWageTheftUI(): string {
   <script>
     let currentCasesResults = [];
 
+    // Multi-hundred-page source reports mirrored in R2; cards link the
+    // single-page case doc first and offer the full report as context.
+    const FULL_REPORT_MIRROR = {
+      'https://www.ag.state.mn.us/Office/Reports/LaborReport_2024.pdf': 'ag-labor-report-2024.pdf',
+      'https://www.ag.state.mn.us/Office/Reports/LaborReport_2025.pdf': 'ag-labor-report-2025.pdf'
+    };
+
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
@@ -1054,6 +1061,7 @@ export function renderWageTheftUI(): string {
         '- **Investigative Findings / Narrative**: ' + (c.description || 'Confirmed civil/administrative wage theft findings.'),
         '- **Primary Legal Dockets & Source Documents**:',
         c.case_id ? '  - Evidence Document (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(c.case_id) + '.pdf' : '',
+        FULL_REPORT_MIRROR[c.source_docket_url] ? '  - Full Source Report (mirrored PDF): ' + location.origin + '/docs/' + FULL_REPORT_MIRROR[c.source_docket_url] : '',
         '  - US DOL Wage & Hour Division Public Enforcement Database: https://enforcement.dol.gov',
         '  - Minnesota Judicial Branch Public Access (MCRO Case Search): https://publicaccess.courts.state.mn.us',
         '  - Minneapolis Civil Rights Labor Standards Findings: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards',
@@ -1117,6 +1125,9 @@ export function renderWageTheftUI(): string {
         lines.push('- **Source Records**:');
         if (c.case_id) {
           lines.push('  - Evidence Document (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(c.case_id) + '.pdf');
+        }
+        if (FULL_REPORT_MIRROR[c.source_docket_url]) {
+          lines.push('  - Full Source Report (mirrored PDF): ' + location.origin + '/docs/' + FULL_REPORT_MIRROR[c.source_docket_url]);
         }
         lines.push('  - US DOL WHD Enforcement Database: https://enforcement.dol.gov');
         lines.push('  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us');
@@ -1308,6 +1319,13 @@ export function renderWageTheftUI(): string {
             <span>•</span>
           \` : '';
 
+          const fullReportLink = FULL_REPORT_MIRROR[c.source_docket_url] ? \`
+            <a href="/docs/\${FULL_REPORT_MIRROR[c.source_docket_url]}" target="_blank" style="color: #38bdf8; text-decoration: underline;">
+              Full source report ↗
+            </a>
+            <span>•</span>
+          \` : '';
+
           return \`
             <div class="case-card">
               <div>
@@ -1351,6 +1369,7 @@ export function renderWageTheftUI(): string {
                   </div>
                   <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     \${primaryDocLink}
+                    \${fullReportLink}
                     <a href="https://enforcement.dol.gov" target="_blank" style="color: #38bdf8; text-decoration: underline;">
                       US DOL WHD Docket ↗
                     </a>

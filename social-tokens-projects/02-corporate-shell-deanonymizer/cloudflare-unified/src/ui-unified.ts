@@ -174,7 +174,12 @@ export function renderUnifiedUI(): string {
       const housing = s.housing_source_excerpt_file && s.housing_source_excerpt_file !== s.source_excerpt_file
         ? evLink(s.housing_source_excerpt_file, s.housing_source_pages, s.housing_source_doc_title, 'housing source')
         : '';
-      const ev = labor && housing ? '📄 ' + labor + ' · 📄 ' + housing : (labor || housing ? '📄 ' + labor + housing : '');
+      const full = s.source_full_file && s.source_full_file !== s.source_excerpt_file
+        ? evLink(s.source_full_file, '', 'full source report')
+        : '';
+      const ev = [labor, housing, full].filter(Boolean).length
+        ? '📄 ' + [labor, housing, full].filter(Boolean).join(' · 📄 ')
+        : '';
       return '<div class="card"><h3>' + esc(s.entity_name) + '</h3>' +
         '<div><span class="badge b-red">' + esc(s.risk_tier) + '</span><span class="badge b-amber">score ' + s.composite_score + '/100</span></div>' +
         '<div class="meta">' + esc(s.city) + ' · ' + s.properties_count + ' properties · ' + s.total_units + ' units · $' +
