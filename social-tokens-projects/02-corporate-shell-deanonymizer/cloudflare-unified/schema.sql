@@ -49,6 +49,9 @@ CREATE INDEX IF NOT EXISTS idx_rl_link_key ON rental_licenses(link_key);
 
 -- Per-feed crawl cursor. A single invocation must never exceed the platform's
 -- D1 queries-per-invocation limit, so large feeds resume here.
+-- started_at is used by chunked rebuild jobs (dual_matches, entity_resolution)
+-- to mark cycle boundaries; older databases need
+--   ALTER TABLE sync_state ADD COLUMN started_at TEXT;
 CREATE TABLE IF NOT EXISTS sync_state (
     feed_id TEXT PRIMARY KEY,
     offset INTEGER NOT NULL DEFAULT 0,
@@ -202,3 +205,56 @@ CREATE TABLE IF NOT EXISTS sync_logs (
 );
 
 CREATE INDEX IF NOT EXISTS idx_sync_logs_source ON sync_logs(source);
+
+-- ---------------------------------------------------------------------------
+-- Entity resolution: canonical owner entities with per-link provenance.
+--
+-- Every rental_licenses row emits linking signals (applicant/owner email,
+-- shared email domain, jurisdiction-scoped normalized name). Each signal
+-- is its own entity (entity_id = the signal key) and every signal links the
+-- parcel to that entity with a match_type + confidence, so a row carrying
+-- both an email and a name links into both clusters. Candidate merges that
+-- need human judgment land in owner_entity_review (cross-jurisdiction
+-- name/domain matches, oversized auto groups); approving re-points the
+-- links. This DDL mirrors the deployed production tables — keep in sync.
+--
+-- Rows are written by the chunked rebuild in src/housing/entities.ts
+-- (sync_state feed_id = 'entity_resolution'), mirroring dual_matches.
+CREATE TABLE IF NOT EXISTS owner_entities (
+    entity_id TEXT PRIMARY KEY,      -- 'email:<email>' | 'domain:<domain>' | 'name:<jurisdiction>:<name>'
+    display_name TEXT NOT NULL,
+    normalized_name TEXT,
+    entity_kind TEXT DEFAULT 'unknown',   -- company | person | unknown
+    email_domain TEXT,
+    parcel_count INTEGER DEFAULT 0,
+    jurisdiction_count INTEGER DEFAULT 0,
+    provenance TEXT DEFAULT '{}',         -- JSON: {signals:[], sources:[], merged_from:[]}
+    status TEXT DEFAULT 'auto',           -- auto | review | confirmed | merged
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+    updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS owner_entity_links (
+    parcel_id TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    match_type TEXT NOT NULL,             -- email_exact | email_domain | name | manual
+    confidence REAL DEFAULT 1.0,
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+    PRIMARY KEY (parcel_id, entity_id)
+);
+
+CREATE TABLE IF NOT EXISTS owner_entity_review (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entity_id_a TEXT NOT NULL,
+    entity_id_b TEXT,                     -- NULL for single-entity flags
+    reason TEXT NOT NULL,                 -- cross_jurisdiction_name_domain | multi_jurisdiction_name | large_auto_group
+    evidence TEXT DEFAULT '{}',           -- JSON describing the candidate
+    status TEXT DEFAULT 'pending',        -- pending | approved | rejected
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+    reviewed_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_oel_entity ON owner_entity_links(entity_id);
+CREATE INDEX IF NOT EXISTS idx_oe_domain ON owner_entities(email_domain);
+CREATE INDEX IF NOT EXISTS idx_oe_status ON owner_entities(status);
+CREATE INDEX IF NOT EXISTS idx_oer_status ON owner_entity_review(status);

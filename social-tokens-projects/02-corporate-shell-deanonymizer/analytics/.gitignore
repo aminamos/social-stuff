@@ -1,0 +1,8 @@
+.venv/
+data/
+logs/
+sqlmesh/
+.cache/
+__pycache__/
+!models/**/*.sql
+!audits/**/*.sql

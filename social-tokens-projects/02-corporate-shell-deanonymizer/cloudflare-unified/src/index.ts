@@ -17,12 +17,16 @@ import {
   runSyncTick,
   syncOne,
   loadStates,
+  beginNewCycle,
+  SyncResult,
 } from "./housing/sync";
 import {
   VIOLATION_ADAPTERS,
   getViolationAdapter,
   syncViolationAdapter,
+  runViolationsTick,
 } from "./housing/violations";
+import { rebuildEntities, applyEntityReview } from "./housing/entities";
 import { WAGE_THEFT_SEED_DATA } from "./labor/data";
 import { runLiveEnforcementSync } from "./labor/live_sync";
 import { renderWageTheftUI } from "./labor/labor-ui";
@@ -91,10 +95,16 @@ export default {
           const r = await rebuildDualMatches(env, 25);
           if (r.done) break;
         }
+        // Entity-resolution pass: chunked over rental_licenses, resumes via
+        // sync_state feed 'entity_resolution'. Same budget discipline.
+        for (let guard = 0; guard < 10; guard++) {
+          const r = await rebuildEntities(env, 800);
+          if (r.done) break;
+        }
       })());
     } else {
       const isDaily = event.cron === "0 4 * * *";
-      ctx.waitUntil(runSyncTick(env, { reset: isDaily }));
+      ctx.waitUntil(runFullTick(env, { reset: isDaily }));
     }
   },
 
@@ -140,7 +150,7 @@ export default {
       if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
       const reset = url.searchParams.get("reset") === "1";
       const budget = parseInt(url.searchParams.get("budget") || String(D1_QUERY_BUDGET), 10);
-      const results = await runSyncTick(env, { reset, budget });
+      const results = await runFullTick(env, { reset, budget });
       return json({ status: "sync tick complete", budget, results });
     }
 
@@ -836,6 +846,148 @@ export default {
         return json({ error: err.message }, { status: 500 });
       }
     }
+    // -------------------------------------------------- entity resolution
+    // Canonical owner entities with per-link provenance. Table is built by
+    // the chunked 'entity_resolution' rebuild (06:00 cron or POST
+    // /api/entities/rebuild); reads here are pure lookups.
+    if (url.pathname === "/api/entities/rebuild" && request.method === "POST") {
+      if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
+      try {
+        const chunks = Math.min(parseInt(url.searchParams.get("chunks") || "10", 10), 40);
+        const out = [];
+        for (let i = 0; i < chunks; i++) {
+          const r = await rebuildEntities(env, 800);
+          out.push(r);
+          if (r.done) break;
+        }
+        return json({ results: out, last: out[out.length - 1] });
+      } catch (err: any) {
+        return json({ error: err.message }, { status: 500 });
+      }
+    }
+
+    // Review queue: proposed merges/flags awaiting a human.
+    if (url.pathname === "/api/entity-review") {
+      if (request.method === "GET") {
+        try {
+          const status = url.searchParams.get("status") || "pending";
+          const rows = await env.DB.prepare(`
+            SELECT r.id, r.entity_id_a, r.entity_id_b, r.reason, r.evidence,
+                   r.status, r.created_at, r.reviewed_at,
+                   ea.display_name AS a_name, ea.entity_kind AS a_kind,
+                   ea.parcel_count AS a_parcels, ea.jurisdiction_count AS a_jurs,
+                   eb.display_name AS b_name, eb.entity_kind AS b_kind,
+                   eb.parcel_count AS b_parcels, eb.jurisdiction_count AS b_jurs
+            FROM owner_entity_review r
+            LEFT JOIN owner_entities ea ON ea.entity_id = r.entity_id_a
+            LEFT JOIN owner_entities eb ON eb.entity_id = r.entity_id_b
+            WHERE r.status = ?
+            ORDER BY r.created_at DESC LIMIT 200
+          `).bind(status).all();
+          return json({ status, count: rows.results.length, review: rows.results });
+        } catch (err: any) {
+          return json({ error: err.message }, { status: 500 });
+        }
+      }
+      if (request.method === "POST") {
+        if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
+        try {
+          const body: any = await request.json();
+          const action = body.action === "approve" ? "approve" : body.action === "reject" ? "reject" : null;
+          const id = Number(body.id);
+          if (!id || !action) {
+            return json({ error: "Missing id or action (approve|reject)" }, { status: 400 });
+          }
+          const r = await applyEntityReview(env, id, action);
+          if (!r.ok) return json({ error: r.error }, { status: 404 });
+          return json({ ok: true, id, status: action === "approve" ? "approved" : "rejected" });
+        } catch (err: any) {
+          return json({ error: err.message }, { status: 500 });
+        }
+      }
+    }
+
+    if (url.pathname === "/api/entities") {
+      try {
+        const q = (url.searchParams.get("q") || "").trim();
+        const jur = (url.searchParams.get("jurisdiction") || "").trim();
+        const minParcels = parseInt(url.searchParams.get("min_parcels") || "1", 10);
+        const limit = Math.min(parseInt(url.searchParams.get("limit") || "50", 10), 200);
+        const res = await env.DB.prepare(`
+          SELECT entity_id, display_name, normalized_name, entity_kind,
+                 parcel_count, jurisdiction_count, status
+          FROM owner_entities
+          WHERE (?1 = '' OR display_name LIKE '%' || ?1 || '%'
+                 OR normalized_name LIKE '%' || ?1 || '%'
+                 OR entity_id LIKE '%' || ?1 || '%')
+            AND (?2 = '' OR EXISTS (
+                  SELECT 1 FROM owner_entity_links l
+                  JOIN rental_licenses r ON r.parcel_id = l.parcel_id
+                  WHERE l.entity_id = owner_entities.entity_id
+                    AND r.jurisdiction_id = ?2))
+            AND parcel_count >= ?3
+            AND status != 'merged'
+          ORDER BY parcel_count DESC
+          LIMIT ?4
+        `).bind(q, jur, minParcels, limit).all();
+        return json({ count: res.results.length, entities: res.results });
+      } catch (err: any) {
+        return json({ error: err.message }, { status: 500 });
+      }
+    }
+
+    if (url.pathname.startsWith("/api/entities/")) {
+      try {
+        const entityId = decodeURIComponent(
+          url.pathname.slice("/api/entities/".length),
+        );
+        const entity = await env.DB.prepare(
+          `SELECT * FROM owner_entities WHERE entity_id = ?`,
+        ).bind(entityId).first();
+        if (!entity) return json({ error: "not found" }, { status: 404 });
+
+        // Linked parcels + the co-linked entities sharing them (the network
+        // this entity belongs to, e.g. email + domain + name clusters).
+        const parcels = await env.DB.prepare(
+          `SELECT l.parcel_id, l.match_type, l.confidence,
+                  r.address, r.city, r.state, r.jurisdiction_id, r.units, r.severity_class
+           FROM owner_entity_links l
+           LEFT JOIN rental_licenses r ON r.parcel_id = l.parcel_id
+           WHERE l.entity_id = ?
+           ORDER BY r.jurisdiction_id, r.address
+           LIMIT 500`,
+        ).bind(entityId).all();
+        const coEntities = await env.DB.prepare(
+          `SELECT l2.entity_id, e.display_name, e.entity_kind, e.parcel_count,
+                  e.jurisdiction_count, e.status,
+                  COUNT(DISTINCT l2.parcel_id) AS shared_parcels
+           FROM owner_entity_links l2
+           LEFT JOIN owner_entities e ON e.entity_id = l2.entity_id
+           WHERE l2.entity_id != ?
+             AND l2.parcel_id IN (
+               SELECT parcel_id FROM owner_entity_links WHERE entity_id = ?
+             )
+           GROUP BY l2.entity_id
+           ORDER BY shared_parcels DESC
+           LIMIT 100`,
+        ).bind(entityId, entityId).all();
+        const review = await env.DB.prepare(
+          `SELECT id, entity_id_a, entity_id_b, reason, evidence, status, created_at
+           FROM owner_entity_review
+           WHERE entity_id_a = ? OR entity_id_b = ?
+           ORDER BY created_at DESC LIMIT 50`,
+        ).bind(entityId, entityId).all();
+        return json({
+          entity,
+          parcels: parcels.results,
+          co_entities: coEntities.results,
+          review_items: review.results,
+        });
+      } catch (err: any) {
+        return json({ error: err.message }, { status: 500 });
+      }
+    }
+
     // -------------------------------------------------- unified browsing
     // Every city/area with data, across housing + labor, in one call.
     if (url.pathname === "/api/cities") {
@@ -1014,6 +1166,57 @@ export default {
     );
   },
 };
+
+/**
+ * One full tick: registries plus a reserved violations slice.
+ *
+ * Violations run first inside a bounded slice (V_TICK_SLICE queries,
+ * ~2 pages/tick) so a multi-day registry refill cannot starve them; the
+ * rest of the budget goes to the registry feeds exactly as before. On
+ * reset ticks, completed violation feeds are reset explicitly — the
+ * shared beginNewCycle skips all violation cursors so multi-day fills
+ * (NYC open: ~2.9M rows) converge instead of rescanning a prefix daily.
+ */
+const V_TICK_SLICE = 10;
+
+async function runFullTick(
+  env: Env,
+  opts: { reset?: boolean; budget?: number } = {},
+): Promise<SyncResult[]> {
+  const budget = opts.budget ?? D1_QUERY_BUDGET;
+  const results: SyncResult[] = [];
+
+  if (opts.reset) {
+    await beginNewCycle(env);
+    // Fresh daily pass for violation feeds that completed; in-progress
+    // fills keep their cursor.
+    await env.DB.prepare(
+      `UPDATE sync_state SET offset=0, completed_at=NULL, last_error=NULL, updated_at=?
+       WHERE completed_at IS NOT NULL
+         AND feed_id IN (SELECT DISTINCT feed_id FROM violations)`,
+    )
+      .bind(new Date().toISOString())
+      .run();
+  }
+
+  const states = await loadStates(env);
+
+  const violationsPending = VIOLATION_ADAPTERS.some(
+    (a) => a.enabled && !states.get(a.feed.id)?.completed_at,
+  );
+  let queriesUsed = 0;
+  if (violationsPending) {
+    const slice = Math.min(V_TICK_SLICE, Math.max(0, budget - 6));
+    const vr = await runViolationsTick(env, { budget: slice, states });
+    queriesUsed += vr.reduce((a, r) => a + r.queriesUsed, 0);
+    results.push(...vr);
+  }
+
+  results.push(
+    ...(await runSyncTick(env, { budget: Math.max(0, budget - queriesUsed) })),
+  );
+  return results;
+}
 
 const DUAL_MATCH_FEED = "dual_matches";
 

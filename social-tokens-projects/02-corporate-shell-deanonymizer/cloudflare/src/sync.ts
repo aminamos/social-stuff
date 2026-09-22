@@ -101,10 +101,20 @@ export async function resetState(env: SyncEnv, feedId: string): Promise<void> {
     .run();
 }
 
-/** Mark every feed stale so the next tick performs a full refresh. */
+/**
+ * Mark every feed stale so the next tick performs a full refresh.
+ *
+ * Violation feeds (any feed_id that has written to the violations table)
+ * and the dual_matches rebuild cursor are exempt: their passes span many
+ * days, so resetting them to 0 would freeze the fill frontier at a
+ * permanently-rescanned prefix. Completed violation feeds are reset
+ * separately by the unified tick so they still get a fresh daily pass.
+ */
 export async function beginNewCycle(env: SyncEnv): Promise<void> {
   await env.DB.prepare(
-    "UPDATE sync_state SET offset=0, completed_at=NULL, last_error=NULL, updated_at=?",
+    `UPDATE sync_state SET offset=0, completed_at=NULL, last_error=NULL, updated_at=?
+     WHERE feed_id <> 'dual_matches'
+       AND feed_id NOT IN (SELECT DISTINCT feed_id FROM violations)`,
   )
     .bind(new Date().toISOString())
     .run();

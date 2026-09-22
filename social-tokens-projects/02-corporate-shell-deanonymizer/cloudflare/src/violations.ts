@@ -76,24 +76,26 @@ export function toViolationRecord(
 }
 
 /**
- * NYC HPD Housing Maintenance Code Violations, bounded to Open + Class C.
+ * NYC HPD Housing Maintenance Code Violations, full-open scope.
  * https://data.cityofnewyork.us/resource/wvxf-dwi5.json
  *
- * Scope is deliberately narrow: violationstatus='Open' AND class='C'
- * (immediately hazardous). The equality-only $where keeps the read
- * index-friendly and the fill inside the per-tick query budget.
+ * Scope is all open violations: violationstatus='Open' (any class).
+ * The equality-only $where keeps the read index-friendly and the fill
+ * inside the per-tick query budget. Widened from Open+Class C on
+ * 2026-09-14 after a measured /search latency check; the feed id was
+ * preserved so the fill resumed from the existing cursor.
  */
 export const nycViolations: ViolationAdapter = {
   feed: {
     id: "ny-hpd-violations-open-c",
-    label: "NYC HPD Violations (Open, Class C)",
+    label: "NYC HPD Violations (Open)",
   },
   source: {
     platform: "socrata",
     endpoint: "https://data.cityofnewyork.us/resource/wvxf-dwi5.json",
     dataset: "wvxf-dwi5",
     pageSize: 1000,
-    where: "violationstatus='Open' AND class='C'",
+    where: "violationstatus='Open'",
     orderBy: ":id",
   },
   violationIdField: "violationid",
@@ -106,55 +108,93 @@ export const nycViolations: ViolationAdapter = {
   boroField: "boro",
   descriptionField: "novdescription",
   enabled: true,
-  note: "Bounded to Open + Class C only. join_key is verbatim bbl (nullable) with BBL fallback. Joins registry on apn equality.",
+  note: "Full-open scope: violationstatus='Open', any class. join_key is verbatim bbl (nullable) with BBL fallback. Joins registry on apn equality.",
 };
 
 /**
- * Seattle violations (dataset ez4a-iug7). Declared behind enabled=false:
- * visible in /feeds and /sync/status, never filled until the schema is
- * verified and the flag is flipped. LA is parked (no adapter declared).
+ * Seattle code complaints & violations (dataset ez4a-iug7).
+ * https://data.seattle.gov/resource/ez4a-iug7.json
+ *
+ * Schema verified live 2026-09-22: ids are recordnum ("001001-03CP"),
+ * class is recordtype (Complaint | Citation | Notice of Violation |
+ * Tenant Relocation | Unfit Building), status is statuscurrent
+ * (20 distinct values). The where clause excludes the six terminal
+ * states (Closed, Completed, Compliance Achieved, Application
+ * Completed, Withdrawn, Reviews Completed — ~232k of ~249k rows);
+ * Warning is fetched but not counted open. No parcel or permit column
+ * is published, so this feed is address-join only: join_key stays null.
  */
 export const seattleViolations: ViolationAdapter = {
   feed: {
     id: "wa-seattle-violations",
-    label: "Seattle Violations (declared, not filled)",
+    label: "Seattle Code Complaints & Violations",
   },
   source: {
     platform: "socrata",
     endpoint: "https://data.seattle.gov/resource/ez4a-iug7.json",
     dataset: "ez4a-iug7",
     pageSize: 1000,
+    where: "statuscurrent NOT IN ('Closed', 'Completed', 'Compliance Achieved', 'Application Completed', 'Withdrawn', 'Reviews Completed')",
     orderBy: ":id",
   },
-  violationIdField: "violationid",
-  classField: "class",
-  statusField: "status",
-  openField: "status",
-  openValues: ["Open"],
-  enabled: false,
-  note: "Declared but disabled: schema unverified, no fill. Flip enabled after verifying id/class/status fields.",
+  violationIdField: "recordnum",
+  classField: "recordtype",
+  statusField: "statuscurrent",
+  openField: "statuscurrent",
+  openValues: [
+    "Awaiting Information",
+    "Citation Issued",
+    "EO Repair Restore Issued",
+    "EO Vacate Close Issued",
+    "Hazard Correction Order Issued",
+    "Initiated",
+    "Issued",
+    "NOV Issued",
+    "Open Duplicate",
+    "Referred to Law",
+    "Reviews In Process",
+    "Stop Work Issued",
+    "Under Investigation",
+  ],
+  addressField: "originaladdress1",
+  descriptionField: "description",
+  enabled: true,
+  note: "Bounded to non-terminal statuscurrent (verified literals). Warning fetched but is_open=0. recordnum is a case id, not a parcel — address-join only, join_key stays null.",
 };
 
-/** Chicago violations (dataset 22u3-xenr). Declared behind enabled=false. */
+/**
+ * Chicago building code violations (dataset 22u3-xenr).
+ * https://data.cityofchicago.org/resource/22u3-xenr.json
+ *
+ * Schema verified live 2026-09-22: ids are id, class is violation_code
+ * (ordinance section, e.g. "CN070024"), status is violation_status —
+ * OPEN (1.16M), COMPLIED (862k), NO ENTRY (7.2k). Bounded to OPEN only;
+ * NO ENTRY means the inspection never happened, so it is not counted
+ * open. property_group is an internal grouping key, not a registry APN,
+ * so join_key stays null — address-join only.
+ */
 export const chicagoViolations: ViolationAdapter = {
   feed: {
     id: "il-chicago-violations",
-    label: "Chicago Violations (declared, not filled)",
+    label: "Chicago Building Violations (Open)",
   },
   source: {
     platform: "socrata",
     endpoint: "https://data.cityofchicago.org/resource/22u3-xenr.json",
     dataset: "22u3-xenr",
     pageSize: 1000,
+    where: "violation_status='OPEN'",
     orderBy: ":id",
   },
-  violationIdField: "violationid",
-  classField: "class",
-  statusField: "status",
-  openField: "status",
-  openValues: ["Open"],
-  enabled: false,
-  note: "Declared but disabled: schema unverified, no fill. Flip enabled after verifying id/class/status fields.",
+  violationIdField: "id",
+  classField: "violation_code",
+  statusField: "violation_status",
+  openField: "violation_status",
+  openValues: ["OPEN"],
+  addressField: "address",
+  descriptionField: "violation_description",
+  enabled: true,
+  note: "Bounded to violation_status='OPEN' (verified literal; COMPLIED and NO ENTRY excluded). join_key null — no Chicago registry feed, address-join only.",
 };
 
 export const VIOLATION_ADAPTERS: ViolationAdapter[] = [

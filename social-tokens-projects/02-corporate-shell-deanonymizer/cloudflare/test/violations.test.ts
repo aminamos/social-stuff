@@ -68,11 +68,64 @@ describe("violation adapter registry", () => {
     expect(getViolationAdapter("nope")).toBe(undefined);
   });
 
-  it("keeps unverified feeds declared but disabled", () => {
-    const disabled = VIOLATION_ADAPTERS.filter((a) => !a.enabled);
-    expect(disabled.length).toBeGreaterThan(0);
-    for (const a of disabled) {
+  it("resolves every enabled adapter by feed id", () => {
+    for (const a of VIOLATION_ADAPTERS) {
+      expect(getViolationAdapter(a.feed.id)).toBe(a);
       expect(a.violationIdField).toBeTruthy();
+    }
+  });
+});
+
+describe("toViolationRecord (verified Socrata feeds)", () => {
+  const seattle = getViolationAdapter("wa-seattle-violations")!;
+  const chicago = getViolationAdapter("il-chicago-violations")!;
+
+  it("maps Seattle recordnum/recordtype/statuscurrent", () => {
+    const rec = toViolationRecord(seattle, {
+      recordnum: "001001-03CP",
+      recordtype: "Complaint",
+      statuscurrent: "Under Investigation",
+      originaladdress1: "1100 2ND AVE",
+      description: "Elevator broken",
+    }, SYNCED_AT)!;
+    expect(rec.violation_id).toBe("001001-03CP");
+    expect(rec.violation_class).toBe("Complaint");
+    expect(rec.status).toBe("Under Investigation");
+    expect(rec.is_open).toBe(1);
+    expect(rec.join_key).toBe(null);
+    expect(rec.address).toBe("1100 2ND AVE");
+  });
+
+  it("treats Seattle terminal and Warning statuses as not open", () => {
+    for (const s of ["Completed", "Closed", "Withdrawn", "Reviews Completed", "Warning"]) {
+      const rec = toViolationRecord(seattle, {
+        recordnum: "x", recordtype: "Complaint", statuscurrent: s,
+      }, SYNCED_AT)!;
+      expect(rec.is_open, s).toBe(0);
+    }
+  });
+
+  it("maps Chicago id/violation_code/violation_status", () => {
+    const rec = toViolationRecord(chicago, {
+      id: "7546762",
+      violation_code: "CN138106",
+      violation_status: "OPEN",
+      violation_description: "STOP/REMOVE NUISANCE",
+      address: "7836 S CARPENTER ST",
+    }, SYNCED_AT)!;
+    expect(rec.violation_id).toBe("7546762");
+    expect(rec.violation_class).toBe("CN138106");
+    expect(rec.is_open).toBe(1);
+    expect(rec.join_key).toBe(null);
+    expect(rec.description).toBe("STOP/REMOVE NUISANCE");
+  });
+
+  it("treats Chicago COMPLIED and NO ENTRY as not open", () => {
+    for (const s of ["COMPLIED", "NO ENTRY"]) {
+      const rec = toViolationRecord(chicago, {
+        id: "x", violation_status: s,
+      }, SYNCED_AT)!;
+      expect(rec.is_open, s).toBe(0);
     }
   });
 });
