@@ -1053,7 +1053,7 @@ export function renderWageTheftUI(): string {
         '- **Affected Workforce**: ' + (c.workers_affected || 0) + ' workers',
         '- **Investigative Findings / Narrative**: ' + (c.description || 'Confirmed civil/administrative wage theft findings.'),
         '- **Primary Legal Dockets & Source Documents**:',
-        c.source_docket_url ? '  - Primary Source Docket URL: ' + c.source_docket_url : '  - US DOL Wage & Hour Division Public Enforcement Database: https://enforcement.dol.gov',
+        c.case_id ? '  - Evidence Document (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(c.case_id) + '.pdf' : '',
         '  - US DOL Wage & Hour Division Public Enforcement Database: https://enforcement.dol.gov',
         '  - Minnesota Judicial Branch Public Access (MCRO Case Search): https://publicaccess.courts.state.mn.us',
         '  - Minneapolis Civil Rights Labor Standards Findings: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards',
@@ -1115,8 +1115,8 @@ export function renderWageTheftUI(): string {
         lines.push('- **Status**: ' + (c.status || 'Active') + (c.repeat_violator ? ' [REPEAT OFFENDER]' : ''));
         lines.push('- **Case Summary**: ' + (c.description || ''));
         lines.push('- **Source Records**:');
-        if (c.source_docket_url) {
-          lines.push('  - Direct Docket URL: ' + c.source_docket_url);
+        if (c.case_id) {
+          lines.push('  - Evidence Document (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(c.case_id) + '.pdf');
         }
         lines.push('  - US DOL WHD Enforcement Database: https://enforcement.dol.gov');
         lines.push('  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us');
@@ -1301,9 +1301,9 @@ export function renderWageTheftUI(): string {
             </div>
           \`;
 
-          const primaryDocLink = c.source_docket_url ? \`
-            <a href="\${c.source_docket_url}" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
-              Official Docket Document / Report PDF ↗
+          const primaryDocLink = c.case_id ? \`
+            <a href="/docs/\${encodeURIComponent(c.case_id)}.pdf" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
+              Case docket PDF ↗
             </a>
             <span>•</span>
           \` : '';

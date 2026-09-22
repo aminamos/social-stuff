@@ -896,7 +896,8 @@ export function renderCrossoverUI(): string {
         '- **Recommended Joint Organizing Strategy**:',
         '  - ' + (s.organizing_playbook || 'Escrow rent; enforce joint employer liability.'),
         '- **Official Source Records & Legal Dockets**:',
-        s.source_docket_url ? '  - Primary Source Docket / Legal Report: ' + s.source_docket_url : '',
+        (s.source_excerpt_file || s.case_id) ? '  - Evidence Excerpt (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(s.source_excerpt_file || (s.case_id + '.pdf')) + (s.source_pages ? ' (' + s.source_pages + (s.source_doc_title ? ', ' + s.source_doc_title : '') + ')' : '') : '',
+        (s.housing_source_excerpt_file && s.housing_source_excerpt_file !== s.source_excerpt_file) ? '  - Housing Evidence Excerpt (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(s.housing_source_excerpt_file) + (s.housing_source_pages ? ' (' + s.housing_source_pages + (s.housing_source_doc_title ? ', ' + s.housing_source_doc_title : '') + ')' : '') : '',
         '  - County Property Tax / Parcel PDF: https://www.hennepin.us/residents/property/property-information-search',
         '  - Municipal Active Rental License Registry: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0',
         '  - US DOL Enforcement Database: https://enforcement.dol.gov',
@@ -962,8 +963,11 @@ export function renderCrossoverUI(): string {
         lines.push('  - ' + (s.labor_narrative || ''));
         lines.push('- **Joint Organizing Playbook**: ' + (s.organizing_playbook || ''));
         lines.push('- **Primary Document & Docket Links**:');
-        if (s.source_docket_url) {
-          lines.push('  - Primary Source Docket / Legal Report: ' + s.source_docket_url);
+        if (s.source_excerpt_file || s.case_id) {
+          lines.push('  - Evidence Excerpt (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(s.source_excerpt_file || (s.case_id + '.pdf')) + (s.source_pages ? ' (' + s.source_pages + (s.source_doc_title ? ', ' + s.source_doc_title : '') + ')' : ''));
+        }
+        if (s.housing_source_excerpt_file && s.housing_source_excerpt_file !== s.source_excerpt_file) {
+          lines.push('  - Housing Evidence Excerpt (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(s.housing_source_excerpt_file) + (s.housing_source_pages ? ' (' + s.housing_source_pages + (s.housing_source_doc_title ? ', ' + s.housing_source_doc_title : '') + ')' : ''));
         }
         lines.push('  - County Parcel PDF: https://www.hennepin.us/residents/property/property-information-search');
         lines.push('  - Rental License Feature Docket: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0');
@@ -1248,14 +1252,14 @@ export function renderCrossoverUI(): string {
                     </a>
                     <span style="color: var(--card-border);">•</span>
                   \` : ''}
-                  \${s.source_docket_url ? \`
-                    <a href="\${s.source_docket_url}\${((s.source_pages || '').match(/[0-9]+/) || [])[0] ? '#page=' + ((s.source_pages || '').match(/[0-9]+/) || [])[0] : ''}" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
-                      \${s.source_doc_title ? s.source_doc_title + (s.source_pages ? ' ' + s.source_pages : '') : 'Official Docket Document / Report PDF'} ↗
+                  \${s.case_id && s.source_excerpt_file !== s.case_id + '.pdf' ? \`
+                    <a href="/docs/\${encodeURIComponent(s.case_id)}.pdf" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
+                      Case docket PDF ↗
                     </a>
                     <span style="color: var(--card-border);">•</span>
                   \` : ''}
-                  \${(s.housing_source_url || s.housing_source_excerpt_file) && s.housing_source_url !== s.source_docket_url && s.housing_source_excerpt_file !== s.source_excerpt_file ? \`
-                    <a href="\${s.housing_source_excerpt_file ? '/docs/' + encodeURIComponent(s.housing_source_excerpt_file) : s.housing_source_url + (((s.housing_source_pages || '').match(/[0-9]+/) || [])[0] ? '#page=' + ((s.housing_source_pages || '').match(/[0-9]+/) || [])[0] : '')}" target="_blank" style="color: #38bdf8; font-weight: 700; text-decoration: underline;">
+                  \${s.housing_source_excerpt_file && s.housing_source_excerpt_file !== s.source_excerpt_file ? \`
+                    <a href="/docs/\${encodeURIComponent(s.housing_source_excerpt_file)}" target="_blank" style="color: #38bdf8; font-weight: 700; text-decoration: underline;">
                       Housing evidence\${s.housing_source_doc_title ? ' — ' + s.housing_source_doc_title : ''}\${s.housing_source_pages ? ' ' + s.housing_source_pages : ''} ↗
                     </a>
                     <span style="color: var(--card-border);">•</span>

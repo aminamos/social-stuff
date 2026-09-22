@@ -637,7 +637,7 @@ export default {
           md.push(`- **Total Financial Restitution & Penalties**: $${total}`);
           md.push(`- **Affected Workforce**: ${row.workers_affected || 0} workers`);
           md.push(`- **Official Findings Summary**: ${row.description || "Confirmed civil/administrative wage theft findings."}`);
-          if (row.source_docket_url) md.push(`- **Primary Source Docket**: ${row.source_docket_url}`);
+          if (row.case_id) md.push(`- **Evidence Document (mirrored PDF)**: ${url.origin}/docs/${encodeURIComponent(row.case_id)}.pdf`);
           md.push("");
         }
         return new Response(md.join("\n"), {
@@ -771,7 +771,8 @@ export default {
         md.push(`  - Workers Impacted: ${s.workers_affected}`);
         md.push(`  - Labor Profile: ${s.labor_narrative}`);
         md.push(`- **Joint Organizing Playbook**: ${s.organizing_playbook}`);
-        if (s.source_docket_url) md.push(`- **Primary Source Docket**: ${s.source_docket_url}`);
+        if (s.source_excerpt_file || s.case_id) md.push(`- **Evidence Excerpt (mirrored PDF)**: ${url.origin}/docs/${encodeURIComponent(s.source_excerpt_file || s.case_id + ".pdf")}${s.source_pages ? ` (${s.source_pages}${s.source_doc_title ? ", " + s.source_doc_title : ""})` : ""}`);
+        if (s.housing_source_excerpt_file && s.housing_source_excerpt_file !== s.source_excerpt_file) md.push(`- **Housing Evidence Excerpt (mirrored PDF)**: ${url.origin}/docs/${encodeURIComponent(s.housing_source_excerpt_file)}${s.housing_source_pages ? ` (${s.housing_source_pages}${s.housing_source_doc_title ? ", " + s.housing_source_doc_title : ""})` : ""}`);
         md.push("");
       }
       return new Response(md.join("\n"), {

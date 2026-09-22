@@ -103,6 +103,8 @@ export const VERIFIED_CROSSOVER_SYNDICATES: CrossoverSyndicate[] = [
     labor_narrative: "Federal Election Commission public filings revealed De Roma was a maximum donor to former Ku Klux Klan Grand Wizard David Duke. Prompted unanimous worker walkout, total service staff resignation, widespread community boycott, and permanent closure of Club Jäger.",
     labor_provenance: "🟢 VERIFIED PUBLIC ENFORCEMENT ACTION",
     source_docket_url: "",
+    source_excerpt_file: "FEC-MN-DUKE-2017.pdf",
+    source_doc_title: "FEC filing / case record",
     composite_score: 96,
     risk_tier: "CRITICAL ETHICAL & REPUTATIONAL RISK",
     organizing_playbook: "Coordinate tenant union councils across all 5 Minneapolis properties; leverage unmasked beneficial ownership (4133 Dupont Ave S) and historical labor solidarity from the Club Jäger worker walkout.",
