@@ -667,7 +667,7 @@ export function renderCrossoverUI(): string {
     <div id="matrixTab" class="tab-pane active">
       <div class="search-section">
         <div class="search-row">
-          <input type="text" id="searchInput" class="search-input" placeholder="Search crossover matrix by landlord, management email, or address (e.g. Julius De Roma, Fitterer, Dominium)..." value="">
+          <input type="text" id="searchInput" class="search-input" placeholder="Search crossover matrix by landlord, management email, or address (e.g. Julius De Roma, Evergreen, PMC)..." value="">
           <button class="search-btn" onclick="executeSearch()">Filter Matrix</button>
           <button class="search-btn" onclick="exportMatrixAsMarkdown()" style="background: #10b981;">📥 Export as .MD</button>
         </div>
@@ -675,11 +675,8 @@ export function renderCrossoverUI(): string {
           <span style="font-size: 0.8rem; color: var(--text-dim); margin-right: 4px;">Quick Filters:</span>
           <button class="chip" onclick="quickFilter('')">All Syndicates</button>
           <button class="chip" onclick="quickFilter('Julius De Roma')">Julius De Roma (Club Jäger)</button>
-          <button class="chip" onclick="quickFilter('Fitterer')">Fitterer / IPG Living</button>
-          <button class="chip" onclick="quickFilter('Dominium')">Dominium</button>
           <button class="chip" onclick="quickFilter('Property Maintenance')">PMC Renovation</button>
-          <button class="chip" onclick="quickFilter('Timberland')">Timberland Partners</button>
-          <button class="chip" onclick="quickFilter('Kleinman')">Kleinman Realty</button>
+          <button class="chip" onclick="quickFilter('Evergreen')">Evergreen Acres</button>
         </div>
       </div>
 
@@ -724,7 +721,7 @@ export function renderCrossoverUI(): string {
         <form id="dualReportForm" onsubmit="submitDualReport(event)">
           <div class="form-group">
             <label class="form-label">Property Owner / Management Company *</label>
-            <input type="text" id="reportEmployer" class="form-input" required placeholder="e.g. Dominium, IPG Living, or shell LLC name">
+            <input type="text" id="reportEmployer" class="form-input" required placeholder="e.g. a property-management company or shell LLC name">
           </div>
 
           <div class="form-group">
@@ -842,7 +839,7 @@ export function renderCrossoverUI(): string {
         <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
           <span style="font-size: 0.75rem; color: var(--text-dim); align-self: center;">Suggested:</span>
           <button class="chip" onclick="askSuggestedQuestion('Which landlords have both Tier 3 habitability citations and active wage theft dockets?')">Top Dual Violators</button>
-          <button class="chip" onclick="askSuggestedQuestion('Explain the joint organizing strategy for tenants and caretakers at Brian Fitterer / IPG properties.')">Fitterer Playbook</button>
+          <button class="chip" onclick="askSuggestedQuestion('Explain the joint organizing strategy for tenants and workers affected by the Evergreen Acres dairy housing case.')">Evergreen Playbook</button>
           <button class="chip" onclick="askSuggestedQuestion('How does Minnesota Joint Liability law (Minn. Stat. 181.165) hold property owners liable for cleaner wages?')">Joint Liability</button>
           <button class="chip" onclick="askSuggestedQuestion('What legal steps allow tenants to escrow rent while filing wage claims?')">Rent Escrow + Wage Liens</button>
         </div>

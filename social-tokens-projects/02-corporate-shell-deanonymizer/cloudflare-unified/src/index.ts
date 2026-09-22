@@ -70,10 +70,6 @@ function authorized(request: Request, env: Env): boolean {
   return request.headers.get("Authorization") === `Bearer ${env.AUTH_SECRET}`;
 }
 
-function isDeRomaQuery(q: string): boolean {
-  return /deroma|de\s*roma|jager|j[aä]ger|club\s*j|teutohellene|hansaware/i.test(q);
-}
-
 export default {
   /**
    * Merged cron dispatch (see wrangler.toml):
@@ -329,7 +325,6 @@ export default {
           { status: 400 },
         );
       }
-      const deRoma = isDeRomaQuery(q);
       const pattern = `%${q}%`;
       const tokenPattern = `%${q.replace(/\s+/g, "%")}%`;
       const noSpacePattern = `%${q.replace(/\s+/g, "")}%`;
@@ -351,22 +346,9 @@ export default {
              WHERE r.link_key IS NOT NULL AND r2.link_key = r.link_key) as sister_properties_count,
             (SELECT SUM(r3.units) FROM rental_licenses r3
              WHERE r.link_key IS NOT NULL AND r3.link_key = r.link_key) as total_syndicate_units,
-            (SELECT COALESCE(
-               (SELECT dm.case_id || '::' || dm.violation_type || '::' || dm.back_wages_recovered || '::' || dm.workers_affected || '::' || COALESCE(dm.provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA')
-                FROM dual_matches dm
-                WHERE dm.landlord_name = r.owner_name LIMIT 1),
-               (SELECT w.case_id || '::' || w.violation_type || '::' || w.back_wages_recovered || '::' || w.workers_affected || '::' || COALESCE(w.provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA')
-                FROM wage_theft_records w
-                WHERE (lower(w.trade_name) LIKE '%jager%' OR lower(w.respondent_legal_name) LIKE '%deroma%') AND (
-                    instr(lower(r.owner_name), 'deroma') > 0
-                    OR instr(lower(r.owner_name), 'de roma') > 0
-                    OR instr(lower(r.applicant_name), 'deroma') > 0
-                    OR instr(lower(r.applicant_name), 'de roma') > 0
-                    OR instr(lower(r.owner_address), '4133 dupont') > 0
-                    OR r.apn = '2202924210384'
-                )
-                LIMIT 1)
-            )) as wage_theft_match
+            (SELECT dm.case_id || '::' || dm.violation_type || '::' || dm.back_wages_recovered || '::' || dm.workers_affected || '::' || COALESCE(dm.provenance_type, 'VERIFIED_PUBLIC_ACTION')
+             FROM dual_matches dm
+             WHERE dm.landlord_name = r.owner_name LIMIT 1) as wage_theft_match
           FROM rental_licenses r
           WHERE (
               r.owner_name LIKE ?1
@@ -382,29 +364,19 @@ export default {
               OR r.applicant_name LIKE ?2
               OR r.owner_name LIKE ?3
               OR r.applicant_name LIKE ?3
-              OR (?4 = 1 AND (
-                  lower(r.owner_name) LIKE '%deroma%'
-                  OR lower(r.owner_name) LIKE '%de roma%'
-                  OR lower(r.applicant_name) LIKE '%deroma%'
-                  OR lower(r.applicant_name) LIKE '%de roma%'
-                  OR lower(r.owner_address) LIKE '%4133 dupont%'
-                  OR r.applicant_email IN ('teutohellene@gmail.com', 'hansaware@gmail.com')
-                  OR r.apn = '2202924210384'
-                  OR r.address LIKE '%923 WASHINGTON%'
-              ))
           )
-          AND (?5 = '' OR r.jurisdiction_id = ?5)
-          AND (?6 = '' OR r.city = ?6)
-          AND (?7 = '' OR r.severity_class = ?7)
-          AND (?8 = '' OR r.state = ?8)
-          AND (?9 = 0 OR r.severity_class = 'C'
+          AND (?4 = '' OR r.jurisdiction_id = ?4)
+          AND (?5 = '' OR r.city = ?5)
+          AND (?6 = '' OR r.severity_class = ?6)
+          AND (?7 = '' OR r.state = ?7)
+          AND (?8 = 0 OR r.severity_class = 'C'
               OR EXISTS (SELECT 1 FROM violations v
                          WHERE v.join_key = r.apn AND v.is_open = 1
                            AND v.violation_class = 'C'))
           ORDER BY r.units DESC
           LIMIT 50
         `).bind(
-          pattern, tokenPattern, noSpacePattern, deRoma ? 1 : 0,
+          pattern, tokenPattern, noSpacePattern,
           jurisdiction, city, severity, state, atRisk ? 1 : 0,
         ).all();
         return json({ query: q, jurisdiction, city, severity, state, at_risk: atRisk, results: searchRes.results });
@@ -416,7 +388,6 @@ export default {
     if (url.pathname === "/wage-theft") {
       const q = (url.searchParams.get("q") || "").trim();
       if (!q) return json({ error: "Missing query param ?q=" }, { status: 400 });
-      const deRoma = isDeRomaQuery(q);
       const pattern = `%${q}%`;
       const tokenPattern = `%${q.replace(/\s+/g, "%")}%`;
       const wageRes = await env.DB.prepare(`
@@ -428,16 +399,9 @@ export default {
            OR address LIKE ?1
            OR respondent_legal_name LIKE ?2
            OR trade_name LIKE ?2
-           OR (?3 = 1 AND (
-               lower(respondent_legal_name) LIKE '%deroma%'
-               OR lower(respondent_legal_name) LIKE '%de roma%'
-               OR lower(trade_name) LIKE '%jager%'
-               OR lower(trade_name) LIKE '%jäger%'
-               OR lower(address) LIKE '%923 washington%'
-           ))
         ORDER BY (back_wages_recovered + settlement_amount) DESC
         LIMIT 50
-      `).bind(pattern, tokenPattern, deRoma ? 1 : 0).all();
+      `).bind(pattern, tokenPattern).all();
       return json({ query: q, results: wageRes.results });
     }
 
@@ -473,13 +437,10 @@ export default {
       let queryStr = `SELECT * FROM wage_theft_records WHERE 1=1`;
       const binds: any[] = [];
       if (q) {
-        const deRoma = isDeRomaQuery(q);
         binds.push(`%${q}%`);
         const idx1 = binds.length;
         binds.push(`%${q.replace(/\s+/g, "%")}%`);
         const idx2 = binds.length;
-        binds.push(deRoma ? 1 : 0);
-        const idx3 = binds.length;
         queryStr += ` AND (
           respondent_legal_name LIKE ?${idx1}
           OR trade_name LIKE ?${idx1}
@@ -490,13 +451,6 @@ export default {
           OR city LIKE ?${idx1}
           OR respondent_legal_name LIKE ?${idx2}
           OR trade_name LIKE ?${idx2}
-          OR (?${idx3} = 1 AND (
-              lower(respondent_legal_name) LIKE '%deroma%'
-              OR lower(respondent_legal_name) LIKE '%de roma%'
-              OR lower(trade_name) LIKE '%jager%'
-              OR lower(trade_name) LIKE '%jäger%'
-              OR lower(address) LIKE '%923 washington%'
-          ))
         )`;
       }
       if (agency) {
