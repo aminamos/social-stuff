@@ -31,6 +31,7 @@ import { WAGE_THEFT_SEED_DATA } from "./labor/data";
 import { runLiveEnforcementSync } from "./labor/live_sync";
 import { renderWageTheftUI } from "./labor/labor-ui";
 import { renderCrossoverUI } from "./crossover/crossover-ui";
+import { renderEntityReviewUI } from "./entity-review-ui";
 import { VERIFIED_CROSSOVER_SYNDICATES } from "./crossover/matrix-data";
 import { renderUnifiedUI } from "./ui-unified";
 
@@ -121,6 +122,7 @@ export default {
     if (url.pathname === "/housing") return html(renderHousingUI());
     if (url.pathname === "/labor") return html(renderWageTheftUI());
     if (url.pathname === "/crossover") return html(renderCrossoverUI());
+    if (url.pathname === "/entity-review") return html(renderEntityReviewUI());
 
     // Worker-hosted primary source documents (R2): one quick excerpt PDF per
     // case, so readers never have to scroll a full-length agency report.

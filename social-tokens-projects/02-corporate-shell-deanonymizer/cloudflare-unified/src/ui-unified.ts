@@ -44,7 +44,7 @@ export function renderUnifiedUI(): string {
     <h1>🏘️⚖️ US Housing & Labor Registry</h1>
     <p>Browse every city/area for bad landlords, wage theft, and landlords who do both. Data: D1 <code>social-housing-db</code> + R2 <code>landlord-directory-data</code>.</p>
   </header>
-  <nav class="legacy">Full apps: <a href="/housing">Housing registry</a><a href="/labor">Wage theft registry</a><a href="/crossover">Crossover matrix</a></nav>
+  <nav class="legacy">Full apps: <a href="/housing">Housing registry</a><a href="/labor">Wage theft registry</a><a href="/crossover">Crossover matrix</a><a href="/entity-review">Entity review</a></nav>
   <div class="stats" id="statBar"><div class="stat"><b>…</b><span>loading</span></div></div>
   <div class="wrap">
     <div class="tabs">

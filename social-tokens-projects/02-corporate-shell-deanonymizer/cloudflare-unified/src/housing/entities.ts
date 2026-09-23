@@ -36,9 +36,28 @@ const CONFIDENCE = { email_exact: 1.0, email_domain: 0.9, name: 0.85 } as const;
 /** Entities at or above this many parcels get a large_auto_group review row. */
 const LARGE_GROUP_PARCELS = 50;
 
+/**
+ * Consumer mail providers: a shared gmail/yahoo domain is not an entity
+ * signal (it fused 8k unrelated parcels into one fake syndicate). Exact
+ * emails still link; only the domain rollup is skipped.
+ */
+const FREEMAIL_DOMAINS = new Set([
+  "gmail.com", "googlemail.com", "yahoo.com", "ymail.com", "rocketmail.com",
+  "hotmail.com", "outlook.com", "live.com", "msn.com", "me.com", "mac.com",
+  "icloud.com", "aol.com", "comcast.net", "verizon.net", "att.net",
+  "sbcglobal.net", "earthlink.net", "charter.net", "mail.com",
+  "protonmail.com", "proton.me", "gmx.com", "gmx.de", "web.de", "mail.ru",
+  "yandex.com", "live.fr", "orange.fr", "free.fr", "sfr.fr", "wanadoo.fr",
+  "laposte.net",
+]);
+
 function normEmail(v: unknown): string {
-  const s = String(v ?? "").trim().toLowerCase();
-  return s.includes("@") && s.length >= 5 ? s : "";
+  // Cells sometimes carry extra text after the address ("a@b.com; notes").
+  const s = String(v ?? "")
+    .trim()
+    .toLowerCase()
+    .split(/[;,\s]/)[0];
+  return s.includes("@") && s.includes(".") && s.length >= 5 ? s : "";
 }
 
 const COMPANY_RE =
@@ -71,7 +90,9 @@ export function entityLinksFor(row: Record<string, unknown>): EntityLink[] {
   if (email) {
     out.push({ entity_id: `email:${email}`, match_type: "email_exact" });
     const domain = email.split("@")[1] || "";
-    if (domain) out.push({ entity_id: `domain:${domain}`, match_type: "email_domain" });
+    if (domain && !FREEMAIL_DOMAINS.has(domain)) {
+      out.push({ entity_id: `domain:${domain}`, match_type: "email_domain" });
+    }
   }
 
   const rawName = String(row.owner_name ?? "") || String(row.applicant_name ?? "");
@@ -357,10 +378,11 @@ async function finalizeEntities(
        FROM owner_entities d
        JOIN owner_entities n
          ON n.entity_id LIKE 'name:%'
-        AND instr(n.normalized_name,
-                  substr(d.email_domain, 1, instr(d.email_domain, '.') - 1)) > 0
+        AND (' ' || n.normalized_name || ' ') LIKE
+            '% ' || substr(d.email_domain, 1, instr(d.email_domain, '.') - 1) || ' %'
        WHERE d.entity_id LIKE 'domain:%'
          AND d.email_domain IS NOT NULL
+         AND d.email_domain NOT IN (${[...FREEMAIL_DOMAINS].map((d) => `'${d}'`).join(",")})
          AND instr(d.email_domain, '.') > 1
          AND length(substr(d.email_domain, 1, instr(d.email_domain, '.') - 1)) >= 4
          AND substr(n.entity_id, 6, instr(substr(n.entity_id, 6), ':') - 1) NOT IN (
