@@ -2,7 +2,10 @@
  * Cloudflare Worker API for the TY2025 federal tax engine.
  *
  *   GET  /health          -> { ok, taxYear }
+ *   GET  /                -> interview UI (questionnaire -> TaxInput -> compute)
  *   POST /compute         -> TaxResult for a posted TaxInput
+ *   POST /mef             -> { input, meta? } -> MeF return XML
+ *   POST /intake          -> { documents: [...] } -> merged partial TaxInput
  *   POST /returns         -> compute + persist { id, result } (requires D1)
  *   GET  /returns/{id}    -> stored { input, result }         (requires D1)
  *   GET  /artifacts       -> list R2 objects (?prefix= to filter) (requires R2)
@@ -21,6 +24,9 @@
 
 import { compute } from "./engine.js";
 import { runWatch } from "./watch/run.js";
+import { toMefXml, type ReturnMeta } from "./mef.js";
+import { mergeDocuments, type IntakeDocument } from "./intake.js";
+import { UI_HTML } from "./ui.js";
 import type { TaxInput } from "./types.js";
 
 interface Env {
@@ -76,10 +82,36 @@ export default {
         return json({ ok: true, taxYear: 2025, persistence: env.DB ? "d1" : "none" });
       }
 
+      if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/ui")) {
+        return new Response(UI_HTML, { headers: { "content-type": "text/html; charset=utf-8" } });
+      }
+
       if (request.method === "POST" && url.pathname === "/compute") {
         const parsed = parseInput(await request.json());
         if (typeof parsed === "string") return err(parsed);
         return json(compute(parsed));
+      }
+
+      if (request.method === "POST" && url.pathname === "/mef") {
+        const body = (await request.json()) as { input?: unknown; meta?: ReturnMeta };
+        const parsed = parseInput(body.input ?? body);
+        if (typeof parsed === "string") return err(parsed);
+        const result = compute(parsed);
+        const xml = toMefXml(parsed, result, body.meta ?? {});
+        return new Response(xml, {
+          headers: { "content-type": "application/xml; charset=utf-8", "content-disposition": "attachment; filename=return-2025.xml" },
+        });
+      }
+
+      if (request.method === "POST" && url.pathname === "/intake") {
+        const body = (await request.json()) as { documents?: IntakeDocument[]; compute?: boolean };
+        if (!Array.isArray(body.documents)) return err("body must contain a documents array");
+        const merged = mergeDocuments(body.documents);
+        if (body.compute && body.documents.length) {
+          const candidate = { filingStatus: "single", taxpayer: {}, ...merged.input } as TaxInput;
+          return json({ ...merged, computed: compute(candidate) });
+        }
+        return json(merged);
       }
 
       if (request.method === "POST" && url.pathname === "/returns") {

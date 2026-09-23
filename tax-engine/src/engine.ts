@@ -6,6 +6,7 @@
  */
 
 import * as T from "./tables2025.js";
+import * as F from "./forms.js";
 import type { FilingStatus, TaxInput, TaxResult } from "./types.js";
 
 /** IRS whole-dollar convention: .50 rounds up. */
@@ -247,7 +248,7 @@ export function compute(input: TaxInput): TaxResult {
   const isMfj = status === "mfj";
   const isMfs = status === "mfs";
 
-  d.push("AMT (Form 6251) not computed; verify separately for high-income returns");
+
 
   // ---- income ----
   const wages = nz(input.wages);
@@ -264,9 +265,6 @@ export function compute(input: TaxInput): TaxResult {
   const capLossLimit = isMfs ? T.CAPITAL_LOSS_LIMIT.mfs : T.CAPITAL_LOSS_LIMIT.default;
   let preferentialGain = 0;
   let line7 = capTotal;
-  if (cap.unrecaptured1250Gain || cap.collectiblesGain) {
-    d.push("unrecaptured §1250 / 28% collectibles gain present: Schedule D Tax Worksheet not implemented; taxed via QDCGT worksheet (approximation)");
-  }
   if (capTotal > 0) {
     preferentialGain = Math.max(0, Math.min(ltNet, capTotal));
   } else {
@@ -442,26 +440,44 @@ export function compute(input: TaxInput): TaxResult {
   L["1040.15"] = ti;
 
   // ---- tax ----
+  // Schedule D Tax Worksheet (collapses to the QDCGT worksheet when no
+  // §1250/28% gain, and to the plain tax computation without preferential).
   const qd = nz(input.qualifiedDividends);
-  let tax: number;
-  if (preferentialGain + qd > 0 && ti > 0) {
-    // Qualified Dividends and Capital Gain Tax Worksheet.
-    const prefTotal = Math.min(ti, preferentialGain + qd);
-    const ordinaryTi = ti - prefTotal;
-    const bp0 = T.CG_ZERO_PCT_TOP[status];
-    const bp15 = T.CG_FIFTEEN_PCT_TOP[status];
-    const zeroAmt = clamp0(Math.min(prefTotal, bp0 - ordinaryTi));
-    const fifteenAmt = clamp0(Math.min(prefTotal - zeroAmt, bp15 - ordinaryTi - zeroAmt));
-    const twentyAmt = prefTotal - zeroAmt - fifteenAmt;
-    const withPref = figureTax(ordinaryTi, status) + rd(fifteenAmt * 0.15) + rd(twentyAmt * 0.2);
-    tax = Math.min(withPref, figureTax(ti, status));
-  } else {
-    tax = figureTax(ti, status);
+  let tax = F.capitalGainTax(ti, qd, preferentialGain, nz(cap.unrecaptured1250Gain), nz(cap.collectiblesGain), status, figureTax);
+
+  // Form 8615 kiddie tax replaces the line-16 tax when it applies.
+  const kiddie = F.form8615(input, ti, figureTax);
+  if (kiddie) {
+    L["f8615.5"] = kiddie.netUnearned;
+    tax = kiddie.tax;
+    d.push("Form 8615 kiddie tax applied: net unearned income taxed at parent's marginal rate");
   }
   L["1040.16"] = tax;
 
-  // ---- credits ----
-  const sch2line3 = 0; // AMT / excess APTC not modeled
+  // ---- AMT (Form 6251) ----
+  const usedItemized = input.forceItemized || itemizedTotal > stdDed;
+  const amtRes = F.form6251(
+    input,
+    {
+      taxableIncome: ti,
+      seniorDeduction: s1a.senior,
+      usedItemized,
+      saltDeducted: saltAllowed,
+      standardDeduction: usedItemized ? 0 : deduction,
+      taxableStateRefunds: nz(input.taxableStateRefunds),
+      qualifiedDividends: qd,
+      netLtGain: preferentialGain,
+      unrecaptured1250: nz(cap.unrecaptured1250Gain),
+      collectibles: nz(cap.collectiblesGain),
+      regularTaxForAmt: tax - nz(input.foreignTaxCredit),
+    },
+    figureTax,
+  );
+  L["f6251.4"] = amtRes.amti;
+  L["f6251.5"] = amtRes.exemption;
+  L["f6251.7"] = amtRes.tentativeMinimumTax;
+  if (amtRes.amt > 0) d.push(`AMT applies: tentative minimum tax ${amtRes.tentativeMinimumTax} exceeds regular tax`);
+  const sch2line3 = amtRes.amt;
   L["sch2.3"] = sch2line3;
   const line18 = tax + sch2line3;
   L["1040.18"] = line18;
@@ -496,7 +512,26 @@ export function compute(input: TaxInput): TaxResult {
     }
   }
 
-  const sch3 = nz(input.foreignTaxCredit) + careCredit + nz(input.educationCredits) + saversCredit + nz(input.otherNonrefundableCredits);
+  // Form 8863 education credits (AOC part is 40% refundable).
+  const edu = F.form8863(input, agi + foreign);
+  const eduNonref = edu.nonrefundable;
+  if (input.education) L["f8863.8"] = edu.refundable;
+
+  // Form 5695 energy credits (nonrefundable; §25D excess would carry forward
+  // but both parts sunset for property placed in service after 2025).
+  const energy = F.form5695(input);
+  if (input.energy) d.push("energy credits claimed at TY2025 rates; §25C/§25D do not apply to property placed in service after 12/31/2025 (OBBBA)");
+
+  // Schedule R — limited to remaining tax after earlier nonrefundable credits.
+  const schRCapacity = clamp0(line18 - ctcRes.nonrefundable - nz(input.foreignTaxCredit) - careCredit - eduNonref - saversCredit - energy.credit);
+  const schRCredit = F.scheduleR(input, agi, schRCapacity, d);
+  if (input.scheduleR) L["schR.22"] = schRCredit;
+
+  const priorMinTaxCredit = nz(input.amt?.priorYearMinimumTaxCredit);
+  const sch3 = nz(input.foreignTaxCredit) + careCredit + eduNonref + nz(input.educationCredits) +
+    saversCredit + energy.credit + schRCredit + priorMinTaxCredit + nz(input.otherNonrefundableCredits);
+  L["sch3.3"] = eduNonref;
+  L["sch3.5"] = energy.credit;
   L["sch3.8"] = sch3;
   L["1040.20"] = sch3;
   const line22 = clamp0(line18 - ctcRes.nonrefundable - sch3);
@@ -544,15 +579,44 @@ export function compute(input: TaxInput): TaxResult {
 
   const payments =
     nz(input.federalWithholding) + nz(input.estimatedTaxPayments) + nz(input.extensionPayment) +
-    nz(input.excessSocialSecurity) + nz(input.otherRefundablePayments) + eitc + ctcRes.actc;
+    nz(input.excessSocialSecurity) + nz(input.otherRefundablePayments) + eitc + ctcRes.actc + edu.refundable;
   L["1040.25d"] = nz(input.federalWithholding);
   L["1040.26"] = nz(input.estimatedTaxPayments) + nz(input.extensionPayment);
+  L["1040.29"] = edu.refundable;
   L["1040.33"] = payments;
 
   const refund = clamp0(payments - totalTax);
-  const amountOwed = clamp0(totalTax - payments);
+  let amountOwed = clamp0(totalTax - payments);
   L["1040.34"] = refund;
   L["1040.37"] = amountOwed;
+
+  // Form 2210 estimated-tax penalty adds to the amount owed (1040 line 38).
+  const penalty2210 = F.form2210(input, totalTax, amountOwed, d);
+  if (penalty2210 > 0) {
+    L["f2210.19"] = penalty2210;
+    L["1040.38"] = penalty2210;
+    amountOwed += penalty2210;
+  }
+
+  // Schedule B trigger diagnostics (payer detail is intake data, not math).
+  if (input.foreignAccounts) d.push("Schedule B Part III applies; FinCEN 114 (FBAR) may also be required");
+  if (input.scheduleBRequired || nz(input.taxableInterest) > 1500 || nz(input.ordinaryDividends) > 1500) {
+    L["schB.4"] = nz(input.taxableInterest);
+    L["schB.6"] = nz(input.ordinaryDividends);
+  }
+
+  // ---- Minnesota M1 (v1) ----
+  if (input.mn) {
+    const mnRes = F.mnReturn(input, agi, itemizedTotal, d);
+    L["m1.1"] = mnRes.agi;
+    L["m1.4"] = mnRes.deduction;
+    L["m1.5"] = mnRes.exemptions;
+    L["m1.6"] = mnRes.taxableIncome;
+    L["m1.7"] = mnRes.tax;
+    L["m1.19"] = mnRes.withholding;
+    L["m1.36"] = mnRes.refund;
+    L["m1.38"] = mnRes.owed;
+  }
 
   if (input.claimedAsDependent && eitcKids > 0) d.push("dependent filer cannot claim dependents");
   if (input.dependents?.length && (status === "mfs")) d.push("verify MFS dependent/credit rules for your situation");

@@ -24,12 +24,16 @@ npx tsx src/cli.ts some-return.json   # CLI, prints form lines
 
 | Route | Needs | Returns |
 |---|---|---|
+| `GET /` | — | interview UI (questionnaire → TaxInput → compute → MeF download) |
 | `GET /health` | — | `{ ok, taxYear, persistence }` |
 | `POST /compute` | — | `TaxResult` for the posted `TaxInput` |
+| `POST /mef` | — | `{ input, meta? }` → MeF `Return` XML (download) |
+| `POST /intake` | — | `{ documents: [...] }` → merged partial `TaxInput` + per-doc mapping |
 | `POST /returns` | D1 | computes + persists `{ id, result, artifact? }`; R2 snapshot at `returns/<id>.json` |
 | `GET /returns/:id` | D1 | stored `{ input, result }` |
 | `GET /artifacts?prefix=` | R2 | `{ objects: [{ key, size, uploaded }], truncated, cursor? }` |
 | `GET /artifacts/:key` | R2 | raw object body (e.g. `state/ca/2025/2025-540-booklet.pdf`) |
+| `GET /watch/status`, `POST /watch/run` | R2 | tax-watch run summary / on-demand run |
 
 `wrangler.jsonc` binds a real `DB` (D1 `tax-engine`) and `RETURNS_BUCKET`
 (R2 `tax-engine-artifacts`); both are provisioned and migrations are applied.
@@ -87,29 +91,53 @@ changes in R2 — the review queue that feeds the state engines.
   W-2/UBIA limits, SSTB exclusion, REIT/PTP carve-out.
 - **Tax (line 16)**: exact 2025 Tax Table ($25 cells below $3k, $50 cells to
   $100k, tax at cell midpoint) below $100k TI; bracket math above;
-  Qualified Dividends & Capital Gain Tax Worksheet with 0/15/20 breakpoints.
+  Qualified Dividends & Capital Gain Tax Worksheet; full **Schedule D Tax
+  Worksheet** (0/15/20 preferential, unrecaptured §1250 at 25%, 28% collectibles)
+  when those gains are present.
 - **Credits**: CTC/ODC/ACTC (Sch 8812, $2,200/$500/$1,700, 5%-per-$1k
   phaseout), EITC (Rev. Proc. 2024-40 params, EIC-table midpoint lookup on both
   earned income and AGI, $11,950 investment limit, age 25–64 no-child rule,
-  MFS-separated rule), dependent-care credit (2441 rate slide), saver's credit.
+  MFS-separated rule), dependent-care credit (2441 rate slide), saver's credit,
+  **Form 8863** education (AOC $2,500 max w/ 40% refundable, LLC 20%×$10k,
+  $80–90k/$160–180k phaseout), **Form 5695** energy (§25C $1,200/yr + per-item
+  caps + $2,000 heat-pump cap; §25D 30% solar/wind/geothermal/battery),
+  **Schedule R** elderly/disabled (15% of base after nontaxable benefits and
+  AGI excess, tax-liability limited).
 - **Other taxes (Sch 2)**: SE tax (with $176,100 SS wage base), additional
-  Medicare 0.9%, NIIT 3.8%.
+  Medicare 0.9%, NIIT 3.8%, **AMT (Form 6251)** — AMTI refigured without the
+  senior deduction, SALT add-back (itemized) or standard-deduction add-back,
+  preference inputs (ISO, PAB interest, depreciation, passive, QSBS),
+  $88,100/$137,000/$68,500 exemption with phaseout, 26%/28% split at
+  $239,100, Part III preferential-rate computation, AMT FTC input.
+- **Kiddie tax (Form 8615)**: net unearned income over $2,700 at the parent's
+  marginal rate; larger of tentative vs. child-rate tax replaces line 16.
+- **Estimated-tax penalty (Form 2210)**: 90%-of-current / 100%-or-110%-of-prior
+  safe harbor, quarterly shortfalls at the 7% §6621 rate (all 2025 quarters),
+  withholding spread evenly unless per-quarter inputs are given.
+- **Minnesota M1 (v1)**: federal AGI + MN additions − subtractions, MN
+  standard/itemized (with the 3%-of-excess-AGI, 80%-cap limiter), $5,200
+  dependent exemptions, 5.35/6.8/7.85/9.85% brackets, withholding →
+  refund/owed. Lines keyed `m1.*`.
 - **Result**: payments, refund vs. amount-owed, plus `diagnostics[]` for
   known simplifications.
 
 ## Deliberate limitations (diagnostics flag most of them)
 
-- AMT (Form 6251) is not computed — a diagnostic always notes it.
-- Unrecaptured §1250 / 28% collectibles gain (Schedule D Tax Worksheet) is
-  approximated under the QDCGT worksheet and flagged.
-- Kiddie tax, foreign earned income exclusion computation, adoption credit,
-  premium tax credit / excess APTC repayment, energy credits: pass-through
-  input fields or not modeled.
+- Foreign earned income exclusion computation, adoption credit, premium tax
+  credit / excess APTC repayment: pass-through input fields or not modeled.
+- Form 2210 uses the standard quarterly method; Schedule AI (annualized
+  income) may produce a smaller penalty — diagnostics note this.
+- Schedule B payer-level detail is intake data, not math; the engine emits
+  totals + Part III diagnostics instead.
+- M1 v1 assumes full-year MN residency (no Schedule M1NR) and does not
+  compute the MN SS subtraction — pass it via `mn.subtractions`.
 - IRA/SLI/SS benefit interdependence is resolved in two passes; inside a
   phaseout band the result can differ from iterated software by a few dollars.
 - MFS edge cases (spouse itemizing, community property) are the caller's job;
   `forceItemized` is provided.
 - Per-business §199A aggregation is simplified to a single QBI pool.
+- MeF XML is structure v1 (correct hierarchy + core monetary elements);
+  ATS-grade conformance needs the official XSD bundle for element validation.
 
 ## Testing strategy
 
@@ -125,15 +153,21 @@ Pub. 1040 Tax Table are asserted verbatim). Extend it with:
 
 ## Roadmap
 
-1. Widen coverage: Schedule B/D detail, Form 8863 education, energy credits,
-   Form 2210 underpayment, Schedule R, AMT, dependent return (8615).
-2. Structured document intake (W-2/1099 parsing) — LLM-assisted extraction
-   feeding this deterministic core; the LLM never computes.
-3. Interview UI (1040 questionnaire → TaxInput).
-4. MeF XML generation for the supported forms, keyed off `lines`.
-5. IRS ATS testing → Authorized e-file Provider (EFIN). See
-   `../tax-software-irs-cost/irs-approval-checklist.md`.
-6. State returns (MN first?).
+1. ~~Widen coverage~~ — done: Sch D Tax Worksheet, 8863, 5695, 2210,
+   Schedule R, AMT (6251), kiddie tax (8615), Schedule B triggers.
+2. ~~Structured document intake~~ — done: `POST /intake` merges typed
+   W-2/1099/1098 documents into `TaxInput` (LLM extraction is upstream;
+   the merge is deterministic).
+3. ~~Interview UI~~ — done: `GET /` serves the questionnaire → `TaxInput` →
+   `/compute` flow, with a MeF XML download button.
+4. ~~MeF XML~~ — done (v1): `POST /mef` emits ReturnHeader + ReturnData
+   keyed off `lines`. Next: validate elements against the official XSDs.
+5. **IRS ATS testing → Authorized e-file Provider (EFIN)** — the harness is
+   ready (`npm run ats`, cases in `test/ats/cases/`); the e-Services
+   application itself is a business process. See
+   `../tax-software-irs-cost-local/irs-approval-checklist.md`.
+6. State returns — MN v1 done (`m1.*` lines); CA/NY reference docs are
+   staged in R2 for when they're added.
 
 ## Sources (all TY2025, verified at build time)
 

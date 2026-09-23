@@ -1,0 +1,25 @@
+{
+  "name": "MFJ wage earners, standard deduction",
+  "description": "Two W-2s, withholding, no other complexity.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "mfj",
+    "taxpayer": {},
+    "spouse": {},
+    "wages": 95000,
+    "federalWithholding": 11000
+  },
+  "expected": {
+    "lines": {
+      "1040.9": 95000,
+      "1040.11": 95000,
+      "1040.12": 31500,
+      "1040.15": 63500,
+      "1040.16": 7146,
+      "1040.24": 7146,
+      "1040.33": 11000
+    },
+    "refund": 3854,
+    "owed": 0
+  }
+}

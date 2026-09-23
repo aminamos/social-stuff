@@ -1,0 +1,29 @@
+{
+  "name": "Single itemizer, SALT under cap",
+  "description": "Itemized deductions beat the standard deduction.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "single",
+    "taxpayer": {},
+    "wages": 120000,
+    "federalWithholding": 18000,
+    "itemized": {
+      "stateLocalIncomeOrSalesTax": 12000,
+      "realEstateTax": 6500,
+      "homeMortgageInterest": 9500,
+      "charitableGifts": 2000
+    }
+  },
+  "expected": {
+    "lines": {
+      "1040.11": 120000,
+      "schA.17": 30000,
+      "1040.12": 30000,
+      "1040.15": 90000,
+      "1040.16": 14720,
+      "1040.24": 14720
+    },
+    "refund": 3280,
+    "owed": 0
+  }
+}

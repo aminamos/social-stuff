@@ -350,5 +350,118 @@ check("dependent care credit: 2 qualifying persons, mid AGI", () => {
   assert.equal(r.lines["sch3.8"], 1000); // 20% * min(5000, 6000)
 });
 
+
+// ---- Schedule D Tax Worksheet (unrecaptured §1250) ----
+check("schD worksheet: 50k LT gain incl 20k unrecaptured §1250, single TI 200k", () => {
+  // ordinary 150k -> 28,847; 15% on 30k pref -> 4,500; 25% on 20k 1250 -> 5,000 = 38,347
+  expect(
+    { filingStatus: "single", taxpayer: {}, wages: 165750, capital: { longTermNet: 50000, unrecaptured1250Gain: 20000 } },
+    { "1040.15": 200000, "1040.16": 38347 },
+  );
+});
+check("schD worksheet collapses to QDCGT without special rates", () => {
+  // single TI 150k: 20k LT + 5k qd -> ordinary 125k; 0% room = 0 (125k > 48,350);
+  // 15% on all 25k -> 3,750; ordinary tax(125k) = 11,335.5+ ... computed below
+  const r = compute({ filingStatus: "single", taxpayer: {}, wages: 140750, ordinaryDividends: 5000, qualifiedDividends: 5000, capital: { longTermNet: 20000 } });
+  assert.equal(r.lines["1040.15"], 150000);
+  // ordinary tax on 125,000 single = 1192.5+4386+12072.5+24%*(125000-103350)=22847
+  assert.equal(r.lines["1040.16"], 22847 + 3750);
+});
+
+// ---- Form 8863 ----
+check("8863: AOC $3,000 expenses single AGI 75,750", () => {
+  expect(
+    { filingStatus: "single", taxpayer: {}, wages: 75750, education: { aocStudents: [{ qualifiedExpenses: 3000 }] } },
+    { "sch3.3": 1350, "1040.29": 900 },
+  );
+});
+check("8863: AOC phaseout at MAGI 85k (factor 0.5)", () => {
+  expect(
+    { filingStatus: "single", taxpayer: {}, wages: 85000, education: { aocStudents: [{ qualifiedExpenses: 3000 }] } },
+    { "sch3.3": 675, "1040.29": 450 },
+  );
+});
+check("8863: LLC 20% of $10k capped", () => {
+  expect(
+    { filingStatus: "single", taxpayer: {}, wages: 60000, education: { llcExpenses: 15000 } },
+    { "sch3.3": 2000, "1040.29": 0 },
+  );
+});
+
+// ---- Form 5695 ----
+check("5695: windows capped at 600, heat pump separate 2k cap, solar 30%", () => {
+  const r = compute({ filingStatus: "single", taxpayer: {}, wages: 120000, energy: { windowsSkylights: 3000, heatPumpOrBiomass: 5000, solarElectric: 20000 } });
+  assert.equal(r.lines["sch3.5"], 600 + 1500 + 6000);
+});
+
+// ---- Schedule R ----
+check("schR: under-65 disabled single, AGI 17k", () => {
+  // base = min(5000, 8000) - 0.5*(17000-7500) = 250 -> 38; capacity = tax 126
+  expect(
+    { filingStatus: "single", taxpayer: {}, wages: 17000, scheduleR: { under65OnDisability: true, disabilityIncome: 8000 } },
+    { "schR.22": 38, "1040.22": 88 },
+  );
+});
+check("schR: MFS without living apart gets 0 + diagnostic", () => {
+  const r = compute({ filingStatus: "mfs", taxpayer: { senior65Plus: true }, wages: 30000, scheduleR: {} });
+  assert.equal(r.lines["schR.22"] ?? 0, 0);
+  assert.ok(r.diagnostics.some((x) => x.includes("lived apart")));
+});
+
+// ---- Form 6251 AMT ----
+check("AMT: ISO spread triggers AMT", () => {
+  const r = compute({ filingStatus: "single", taxpayer: {}, wages: 300000, amt: { isoAdjustment: 400000 } });
+  assert.equal(r.lines["f6251.4"], 700000);
+  assert.ok((r.lines["sch2.3"] ?? 0) > 100000, `AMT should be large, got ${r.lines["sch2.3"]}`);
+});
+check("AMT: wage-only 300k no prefs -> zero AMT", () => {
+  const r = compute({ filingStatus: "single", taxpayer: {}, wages: 300000 });
+  assert.equal(r.lines["sch2.3"], 0);
+});
+
+// ---- Form 8615 kiddie tax ----
+check("8615: dependent child, $5k interest, parent MFJ TI 100k", () => {
+  // netUnearned 2,300; parent diff 506; child tax on 1,350 = 136; tentative 642 > 368
+  const r = compute({
+    filingStatus: "single", taxpayer: {}, claimedAsDependent: true, taxableInterest: 5000,
+    kiddieTax: { unearnedIncome: 5000, parentFilingStatus: "mfj", parentTaxableIncome: 100000 },
+  });
+  assert.equal(r.lines["f8615.5"], 2300);
+  assert.equal(r.lines["1040.16"], 642);
+});
+
+// ---- Form 2210 ----
+check("2210: no payments, prior tax lower safe harbor", () => {
+  const r = compute({
+    filingStatus: "single", taxpayer: {}, wages: 300000,
+    underpayment: { priorYearTax: 60000, priorYearAgi: 100000 },
+  });
+  // requiredAnnual = min(0.9*totalTax, 60000); quarterly = 15000
+  // penalty = 15000 * .07 * 971/365 = 2793.3 -> 2793
+  assert.equal(r.lines["f2210.19"], 2793);
+  assert.equal(r.amountOwed, (r.lines["1040.37"] ?? 0) + 2793);
+});
+check("2210: balance due under $1,000 -> no penalty", () => {
+  const r = compute({
+    filingStatus: "single", taxpayer: {}, wages: 50000, federalWithholding: 7000,
+    underpayment: { priorYearTax: 1000 },
+  });
+  assert.equal(r.lines["f2210.19"] ?? 0, 0);
+});
+
+// ---- Minnesota M1 ----
+check("M1: single wages 60k, MN withholding 2.5k", () => {
+  // mnTI = 60000 - 14950 = 45050; tax = 5.35%*32570 + 6.8%*12480 = 1742.50+848.64 = 2591
+  expect(
+    { filingStatus: "single", taxpayer: {}, wages: 60000, mn: { withholding: 2500 } },
+    { "m1.6": 45050, "m1.7": 2591, "m1.38": 91 },
+  );
+});
+check("M1: std deduction 3% reduction over 238,950 AGI", () => {
+  // agi 300k: reduction = min(0.8*14950, 0.03*61050=1831.5) -> ded 14950-1831.5 = 13118.5 -> 13119 (rd of 13118.5 = 13119? rd rounds .5 up -> wait Math.round(13118.5)=13119)
+  const r = compute({ filingStatus: "single", taxpayer: {}, wages: 300000, mn: {} });
+  assert.equal(r.lines["m1.4"], 13119);
+});
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

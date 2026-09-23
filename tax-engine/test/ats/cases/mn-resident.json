@@ -1,0 +1,27 @@
+{
+  "name": "MN resident return alongside federal",
+  "description": "Federal 1040 + M1 with MN withholding.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "single",
+    "taxpayer": {},
+    "wages": 60000,
+    "federalWithholding": 6000,
+    "mn": {
+      "withholding": 2500
+    }
+  },
+  "expected": {
+    "lines": {
+      "1040.16": 5075,
+      "m1.1": 60000,
+      "m1.4": 14950,
+      "m1.6": 45050,
+      "m1.7": 2591,
+      "m1.36": 0,
+      "m1.38": 91
+    },
+    "refund": 925,
+    "owed": 0
+  }
+}

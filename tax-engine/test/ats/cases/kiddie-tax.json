@@ -1,0 +1,26 @@
+{
+  "name": "Dependent child with unearned income (Form 8615)",
+  "description": "Net unearned income taxed at parent's MFJ marginal rate.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "single",
+    "taxpayer": {},
+    "claimedAsDependent": true,
+    "taxableInterest": 5000,
+    "kiddieTax": {
+      "unearnedIncome": 5000,
+      "parentFilingStatus": "mfj",
+      "parentTaxableIncome": 100000
+    }
+  },
+  "expected": {
+    "lines": {
+      "f8615.5": 2300,
+      "1040.15": 3650,
+      "1040.16": 642,
+      "1040.24": 642
+    },
+    "refund": 0,
+    "owed": 642
+  }
+}

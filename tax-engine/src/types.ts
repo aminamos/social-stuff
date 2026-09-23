@@ -40,12 +40,9 @@ export interface CapitalSummary {
   /** Capital loss carryover into 2025, split by character (positive numbers). */
   shortTermCarryover?: number;
   longTermCarryover?: number;
-  /**
-   * Unrecaptured section 1250 gain / 28%-rate (collectibles) gain.
-   * These require the Schedule D Tax Worksheet, which is not implemented;
-   * the engine reports a diagnostic instead.
-   */
+  /** Unrecaptured §1250 gain — Schedule D line 19 (taxed max 25%). */
   unrecaptured1250Gain?: number;
+  /** 28%-rate (collectibles) gain — Schedule D line 18 (taxed max 28%). */
   collectiblesGain?: number;
 }
 
@@ -211,6 +208,125 @@ export interface TaxInput {
   eitcInvestmentIncome?: number;
   /** Set if the taxpayer is ineligible (e.g. no SSN, prior disallowance). */
   eitcIneligible?: boolean;
+
+  // ---- Education credits (Form 8863) ----
+  education?: {
+    /** American Opportunity Credit students (first 4 years, >= half-time, no felony drug conviction). */
+    aocStudents?: {
+      qualifiedExpenses: number;
+      /** Set false to disqualify (e.g. claimed AOC 4 prior years). */
+      eligible?: boolean;
+    }[];
+    /** Lifetime Learning Credit qualified expenses, all students combined. */
+    llcExpenses?: number;
+  };
+
+  // ---- Energy credits (Form 5695, TY2025 — both parts sunset after 2025 under OBBBA) ----
+  energy?: {
+    /** §25C — 30% of costs, $1,200/yr cap (+$2,000 separate heat-pump/biomass cap). */
+    exteriorDoors?: number;
+    windowsSkylights?: number;
+    insulationAirSealing?: number;
+    homeEnergyAudit?: number;
+    heatPumpOrBiomass?: number;
+    otherQualifiedProperty?: number;
+    /** §25D — 30%, no annual cap; unused carries forward. */
+    solarElectric?: number;
+    solarWaterHeating?: number;
+    windEnergy?: number;
+    geothermalHeatPump?: number;
+    batteryStorage?: number;
+    /** Fuel cell: $500 per 0.5 kW of capacity — pass the computed credit. */
+    fuelCellCredit?: number;
+    carryforwardFrom2024?: number;
+  };
+
+  // ---- Schedule R — credit for the elderly or the disabled ----
+  scheduleR?: {
+    /** Taxable disability income (required when under 65 and claiming via disability). */
+    disabilityIncome?: number;
+    /** Under 65, retired on permanent and total disability. */
+    under65OnDisability?: boolean;
+    /** Nontaxable part of Social Security + nontaxable pensions/annuities. */
+    nontaxableBenefits?: number;
+    /** MFS only: did not live with spouse at any time in 2025 (required for Sch R). */
+    mfsLivedApartAllYear?: boolean;
+  };
+
+  // ---- AMT (Form 6251) preference/adjustment inputs ----
+  amt?: {
+    /** §2g — tax-exempt interest on private activity bonds. */
+    privateActivityBondInterest?: number;
+    /** §2i — ISO exercise spread (FMV minus exercise price). */
+    isoAdjustment?: number;
+    /** §2h — excluded QSBS gain add-back (7% of the §1202 exclusion). */
+    qsbsExclusionAddback?: number;
+    /** §2l — post-1986 depreciation difference (AMT minus regular; can be negative). */
+    depreciationAdjustment?: number;
+    /** §2k — disposition-of-property basis difference (AMT minus regular). */
+    dispositionAdjustment?: number;
+    /** §2m — passive activity loss difference (AMT minus regular). */
+    passiveAdjustment?: number;
+    /** §2c — AMT Form 4952 minus regular Form 4952 (can be negative). */
+    investmentInterestDifference?: number;
+    /** §2d/2o-2t/3 catch-all: depletion, long-term contracts, IDCs, circulation, etc. */
+    otherAdjustments?: number;
+    /** AMT foreign tax credit (line 8). */
+    amtForeignTaxCredit?: number;
+    /** Form 8801 prior-year minimum tax credit (nonrefundable, Sch 3). */
+    priorYearMinimumTaxCredit?: number;
+  };
+
+  // ---- Form 8615 "kiddie tax" — this return is the CHILD's return ----
+  kiddieTax?: {
+    /** Child's unearned income (interest, dividends, gains, taxable SS part of child). */
+    unearnedIncome: number;
+    /** Parent's filing status (controls the parent's bracket set). */
+    parentFilingStatus: FilingStatus;
+    /** Parent's taxable income (Form 1040 line 15). */
+    parentTaxableIncome: number;
+    /** Net unearned income of all OTHER children of the parent (8615 line 7). */
+    otherChildrenNetUnearned?: number;
+    /** Child's itemized deductions directly connected to unearned income + $1,350. */
+    itemizedDeductionBase?: number;
+    /** Child's age/status confirms 8615 applies; set false to force off. */
+    applies?: boolean;
+  };
+
+  // ---- Form 2210 underpayment penalty ----
+  underpayment?: {
+    /** Prior-year (2024) total tax. */
+    priorYearTax: number;
+    /** Prior-year AGI (drives the 110% rule above $150k / $75k MFS). */
+    priorYearAgi?: number;
+    /** Withholding per quarter [Q1..Q4]; default: spread evenly. */
+    withholdingByQuarter?: number[];
+    /** Estimated payments per quarter [Q1..Q4] (due 4/15, 6/15, 9/15, 1/15). */
+    estimatesByQuarter?: number[];
+    /** Skip the penalty computation even when inputs are present. */
+    waive?: boolean;
+  };
+
+  // ---- Schedule B triggers ----
+  /** Foreign financial accounts — Schedule B Part III + FBAR diagnostic. */
+  foreignAccounts?: boolean;
+  /** Seller-financed mortgage interest, bond-premium amortization, nominee, etc. */
+  scheduleBRequired?: boolean;
+
+  // ---- Minnesota M1 (v1) ----
+  mn?: {
+    /** Wages sourced to MN (defaults to wages — resident assumption). */
+    resident?: boolean;
+    additions?: number;
+    /** MN subtractions (e.g. SS subtraction computed elsewhere, milit. pay). */
+    subtractions?: number;
+    /** MN itemized total (Schedule M1SA); defaults to federal itemized. */
+    itemizedTotal?: number;
+    /** MN income tax withheld. */
+    withholding?: number;
+    /** MN estimated payments. */
+    estimatedPayments?: number;
+  };
 }
 
 export interface TaxResult {

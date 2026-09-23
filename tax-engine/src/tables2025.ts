@@ -259,3 +259,92 @@ export const QBI = {
   phaseRangeOther: 50000,
   phaseRangeJoint: 100000,
 };
+
+/** AMT (Form 6251) — Rev. Proc. 2024-40 §3.11. */
+export const AMT = {
+  exemption: { single: 88100, hoh: 88100, mfj: 137000, qss: 137000, mfs: 68500 } as Record<FilingStatus, number>,
+  /** Exemption phaseout: 25% of AMTI over threshold; exemption gone at completePhaseout. */
+  phaseoutStart: { single: 626350, hoh: 626350, mfj: 1252700, qss: 1252700, mfs: 626350 } as Record<FilingStatus, number>,
+  phaseoutRate: 0.25,
+  /** 28% rate begins above this taxable excess amount. */
+  rate28Breakpoint: { single: 239100, hoh: 239100, mfj: 239100, qss: 239100, mfs: 119550 } as Record<FilingStatus, number>,
+};
+
+/** Education credits (Form 8863) — AOC §25A(b), LLC §25A(c); phaseouts not indexed. */
+export const EDUCATION = {
+  aocMax: 2500,
+  aocFirstTier: 2000,
+  aocSecondTier: 2000,
+  aocRefundableRate: 0.4,
+  llcRate: 0.2,
+  llcExpenseCap: 10000,
+  phaseout: [80000, 90000] as const,
+  phaseoutJoint: [160000, 180000] as const,
+};
+
+/** Form 5695 — §25C home improvement + §25D clean energy (both expire 12/31/2025, OBBBA §§70406/70407). */
+export const ENERGY = {
+  c: {
+    rate: 0.3,
+    annualCap: 1200,
+    doorCapEach: 250,
+    doorCapTotal: 500,
+    windowCap: 600,
+    auditCap: 150,
+    heatPumpCap: 2000, // separate annual cap for heat pumps / biomass
+  },
+  d: {
+    rate: 0.3,
+  },
+};
+
+/** Schedule R — §22 (amounts are statutory, not indexed). */
+export const SCHEDULE_R = {
+  initial: {
+    singleOrHoh: 5000,
+    qss: 5000,
+    mfjBothElderly: 7500,
+    mfjOneElderly: 5000,
+    mfsApart: 3750,
+  },
+  agiThreshold: { single: 7500, hoh: 7500, qss: 7500, mfj: 10000, mfs: 5000 } as Record<FilingStatus, number>,
+  rate: 0.15,
+};
+
+/** Form 8615 kiddie tax — Rev. Proc. 2024-40 §3.31 / i8615. */
+export const KIDDIE = {
+  /** Unearned-income trigger. */
+  trigger: 2700,
+  /** Line 2 deduction when the child doesn't itemize. */
+  nonItemizerDeduction: 2700,
+  /** Itemized filer floor = $1,350 + directly-connected deductions. */
+  itemizerBase: 1350,
+};
+
+/** Form 2210 — §6621 underpayment rate held 7% all four quarters of 2025 (Rev. Rul. 2025-7/13/19). */
+export const F2210 = {
+  annualRate: 0.07,
+  /** Days each quarter's underpayment accrues through the 4/15/26 return due date. */
+  accrualDays: [365, 304, 212, 90] as const,
+  safeHarborBalanceDue: 1000,
+  currentTaxPct: 0.9,
+  priorTaxPct: 1.0,
+  priorTaxPctHighAgi: 1.1,
+  highAgiThreshold: 150000,
+  highAgiThresholdMfs: 75000,
+};
+
+/** Minnesota M1, TY2025 — Dept. of Revenue inflation-adjusted amounts (Dec 2024 notice). */
+export const MN = {
+  brackets: {
+    mfj: [[0, 0.0535], [47620, 0.068], [189180, 0.0785], [330410, 0.0985]],
+    qss: [[0, 0.0535], [47620, 0.068], [189180, 0.0785], [330410, 0.0985]],
+    single: [[0, 0.0535], [32570, 0.068], [106990, 0.0785], [198630, 0.0985]],
+    mfs: [[0, 0.0535], [23810, 0.068], [94590, 0.0785], [165205, 0.0985]],
+    hoh: [[0, 0.0535], [40100, 0.068], [161130, 0.0785], [264050, 0.0985]],
+  } as Record<FilingStatus, Array<[number, number]>>,
+  standardDeduction: { single: 14950, mfs: 14950, hoh: 22500, mfj: 29900, qss: 29900 } as Record<FilingStatus, number>,
+  /** Std/itemized reduced by 3% of AGI over threshold, capped at 80% reduction. */
+  deductionPhaseout: { threshold: 238950, thresholdMfs: 119475, rate: 0.03, maxReduction: 0.8 },
+  dependentExemption: 5200,
+};

@@ -1,0 +1,41 @@
+{
+  "name": "Parent with two AOC students",
+  "description": "Two students, $3k expenses each — refundable portion.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "mfj",
+    "taxpayer": {},
+    "spouse": {},
+    "wages": 70000,
+    "federalWithholding": 5000,
+    "dependents": [
+      {
+        "qualifyingChildForCtc": false
+      },
+      {
+        "qualifyingChildForCtc": false
+      }
+    ],
+    "education": {
+      "aocStudents": [
+        {
+          "qualifiedExpenses": 3000
+        },
+        {
+          "qualifiedExpenses": 3000
+        }
+      ]
+    }
+  },
+  "expected": {
+    "lines": {
+      "sch3.3": 2700,
+      "1040.29": 1800,
+      "sch3.8": 2700,
+      "1040.24": 446,
+      "1040.33": 6800
+    },
+    "refund": 6354,
+    "owed": 0
+  }
+}

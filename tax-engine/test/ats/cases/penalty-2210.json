@@ -1,0 +1,25 @@
+{
+  "name": "Underpayment penalty, no estimates paid",
+  "description": "Safe harbor via 100% prior-year tax not met.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "single",
+    "taxpayer": {},
+    "wages": 300000,
+    "federalWithholding": 10000,
+    "underpayment": {
+      "priorYearTax": 60000,
+      "priorYearAgi": 100000
+    }
+  },
+  "expected": {
+    "lines": {
+      "1040.24": 69935,
+      "1040.33": 10000,
+      "1040.37": 59935,
+      "f2210.19": 2328
+    },
+    "refund": 0,
+    "owed": 62263
+  }
+}

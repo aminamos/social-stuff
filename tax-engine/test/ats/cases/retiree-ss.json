@@ -1,0 +1,28 @@
+{
+  "name": "Retiree: pension + IRA + Social Security + senior deduction",
+  "description": "SS taxable-share worksheet + Schedule 1-A senior deduction.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "single",
+    "taxpayer": {
+      "senior65Plus": true
+    },
+    "pensions": 28000,
+    "iraDistributions": 12000,
+    "socialSecurityBenefits": 22000,
+    "federalWithholding": 1500
+  },
+  "expected": {
+    "lines": {
+      "1040.6b": 18700,
+      "1040.9": 58700,
+      "1040.11": 58700,
+      "sched1A.37": 6000,
+      "1040.12": 17750,
+      "1040.15": 34950,
+      "1040.16": 3959
+    },
+    "refund": 0,
+    "owed": 2459
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "Schedule C sole proprietor",
+  "description": "SE tax + half-SE adjustment + QBI deduction.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "single",
+    "taxpayer": {},
+    "businessIncome": 80000,
+    "federalWithholding": 0,
+    "estimatedTaxPayments": 14000,
+    "qbi": {
+      "qualifiedBusinessIncome": 80000,
+      "w2WagesFromBusiness": 0
+    }
+  },
+  "expected": {
+    "lines": {
+      "1040.8": 80000,
+      "1040.10": 5652,
+      "1040.11": 74348,
+      "1040.13a": 11720,
+      "1040.15": 46878,
+      "sch2.4": 11304,
+      "1040.24": 16691
+    },
+    "refund": 0,
+    "owed": 2691
+  }
+}

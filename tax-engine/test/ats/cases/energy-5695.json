@@ -1,0 +1,25 @@
+{
+  "name": "Homeowner energy credits",
+  "description": "25C windows+heat pump, 25D solar.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "mfj",
+    "taxpayer": {},
+    "wages": 110000,
+    "federalWithholding": 12000,
+    "energy": {
+      "windowsSkylights": 4000,
+      "heatPumpOrBiomass": 6000,
+      "solarElectric": 25000
+    }
+  },
+  "expected": {
+    "lines": {
+      "sch3.5": 9900,
+      "sch3.8": 9900,
+      "1040.24": 0
+    },
+    "refund": 12000,
+    "owed": 0
+  }
+}

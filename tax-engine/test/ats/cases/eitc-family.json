@@ -1,0 +1,35 @@
+{
+  "name": "MFJ, two kids, EITC + CTC + ACTC",
+  "description": "Refundable credits exceed tax.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "mfj",
+    "taxpayer": {},
+    "spouse": {},
+    "wages": 32000,
+    "federalWithholding": 800,
+    "dependents": [
+      {
+        "qualifyingChildForCtc": true,
+        "under17": true,
+        "eitcQualifyingChild": true
+      },
+      {
+        "qualifyingChildForCtc": true,
+        "under17": true,
+        "eitcQualifyingChild": true
+      }
+    ]
+  },
+  "expected": {
+    "lines": {
+      "1040.19": 51,
+      "1040.27": 6825,
+      "1040.28": 3400,
+      "1040.24": 0,
+      "1040.33": 11025
+    },
+    "refund": 11025,
+    "owed": 0
+  }
+}

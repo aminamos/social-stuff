@@ -1,0 +1,26 @@
+{
+  "name": "AMT via ISO exercise spread",
+  "description": "Large ISO adjustment pushes TMT above regular tax.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "single",
+    "taxpayer": {},
+    "wages": 300000,
+    "federalWithholding": 60000,
+    "amt": {
+      "isoAdjustment": 400000
+    }
+  },
+  "expected": {
+    "lines": {
+      "f6251.4": 700000,
+      "f6251.5": 69688,
+      "f6251.7": 171706,
+      "sch2.3": 102671,
+      "1040.18": 171706,
+      "1040.24": 172606
+    },
+    "refund": 0,
+    "owed": 112606
+  }
+}

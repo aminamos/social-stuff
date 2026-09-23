@@ -1,0 +1,27 @@
+{
+  "name": "Investor: LT gains + unrecaptured 1250 + qualified dividends",
+  "description": "Schedule D Tax Worksheet with 25% rate gain.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "mfj",
+    "taxpayer": {},
+    "wages": 140000,
+    "ordinaryDividends": 8000,
+    "qualifiedDividends": 6000,
+    "capital": {
+      "longTermNet": 45000,
+      "unrecaptured1250Gain": 15000
+    },
+    "federalWithholding": 16000
+  },
+  "expected": {
+    "lines": {
+      "1040.7": 45000,
+      "1040.11": 193000,
+      "1040.15": 161500,
+      "1040.16": 23288
+    },
+    "refund": 0,
+    "owed": 7288
+  }
+}
