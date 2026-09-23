@@ -4,3 +4,6 @@
 data/cache/
 node_modules/
 .firecrawl/
+
+# tax-engine runtime watch state (R2 mirrors this)
+tax-engine/state/

@@ -1,0 +1,900 @@
+[
+ {
+  "fips": "27001",
+  "name": "Aitkin County",
+  "countySite": "https://aitkincountymn.gov",
+  "propertyTaxUrl": "https://aitkincountymn.gov/departments/treasurer/treasurer-property-tax-info.php",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27003",
+  "name": "Anoka County",
+  "countySite": "https://anokacountymn.gov",
+  "propertyTaxUrl": "https://anokacountymn.gov/1859/About-Your-Property-Tax-Statement",
+  "localSalesTaxRatePct": 1.25,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.25,
+   "metroAreaTaxPct": 1
+  },
+  "notes": "County-wide local sales/use tax = 0.25% county transit sales/use tax + 1% Metro Area taxes (0.25% housing + 0.75% transportation)"
+ },
+ {
+  "fips": "27005",
+  "name": "Becker County",
+  "countySite": "https://www.beckercountymn.gov",
+  "propertyTaxUrl": "https://www.beckercountymn.gov/dept/auditor_treasurer/",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Detroit Lakes 0.5%"
+ },
+ {
+  "fips": "27007",
+  "name": "Beltrami County",
+  "countySite": "https://www.beltramicountymn.gov",
+  "propertyTaxUrl": "https://www.beltramicountymn.gov/living-here/real-estate-property-tax-services/",
+  "localSalesTaxRatePct": 1.125,
+  "localSalesTaxComponents": {
+   "countyGeneralSalesTaxPct": 0.625,
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.625% county general sales/use tax + 0.5% county transit sales/use tax; Additional city sales taxes: Bemidji 0.5%"
+ },
+ {
+  "fips": "27009",
+  "name": "Benton County",
+  "countySite": "https://bentoncountymn.gov",
+  "propertyTaxUrl": "https://property.bentoncountymn.gov/",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; St. Cloud area 0.50% local tax also applies in: St. Cloud, Sartell, Sauk Rapids"
+ },
+ {
+  "fips": "27011",
+  "name": "Big Stone County",
+  "countySite": "https://bigstonecounty.gov",
+  "propertyTaxUrl": "https://bigstonecounty.gov/departments/auditor-treasurer/",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27013",
+  "name": "Blue Earth County",
+  "countySite": "https://www.blueearthcountymn.gov",
+  "propertyTaxUrl": "https://www.blueearthcountymn.gov/456/Paying-Taxes",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Mankato 0.5%, North Mankato 0.5%"
+ },
+ {
+  "fips": "27015",
+  "name": "Brown County",
+  "countySite": "https://browncountymn.gov",
+  "propertyTaxUrl": "https://browncountymn.gov/186/How-to-Pay-Your-Property-Taxes",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: New Ulm 0.5%"
+ },
+ {
+  "fips": "27017",
+  "name": "Carlton County",
+  "countySite": "https://carltoncountymn.gov",
+  "propertyTaxUrl": "https://carltoncountymn.gov/859/Property-Taxes",
+  "localSalesTaxRatePct": 1,
+  "localSalesTaxComponents": {
+   "countyGeneralSalesTaxPct": 0.5,
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county general sales/use tax + 0.5% county transit sales/use tax; Additional city sales taxes: Cloquet 1%, Moose Lake 0.5%"
+ },
+ {
+  "fips": "27019",
+  "name": "Carver County",
+  "countySite": "https://www.carvercountymn.gov",
+  "propertyTaxUrl": "https://www.carvercountymn.gov/departments/property-finance/property-tax",
+  "localSalesTaxRatePct": 1.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5,
+   "metroAreaTaxPct": 1
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax + 1% Metro Area taxes (0.25% housing + 0.75% transportation); Additional city sales taxes: Chanhassen 0.5%"
+ },
+ {
+  "fips": "27021",
+  "name": "Cass County",
+  "countySite": "https://www.casscountymn.gov",
+  "propertyTaxUrl": "https://www.casscountymn.gov/1423/Property-Taxes",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Walker 1.5%"
+ },
+ {
+  "fips": "27023",
+  "name": "Chippewa County",
+  "countySite": "https://chippewacountymn.gov",
+  "propertyTaxUrl": "https://chippewacountymn.gov/182/Property-Tax-Administration",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27025",
+  "name": "Chisago County",
+  "countySite": "https://www.chisagocountymn.gov",
+  "propertyTaxUrl": "https://www.chisagocountymn.gov/199/Property-Tax-Information",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27027",
+  "name": "Clay County",
+  "countySite": "https://claycountymn.gov",
+  "propertyTaxUrl": "https://claycountymn.gov/200/Treasurer",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Dilworth 0.5%, Moorhead 0.5%"
+ },
+ {
+  "fips": "27029",
+  "name": "Clearwater County",
+  "countySite": "https://clearwatercountymn.gov",
+  "propertyTaxUrl": "https://clearwatercountymn.gov/auditor-treasurer",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27031",
+  "name": "Cook County",
+  "countySite": "https://www.co.cook.mn.us",
+  "propertyTaxUrl": "https://www.co.cook.mn.us/government/departments/auditor_treasurer/index.php",
+  "localSalesTaxRatePct": 1.5,
+  "localSalesTaxComponents": {
+   "countyGeneralSalesTaxPct": 1,
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 1% county general sales/use tax + 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27033",
+  "name": "Cottonwood County",
+  "countySite": "https://www.cottonwoodcountymn.gov",
+  "propertyTaxUrl": "https://www.cottonwoodcountymn.gov/departments/administrative/auditor_treasurer/index.php",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27035",
+  "name": "Crow Wing County",
+  "countySite": "https://crowwing.gov",
+  "propertyTaxUrl": "https://crowwing.gov/765/Tax-Payments",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Baxter 0.5%, Brainerd 0.5%"
+ },
+ {
+  "fips": "27037",
+  "name": "Dakota County",
+  "countySite": "https://dakotacountymn.gov",
+  "propertyTaxUrl": "https://dakotacountymn.gov/residents/home-property/paying-property-taxes",
+  "localSalesTaxRatePct": 1.25,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.25,
+   "metroAreaTaxPct": 1
+  },
+  "notes": "County-wide local sales/use tax = 0.25% county transit sales/use tax + 1% Metro Area taxes (0.25% housing + 0.75% transportation); Additional city sales taxes: West St Paul 0.5%"
+ },
+ {
+  "fips": "27039",
+  "name": "Dodge County",
+  "countySite": "https://www.co.dodge.mn.us",
+  "propertyTaxUrl": "https://www.co.dodge.mn.us/departments/adminstration/property_tax_inquiry.php",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27041",
+  "name": "Douglas County",
+  "countySite": "https://www.douglascountymn.gov",
+  "propertyTaxUrl": "https://www.douglascountymn.gov/government/auditor-treasurer",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27043",
+  "name": "Faribault County",
+  "countySite": "https://www.faribaultcountymn.gov",
+  "propertyTaxUrl": "https://www.faribaultcountymn.gov/1249/Property-Tax-Statements",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Blue Earth 0.5%; County transit tax began April 1, 2026 (per DOR guide)"
+ },
+ {
+  "fips": "27045",
+  "name": "Fillmore County",
+  "countySite": "https://www.fillmorecountymn.gov",
+  "propertyTaxUrl": "https://www.co.fillmore.mn.us/departments/auditor_treasurer/",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27047",
+  "name": "Freeborn County",
+  "countySite": "https://freeborncountymn.gov",
+  "propertyTaxUrl": "https://freeborncountymn.gov/345/Property-Taxes",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27049",
+  "name": "Goodhue County",
+  "countySite": "https://goodhuecountymn.gov",
+  "propertyTaxUrl": "https://goodhuecountymn.gov/finance/auditor_treasurer/",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27051",
+  "name": "Grant County",
+  "countySite": "https://www.grantcountymn.gov",
+  "propertyTaxUrl": "https://www.grantcountymn.gov/180/Treasurer",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27053",
+  "name": "Hennepin County",
+  "countySite": "https://hennepincounty.gov",
+  "propertyTaxUrl": "https://www.hennepincounty.gov/services/property/property-taxes/pay-property-taxes",
+  "localSalesTaxRatePct": 1.65,
+  "localSalesTaxComponents": {
+   "countyGeneralSalesTaxPct": 0.15,
+   "countyTransitTaxPct": 0.5,
+   "metroAreaTaxPct": 1
+  },
+  "notes": "County-wide local sales/use tax = 0.15% county general sales/use tax + 0.5% county transit sales/use tax + 1% Metro Area taxes (0.25% housing + 0.75% transportation); Additional city sales taxes: Bloomington 0.5%, Chanhassen 0.5%, Edina 0.5%, Excelsior 0.5%, Golden Valley 1.25%, Maple Grove 0.5%, Minneapolis 0.5%, Richfield 0.5%, Rogers 0.25%"
+ },
+ {
+  "fips": "27055",
+  "name": "Houston County",
+  "countySite": "https://www.hocomn.gov",
+  "propertyTaxUrl": "https://www.hocomn.gov/departments/auditor_treasurer/index.php",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27057",
+  "name": "Hubbard County",
+  "countySite": "https://co.hubbard.mn.us",
+  "propertyTaxUrl": "https://www.hubbardcounty.gov/auditor_treasurer",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27059",
+  "name": "Isanti County",
+  "countySite": "https://www.isanticountymn.gov",
+  "propertyTaxUrl": "https://www.isanticountymn.gov/211/Property-Taxes",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Cambridge 0.5%"
+ },
+ {
+  "fips": "27061",
+  "name": "Itasca County",
+  "countySite": "https://www.itascacountymn.gov",
+  "propertyTaxUrl": "https://www.itascacountymn.gov/188/Property-Taxes",
+  "localSalesTaxRatePct": 1,
+  "localSalesTaxComponents": {
+   "countyGeneralSalesTaxPct": 1
+  },
+  "notes": "County-wide local sales/use tax = 1% county general sales/use tax; Additional city sales taxes: Grand Rapids 0.5%"
+ },
+ {
+  "fips": "27063",
+  "name": "Jackson County",
+  "countySite": "https://jacksoncountymn.gov",
+  "propertyTaxUrl": "https://jacksoncountymn.gov/index.asp?SEC=066D425D-4B14-4A23-A088-66789AC84C0A",
+  "localSalesTaxRatePct": 1,
+  "localSalesTaxComponents": {
+   "countyGeneralSalesTaxPct": 1
+  },
+  "notes": "County-wide local sales/use tax = 1% county general sales/use tax"
+ },
+ {
+  "fips": "27065",
+  "name": "Kanabec County",
+  "countySite": "https://kanabeccountymn.gov",
+  "propertyTaxUrl": "https://kanabeccountymn.gov/departments/auditor_treasurer.php",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27067",
+  "name": "Kandiyohi County",
+  "countySite": "https://www.kcmn.us",
+  "propertyTaxUrl": "https://www.kcmn.us/departments/auditor_treasurer/index.php",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Spicer 0.5%, Willmar 0.5%"
+ },
+ {
+  "fips": "27069",
+  "name": "Kittson County",
+  "countySite": "https://co.kittson.mn.us",
+  "propertyTaxUrl": "https://co.kittson.mn.us/community/property_tax_look_up_payment.php",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27071",
+  "name": "Koochiching County",
+  "countySite": "https://www.co.koochiching.mn.us",
+  "propertyTaxUrl": "https://www.paydici.com/koochiching-county-treasurer/search/landing",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: International Falls 1%"
+ },
+ {
+  "fips": "27073",
+  "name": "Lac qui Parle County",
+  "countySite": "https://www.lqpcomn.gov",
+  "propertyTaxUrl": "https://www.lqpcomn.gov/225/Property-Tax",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27075",
+  "name": "Lake County",
+  "countySite": "https://lakecountymn.gov",
+  "propertyTaxUrl": "https://lakecountymn.gov/auditor/",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Two Harbors 1%"
+ },
+ {
+  "fips": "27077",
+  "name": "Lake of the Woods County",
+  "countySite": "https://lotwcounty.gov",
+  "propertyTaxUrl": "https://lotwcounty.gov/auditor/property-taxes/",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27079",
+  "name": "Le Sueur County",
+  "countySite": "https://lesueurcounty.gov",
+  "propertyTaxUrl": "https://www.lesueurcounty.gov/188/Property-Tax-Info",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27081",
+  "name": "Lincoln County",
+  "countySite": "https://lincolncountymn.gov",
+  "propertyTaxUrl": "https://lincolncountymn.gov/departments_agencies/auditor_treasurer.php",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27083",
+  "name": "Lyon County",
+  "countySite": "https://www.lyoncountymn.gov",
+  "propertyTaxUrl": "https://www.lyoncountymn.gov/services/find-and-or-pay-your-property-tax-online",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27085",
+  "name": "McLeod County",
+  "countySite": "https://www.mcleodcountymn.gov",
+  "propertyTaxUrl": "https://www.mcleodcountymn.gov/government/auditor-treasurer/property_tax_info/index.php",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Hutchinson 0.5%"
+ },
+ {
+  "fips": "27087",
+  "name": "Mahnomen County",
+  "countySite": "https://www.mahnomencounty.gov",
+  "propertyTaxUrl": "https://www.mahnomencounty.gov/department/departments_a_h/auditor/index.php",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27089",
+  "name": "Marshall County",
+  "countySite": "https://www.marshallcountymn.gov",
+  "propertyTaxUrl": "https://www.marshallcountymn.gov/departments/auditor-treasurer/index.php",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27091",
+  "name": "Martin County",
+  "countySite": "https://martincountymn.gov",
+  "propertyTaxUrl": "https://martincountymn.gov/your_government/departments/auditor_treasurer/property_taxes.php",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Fairmont 0.5%; County transit tax began January 1, 2026 (per DOR guide)"
+ },
+ {
+  "fips": "27093",
+  "name": "Meeker County",
+  "countySite": "https://meekercountymn.gov",
+  "propertyTaxUrl": "https://meekercountymn.gov/182/Property-Tax-Information",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Litchfield 0.5%; County transit tax began July 1, 2026 (per DOR guide)"
+ },
+ {
+  "fips": "27095",
+  "name": "Mille Lacs County",
+  "countySite": "https://www.millelacs.mn.gov",
+  "propertyTaxUrl": "https://www.millelacs.mn.gov/1275/Property-Taxes",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27097",
+  "name": "Morrison County",
+  "countySite": "https://morrisoncountymn.gov",
+  "propertyTaxUrl": "https://morrisoncountymn.gov/220/Property-Tax",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27099",
+  "name": "Mower County",
+  "countySite": "https://mowercountymn.gov",
+  "propertyTaxUrl": "https://mowercountymn.gov/207/Property-Taxes",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Austin 0.5%"
+ },
+ {
+  "fips": "27101",
+  "name": "Murray County",
+  "countySite": "https://www.murraycountymn.gov",
+  "propertyTaxUrl": "https://www.murraycountymn.gov/county_departments/auditor_treasurer/index.php",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27103",
+  "name": "Nicollet County",
+  "countySite": "https://nicolletcountymn.gov",
+  "propertyTaxUrl": "https://nicolletcountymn.gov/162/Property-Tax",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: North Mankato 0.5%, St. Peter 0.5%"
+ },
+ {
+  "fips": "27105",
+  "name": "Nobles County",
+  "countySite": "https://www.noblescountymn.gov",
+  "propertyTaxUrl": "https://www.co.nobles.mn.us/departments/auditor-treasurer/",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Worthington 0.5%"
+ },
+ {
+  "fips": "27107",
+  "name": "Norman County",
+  "countySite": "https://www.normanmn.gov",
+  "propertyTaxUrl": "https://www.normanmn.gov/departments/auditor-treasurer/property_tax_faqs.php",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27109",
+  "name": "Olmsted County",
+  "countySite": "https://www.olmstedcounty.gov",
+  "propertyTaxUrl": "https://www.olmstedcounty.gov/residents/land-property/property-taxes",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Rochester 0.75%"
+ },
+ {
+  "fips": "27111",
+  "name": "Otter Tail County",
+  "countySite": "https://co.ottertail.mn.us",
+  "propertyTaxUrl": "https://ottertailcounty.gov/property-home/property-taxes-and-values/",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Fergus Falls 0.5%, Perham 0.5%"
+ },
+ {
+  "fips": "27113",
+  "name": "Pennington County",
+  "countySite": "https://co.pennington.mn.us",
+  "propertyTaxUrl": "https://publicsearch.co.pennington.mn.us/",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27115",
+  "name": "Pine County",
+  "countySite": "https://www.pinecountymn.gov",
+  "propertyTaxUrl": "https://www.pinecountymn.gov/departments/auditor/pay_your_property_taxes.php",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27117",
+  "name": "Pipestone County",
+  "countySite": "https://pipestonecounty.gov",
+  "propertyTaxUrl": "https://pipestonecounty.gov/government/departments/assessor/property_tax.php",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27119",
+  "name": "Polk County",
+  "countySite": "https://www.polkcountymn.gov",
+  "propertyTaxUrl": "https://mn-polk.publicaccessnow.com/",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27121",
+  "name": "Pope County",
+  "countySite": "https://www.popecountymn.gov",
+  "propertyTaxUrl": "https://www.popecountymn.gov/auditor-treasurer/",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27123",
+  "name": "Ramsey County",
+  "countySite": "https://www.ramseycountymn.gov",
+  "propertyTaxUrl": "https://www.ramseycountymn.gov/residents/property-home/taxes-values/pay-property-tax",
+  "localSalesTaxRatePct": 1.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5,
+   "metroAreaTaxPct": 1
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax + 1% Metro Area taxes (0.25% housing + 0.75% transportation); Additional city sales taxes: Roseville 0.5%, St. Paul 1.5%"
+ },
+ {
+  "fips": "27125",
+  "name": "Red Lake County",
+  "countySite": "https://redlakecounty.gov",
+  "propertyTaxUrl": "https://redlakecounty.gov/departments/treasurer/property_tax_information.php",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27127",
+  "name": "Redwood County",
+  "countySite": "https://redwoodcounty-mn.gov",
+  "propertyTaxUrl": "https://redwoodcounty-mn.gov/departments/auditor-treasurer/",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27129",
+  "name": "Renville County",
+  "countySite": "https://www.renvillecountymn.gov",
+  "propertyTaxUrl": "https://www.renvillecountymn.gov/auditor-treasurer/",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27131",
+  "name": "Rice County",
+  "countySite": "https://ricecountymn.gov",
+  "propertyTaxUrl": "https://www.ricecountymn.gov/242",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27133",
+  "name": "Rock County",
+  "countySite": "https://www.co.rock.mn.us",
+  "propertyTaxUrl": "https://www.co.rock.mn.us/department_directory/auditor_treasurer/index.php",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27135",
+  "name": "Roseau County",
+  "countySite": "https://www.roseaucountymn.gov",
+  "propertyTaxUrl": "https://www.roseaucountymn.gov/residents/property_taxes.php",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27137",
+  "name": "St. Louis County",
+  "countySite": "https://www.stlouiscountymn.gov",
+  "propertyTaxUrl": "https://www.stlouiscountymn.gov/departments-a-z/auditor/property-tax-payments-and-services",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Duluth 1.5%, Hermantown 1.5%, Hibbing 0.5%, Proctor 1.5%, Virginia 1%"
+ },
+ {
+  "fips": "27139",
+  "name": "Scott County",
+  "countySite": "https://www.scottcountymn.gov",
+  "propertyTaxUrl": "https://www.scottcountymn.gov/383/Pay-Property-Tax",
+  "localSalesTaxRatePct": 1.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5,
+   "metroAreaTaxPct": 1
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax + 1% Metro Area taxes (0.25% housing + 0.75% transportation)"
+ },
+ {
+  "fips": "27141",
+  "name": "Sherburne County",
+  "countySite": "https://www.co.sherburne.mn.us",
+  "propertyTaxUrl": "https://www.co.sherburne.mn.us/219/Property-Tax-Information",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Elk River 0.5%; St. Cloud area 0.50% local tax also applies in: St. Cloud"
+ },
+ {
+  "fips": "27143",
+  "name": "Sibley County",
+  "countySite": "https://www.sibleycounty.gov",
+  "propertyTaxUrl": "https://www.sibleycounty.gov/238/Property-Tax",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Henderson 0.5%; County transit tax began January 1, 2026 (per DOR guide)"
+ },
+ {
+  "fips": "27145",
+  "name": "Stearns County",
+  "countySite": "https://www.stearnscountymn.gov",
+  "propertyTaxUrl": "https://www.stearnscountymn.gov/property-taxes",
+  "localSalesTaxRatePct": 0.625,
+  "localSalesTaxComponents": {
+   "countyGeneralSalesTaxPct": 0.375,
+   "countyTransitTaxPct": 0.25
+  },
+  "notes": "County-wide local sales/use tax = 0.375% county general sales/use tax + 0.25% county transit sales/use tax; Additional city sales taxes: Avon 0.5%, Sauk Centre 0.5%, Waite Park 0.5%; St. Cloud area 0.50% local tax also applies in: St. Augusta, St. Cloud, St. Joseph, Sartell, Waite Park"
+ },
+ {
+  "fips": "27147",
+  "name": "Steele County",
+  "countySite": "https://www.steelecountymn.gov",
+  "propertyTaxUrl": "https://www.steelecountymn.gov/departments/finance/property_tax_payments.php",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Medford 0.5%"
+ },
+ {
+  "fips": "27149",
+  "name": "Stevens County",
+  "countySite": "https://www.stevenscountymn.gov",
+  "propertyTaxUrl": "https://www.stevenscountymn.gov/864/AuditorTreasurer",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27151",
+  "name": "Swift County",
+  "countySite": "https://swiftcounty.gov",
+  "propertyTaxUrl": "https://swiftcounty.gov/propertytax",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27153",
+  "name": "Todd County",
+  "countySite": "https://toddcountymn.gov",
+  "propertyTaxUrl": "https://toddcountymn.gov/government/departments/auditor_and_treasurer/property_tax_payment_options.php",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Staples 0.5%"
+ },
+ {
+  "fips": "27155",
+  "name": "Traverse County",
+  "countySite": "https://traversecountymn.gov",
+  "propertyTaxUrl": "https://traversecountymn.gov/resources/property-tax/",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27157",
+  "name": "Wabasha County",
+  "countySite": "https://www.co.wabasha.mn.us",
+  "propertyTaxUrl": "https://www.co.wabasha.mn.us/departments/auditor_treasurer/index.php",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27159",
+  "name": "Wadena County",
+  "countySite": "https://wadenacounty.gov",
+  "propertyTaxUrl": "https://wadenacounty.gov/149/Paying-Property-Taxes",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Staples 0.5%"
+ },
+ {
+  "fips": "27161",
+  "name": "Waseca County",
+  "countySite": "https://www.co.waseca.mn.us",
+  "propertyTaxUrl": "https://www.co.waseca.mn.us/147/Pay-Property-Tax",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27163",
+  "name": "Washington County",
+  "countySite": "https://washingtoncountymn.gov",
+  "propertyTaxUrl": "https://washingtoncountymn.gov/680/Property-Tax",
+  "localSalesTaxRatePct": 1.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5,
+   "metroAreaTaxPct": 1
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax + 1% Metro Area taxes (0.25% housing + 0.75% transportation); Additional city sales taxes: Oakdale 0.5%, Stillwater 0.5%, Woodbury 0.5%"
+ },
+ {
+  "fips": "27165",
+  "name": "Watonwan County",
+  "countySite": "https://www.watonwancountymn.gov",
+  "propertyTaxUrl": "https://www.watonwancountymn.gov/293/Property-Tax-Payment-Options",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27167",
+  "name": "Wilkin County",
+  "countySite": "https://wilkincounty.gov",
+  "propertyTaxUrl": "https://wilkincounty.gov/auditortreasurer",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ },
+ {
+  "fips": "27169",
+  "name": "Winona County",
+  "countySite": "https://www.winonacounty.gov",
+  "propertyTaxUrl": "https://www.winonacounty.gov/180/Property-Taxes",
+  "localSalesTaxRatePct": 0.75,
+  "localSalesTaxComponents": {
+   "countyGeneralSalesTaxPct": 0.25,
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.25% county general sales/use tax + 0.5% county transit sales/use tax"
+ },
+ {
+  "fips": "27171",
+  "name": "Wright County",
+  "countySite": "https://wrightcountymn.gov",
+  "propertyTaxUrl": "https://wrightcountymn.gov/1535/Property-Tax-Information",
+  "localSalesTaxRatePct": 0.5,
+  "localSalesTaxComponents": {
+   "countyTransitTaxPct": 0.5
+  },
+  "notes": "County-wide local sales/use tax = 0.5% county transit sales/use tax; Additional city sales taxes: Clearwater 0.5%, Monticello 0.5%"
+ },
+ {
+  "fips": "27173",
+  "name": "Yellow Medicine County",
+  "countySite": "https://www.co.ym.mn.gov",
+  "propertyTaxUrl": "https://www.co.ym.mn.gov/index.asp?SEC=D0C5D9DC-B071-4C03-B23B-33D14292C72A",
+  "localSalesTaxRatePct": 0,
+  "notes": "No county-level local sales or use tax per MN DOR rate guide (cities may still levy their own)"
+ }
+]

@@ -5,17 +5,36 @@
  *   POST /compute         -> TaxResult for a posted TaxInput
  *   POST /returns         -> compute + persist { id, result } (requires D1)
  *   GET  /returns/{id}    -> stored { input, result }         (requires D1)
+ *   GET  /artifacts       -> list R2 objects (?prefix= to filter) (requires R2)
+ *   GET  /artifacts/{key} -> fetch an R2 object body            (requires R2)
+ *   POST /watch/run       -> run tax-watch now (?searches=0 to poll only) (R2)
+ *   GET  /watch/status    -> last watch run summary                        (R2)
+ *
+ * Weekly cron (`triggers.crons`) runs tax-watch: hash-diffs the registered
+ * federal/state/local tax-law sources and runs discovery queries through the
+ * SEARCH_PROVIDER-configured search provider. Findings land in R2 under
+ * watch/. See src/watch/.
  *
  * Everything is stateless per request; D1/R2 bindings are optional — compute
  * routes work without them.
  */
 
 import { compute } from "./engine.js";
+import { runWatch } from "./watch/run.js";
 import type { TaxInput } from "./types.js";
 
 interface Env {
   DB?: D1Database;
   RETURNS_BUCKET?: R2Bucket;
+  SEARCH_PROVIDER?: string;
+  WATCH_SEARCH_ENABLED?: string;
+  WATCH_SEARCH_LIMIT?: string;
+  WATCH_SEARCH_DELAY_MS?: string;
+  BRAVE_API_KEY?: string;
+  EXA_API_KEY?: string;
+  PERPLEXITY_API_KEY?: string;
+  FIRECRAWL_API_KEY?: string;
+  FIRECRAWL_BASE_URL?: string;
 }
 
 const JSON_HEADERS = {
@@ -75,7 +94,14 @@ export default {
         )
           .bind(id, parsed.filingStatus, JSON.stringify(parsed), JSON.stringify(result))
           .run();
-        return json({ id, result }, 201);
+        let artifact: string | undefined;
+        if (env.RETURNS_BUCKET) {
+          artifact = `returns/${id}.json`;
+          await env.RETURNS_BUCKET.put(artifact, JSON.stringify({ id, input: parsed, result }), {
+            httpMetadata: { contentType: "application/json" },
+          });
+        }
+        return json(artifact ? { id, result, artifact } : { id, result }, 201);
       }
 
       const match = url.pathname.match(/^\/returns\/([0-9a-f-]+)$/i);
@@ -96,9 +122,55 @@ export default {
         });
       }
 
+      if (request.method === "GET" && url.pathname === "/artifacts") {
+        if (!env.RETURNS_BUCKET) return err("R2 binding not configured", 501);
+        const listed = await env.RETURNS_BUCKET.list({
+          prefix: url.searchParams.get("prefix") ?? undefined,
+          limit: 200,
+        });
+        return json({
+          truncated: listed.truncated,
+          cursor: listed.truncated ? listed.cursor : undefined,
+          objects: listed.objects.map((o) => ({ key: o.key, size: o.size, uploaded: o.uploaded })),
+        });
+      }
+
+      const artMatch = url.pathname.match(/^\/artifacts\/(.+)$/);
+      if (request.method === "GET" && artMatch) {
+        if (!env.RETURNS_BUCKET) return err("R2 binding not configured", 501);
+        const key = decodeURIComponent(artMatch[1]);
+        const obj = await env.RETURNS_BUCKET.get(key);
+        if (!obj) return err("not found", 404);
+        const headers = new Headers(JSON_HEADERS);
+        headers.set(
+          "content-type",
+          obj.httpMetadata?.contentType ?? (key.endsWith(".json") ? "application/json" : "application/octet-stream"),
+        );
+        headers.set("etag", obj.httpEtag);
+        return new Response(obj.body, { headers });
+      }
+
+      if (request.method === "GET" && url.pathname === "/watch/status") {
+        if (!env.RETURNS_BUCKET) return err("R2 binding not configured", 501);
+        const obj = await env.RETURNS_BUCKET.get("watch/status.json");
+        if (!obj) return err("no watch run recorded yet", 404);
+        return new Response(obj.body, { headers: JSON_HEADERS });
+      }
+
+      if (request.method === "POST" && url.pathname === "/watch/run") {
+        if (!env.RETURNS_BUCKET) return err("R2 binding not configured", 501);
+        const searches = url.searchParams.get("searches") !== "0";
+        return json(await runWatch(env.RETURNS_BUCKET, env as Record<string, string | undefined>, { searches }));
+      }
+
       return err("not found", 404);
     } catch (e) {
       return err(e instanceof SyntaxError ? "invalid JSON body" : String(e), e instanceof SyntaxError ? 400 : 500);
     }
+  },
+
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    if (!env.RETURNS_BUCKET) return;
+    ctx.waitUntil(runWatch(env.RETURNS_BUCKET, env as Record<string, string | undefined>));
   },
 };

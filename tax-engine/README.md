@@ -26,16 +26,46 @@ npx tsx src/cli.ts some-return.json   # CLI, prints form lines
 |---|---|---|
 | `GET /health` | — | `{ ok, taxYear, persistence }` |
 | `POST /compute` | — | `TaxResult` for the posted `TaxInput` |
-| `POST /returns` | D1 | computes + persists `{ id, result }` |
+| `POST /returns` | D1 | computes + persists `{ id, result, artifact? }`; R2 snapshot at `returns/<id>.json` |
 | `GET /returns/:id` | D1 | stored `{ input, result }` |
+| `GET /artifacts?prefix=` | R2 | `{ objects: [{ key, size, uploaded }], truncated, cursor? }` |
+| `GET /artifacts/:key` | R2 | raw object body (e.g. `state/ca/2025/2025-540-booklet.pdf`) |
 
-`wrangler.jsonc` ships a `DB` (D1) and `RETURNS_BUCKET` (R2) binding. Deploy:
-create the resources (`wrangler d1 create tax-engine`, `wrangler r2 bucket
-create tax-engine-artifacts`), paste the real `database_id` into
-`wrangler.jsonc`, run `wrangler d1 migrations apply DB --remote`, `wrangler deploy`.
-(`migrations apply` and `r2 object` default to the local simulator — `--remote`
+`wrangler.jsonc` binds a real `DB` (D1 `tax-engine`) and `RETURNS_BUCKET`
+(R2 `tax-engine-artifacts`); both are provisioned and migrations are applied.
+The worker is deployed at `https://tax-engine.a-8c6.workers.dev`.
+R2 also holds reference data: TY2025 state tax docs under `state/{ca,mn,ny}/2025/`
+and county data under `geo/` — see each prefix's `manifest.json`.
+(`d1 migrations apply` and `r2 object` default to the local simulator — `--remote`
 is required for the real database; see repo `AGENTS.md`.)
 Compute routes work even with the bindings absent (501 on persistence routes).
+
+## tax-watch (tax-law change monitor)
+
+`src/watch/` is a separate subsystem: a weekly cron (`triggers.crons`, Mon
+06:20 UTC) that monitors federal/state/local tax-law sources and records
+changes in R2 — the review queue that feeds the state engines.
+
+- **Polling**: every `WatchSource` in `src/watch/registry.ts` (IRS newsroom,
+  Federal Register API, all 50 state DORs + DC/PR, and the local
+  income-tax jurisdictions that exist — MD counties, NYC, Detroit, OH/RITA,
+  PA Act 32, Portland, STL/KC) gets its URLs fetched and word-diffed against
+  the last snapshot in `watch/state/`. Cosmetic churn (timestamps, counters)
+  is filtered by a minimum-diff threshold; fetch errors are recorded, so
+  dead URLs and bot-walled sites surface instead of failing silently.
+- **Search discovery**: per-jurisdiction queries run through a pluggable
+  provider — `SEARCH_PROVIDER` = `duckduckgo` (default, key-free), `brave`,
+  `exa`, `perplexity`, `firecrawl` (keys via `wrangler secret put
+  <NAME>_API_KEY`). New URLs land as findings; `WATCH_SEARCH_ENABLED=0`
+  makes a poll-only run.
+- **Scope**: income, corporate, capital-gains, withholding, pass-through,
+  credits, estate, payroll. Sales tax deliberately excluded.
+- **Output**: `watch/changes/<ts>.json` + `watch/changes/latest.json` +
+  `watch/status.json` in R2; `GET /watch/status` and `POST /watch/run`
+  (`?searches=0` = poll only) expose it live.
+- **Known limit**: some `.gov` sites bot-wall datacenter IPs (FTB, mass.gov,
+  detroitmi.gov…) — those poll as persistent fetch-errors until a proxied
+  fetch path or better URL exists; search discovery covers them meanwhile.
 
 ## What it computes (TY2025)
 
