@@ -6,6 +6,7 @@
 
 import { strict as assert } from "node:assert";
 import { compute, taxTable, figureTax } from "../src/engine.js";
+import { toMefXml } from "../src/mef.js";
 import type { TaxInput } from "../src/types.js";
 
 let passed = 0;
@@ -461,6 +462,155 @@ check("M1: std deduction 3% reduction over 238,950 AGI", () => {
   // agi 300k: reduction = min(0.8*14950, 0.03*61050=1831.5) -> ded 14950-1831.5 = 13118.5 -> 13119 (rd of 13118.5 = 13119? rd rounds .5 up -> wait Math.round(13118.5)=13119)
   const r = compute({ filingStatus: "single", taxpayer: {}, wages: 300000, mn: {} });
   assert.equal(r.lines["m1.4"], 13119);
+});
+
+// ---- Form 2555 FEIE: 365 days abroad, $150k foreign wages ----
+// Exclusion $130k -> income $20k, TI $4,250. Stacking: bracketTax(134,250) -
+// bracketTax(130,000) = 25,067 - 24,047 = 1,020 (= 4,250 x 24% marginal).
+expect(
+  { filingStatus: "single", taxpayer: {}, wages: 150000, feie: { foreignEarnedIncome: 150000, qualifyingDays: 365 } },
+  {
+    "f2555.42": 130000, "sch1.8d": -130000, "1040.9": 20000, "1040.11": 20000,
+    "1040.15": 4250, "1040.16": 1020, "1040.24": 1020,
+  },
+  { diagnosticIncludes: "Form 2555 foreign earned income exclusion applied" },
+);
+
+// ---- Form 2555 partial year: 200 qualifying days, $80k ----
+// Cap = 130,000 x 200/365 = 71,233; exclusion min(80,000, 71,233) = 71,233.
+expect(
+  { filingStatus: "single", taxpayer: {}, wages: 80000, feie: { foreignEarnedIncome: 80000, qualifyingDays: 200 } },
+  { "f2555.42": 71233, "1040.9": 8767, "1040.15": 0, "1040.16": 0 },
+);
+
+// ---- Form 8839: two children, expenses $20k + $10k, MAGI $100k ----
+// Credit 17,280 + 10,000 = 27,280; refundable cap 2 x $5,000 -> ref 10,000,
+// nonrefundable 17,280. Wages 100k -> tax 13,455 -> line22 0; refund 10,000.
+expect(
+  {
+    filingStatus: "single", taxpayer: {}, wages: 100000,
+    adoption: { expensesPerChild: [20000, 10000] },
+  },
+  { "f8839.16": 27280, "sch3.6c": 17280, "f8839.ref": 10000, "1040.33": 10000 },
+  { refund: 10000 },
+);
+
+// ---- Form 8839 phaseout: MAGI 279,190 (midpoint) -> half credit ----
+expect(
+  {
+    filingStatus: "single", taxpayer: {}, wages: 279190,
+    adoption: { expensesPerChild: [17280] },
+  },
+  { "f8839.16": 8640, "f8839.ref": 5000 },
+);
+
+// ---- Form 8962 PTC: family of 1, household income $30k (~199% FPL) ----
+// FPL 15,060 -> 199%; applicable figure ~0.0197 -> contribution 590;
+// PTC = min(6,000-590, 6,000) = 5,410 -> net PTC (no APTC) refundable.
+expect(
+  {
+    filingStatus: "single", taxpayer: {}, wages: 30000,
+    marketplace: { familySize: 1, slcspBenchmarkAnnual: 6000, premiumsPaidAnnual: 6000 },
+  },
+  { "f8962.5": 199, "f8962.8a": 590, "f8962.24": 5410, "sch3.9": 5410, "1040.24": 1475 },
+  { refund: 3935 },
+);
+
+// ---- Form 8962 excess APTC: $7k advanced vs $5,410 PTC -> capped at $375 ----
+expect(
+  {
+    filingStatus: "single", taxpayer: {}, wages: 30000,
+    marketplace: { familySize: 1, slcspBenchmarkAnnual: 6000, premiumsPaidAnnual: 6000, aptcReceived: 7000 },
+  },
+  { "f8962.29": 375, "sch2.1a": 375, "1040.24": 1850 },
+  { owed: 1850 },
+);
+
+// ---- Form 4952: investment interest $20k vs NII $5k -> limited, carryforward ----
+expect(
+  {
+    filingStatus: "single", taxpayer: {}, wages: 100000, taxableInterest: 5000,
+    itemized: { stateLocalIncomeOrSalesTax: 20000, investmentInterest: 20000 },
+  },
+  { "f4952.5": 5000, "schA.17": 25000 },
+  { diagnosticIncludes: "carries forward" },
+);
+
+// ---- Form 2210 Schedule AI: back-loaded income shrinks early installments ----
+// Wages 200k -> tax 37,067; required annual min(90%x37,067, 50,000) = 33,360.
+// AI installments [602, 1682, 14636, 15655] -> effective [602, 1682, 8340, 8340].
+// Penalty = 42.14 + 98.06 + 339.05 + 143.95 = 623.
+expect(
+  {
+    filingStatus: "single", taxpayer: {}, wages: 200000,
+    underpayment: {
+      priorYearTax: 50000,
+      scheduleAI: { agiByPeriod: [10000, 25000, 100000, 180000] },
+    },
+  },
+  { "1040.24": 37067, "f2210.19": 623 },
+  { diagnosticIncludes: "Schedule AI applied" },
+);
+
+// ---- California 540: single $100k wages, $4k withholding ----
+// CA TI = 100,000 - 5,706 = 94,294 -> Schedule X tax 5,208; minus $153
+// personal exemption credit -> 5,055; owed 1,055.
+expect(
+  { filingStatus: "single", taxpayer: {}, wages: 100000, ca: { withholding: 4000 } },
+  { "f540.17": 100000, "f540.19": 94294, "f540.32": 153, "f540.35": 5055, "f540.100": 1055 },
+);
+
+// ---- New York IT-201: single $80k, 2 dependents, $3k withholding ----
+// NY TI = 80,000 - 8,000 - 2,000 = 70,000 -> tax 3,685; owed 685.
+expect(
+  {
+    filingStatus: "single", taxpayer: {}, wages: 80000,
+    dependents: [{}, {}],
+    ny: { withholding: 3000 },
+  },
+  { "it201.33": 80000, "it201.37": 70000, "it201.39": 3685, "it201.80": 685 },
+);
+
+// ---- MN M1: SS subtraction (full) + Working Family Credit ----
+// MFJ wages 40k + SS 30k -> taxable SS 20,850; AGI 60,850 < 108,320 -> full
+// subtraction -> MN AGI 40,000; TI 10,100 -> tax 540. WFC base 379 phased
+// 12% over 37,910 -> 128. Withholding 500 -> refund 88.
+expect(
+  {
+    filingStatus: "mfj", taxpayer: {}, spouse: {}, wages: 40000,
+    socialSecurityBenefits: 30000, mn: { withholding: 500 },
+  },
+  {
+    "1040.6b": 20850, "m1m.12": 20850, "m1.1": 40000, "m1.6": 10100,
+    "m1.7": 540, "m1cwfc.wfc": 128, "m1.36": 88,
+  },
+);
+
+// ---- MN M1NR: nonresident, 50% MN-source ----
+expect(
+  {
+    filingStatus: "mfj", taxpayer: {}, spouse: {}, wages: 40000,
+    socialSecurityBenefits: 30000,
+    mn: { withholding: 500, resident: false, mnSourceIncome: 20000 },
+  },
+  { "m1.7a": 540, "m1nr.ratio": 0.5, "m1.7": 270, "m1cwfc.wfc": 64, "m1.36": 294 },
+);
+
+// ---- MeF: transmitter/EFIN/address blocks in ReturnHeader ----
+check("mef: header carries OriginatorGrp + Filer USAddress", () => {
+  const r = compute({ filingStatus: "single", taxpayer: {}, wages: 50000 });
+  const xml = toMefXml({ filingStatus: "single", taxpayer: {}, wages: 50000 }, r, {
+    efin: "123456", etin: "654321", transmitterName: "Test Transmitter LLC",
+    originatorType: "ERO",
+    primarySsn: "123456789", primaryFirstName: "Jane", primaryLastName: "Doe",
+    address: { line1: "1 Main St", city: "Minneapolis", state: "MN", zip: "55401" },
+  });
+  assert.ok(xml.includes("<EFIN>123456</EFIN>"), "EFIN missing");
+  assert.ok(xml.includes("<ETIN>654321</ETIN>"), "ETIN missing");
+  assert.ok(xml.includes("<OriginatorTypeCd>ERO</OriginatorTypeCd>"), "originator type missing");
+  assert.ok(xml.includes("<AddressLine1Txt>1 Main St</AddressLine1Txt>"), "address missing");
+  assert.ok(xml.includes("<ZIPCd>55401</ZIPCd>"), "zip missing");
+  assert.ok(xml.includes("<PrimaryNameControlTxt>DOE</PrimaryNameControlTxt>"), "name control missing");
 });
 
 console.log(`\n${passed} passed, ${failed} failed`);

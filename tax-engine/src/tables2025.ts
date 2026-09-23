@@ -348,3 +348,137 @@ export const MN = {
   deductionPhaseout: { threshold: 238950, thresholdMfs: 119475, rate: 0.03, maxReduction: 0.8 },
   dependentExemption: 5200,
 };
+
+/**
+ * Minnesota Social Security subtraction (Schedule M1M line 12), TY2025 —
+ * MN Dept. of Revenue inflation-adjusted amounts. Below the full-subtraction
+ * threshold the entire taxable-SS amount is subtracted; above it the result is
+ * the greater of the alternative method (taxable SS reduced 10% per step) or
+ * the simplified method (statutory max reduced 10% per step over its own
+ * threshold). Steps are ceil(excess / divisor), capped at 10.
+ */
+export const MN_SS = {
+  /** AGI at/below which 100% of taxable SS is subtracted. */
+  fullThreshold: { mfj: 108320, qss: 108320, single: 84490, hoh: 84490, mfs: 54160 } as Record<FilingStatus, number>,
+  /** Simplified-method maximum subtraction. */
+  simplifiedMax: { mfj: 5840, qss: 5840, single: 4560, hoh: 4560, mfs: 2920 } as Record<FilingStatus, number>,
+  /** Simplified-method phaseout start. */
+  simplifiedPhaseStart: { mfj: 88630, qss: 88630, single: 69250, hoh: 69250, mfs: 44315 } as Record<FilingStatus, number>,
+  /** Phase step divisor: $4,000 except $2,000 for MFS. */
+  stepDivisor: (status: FilingStatus) => (status === "mfs" ? 2000 : 4000),
+};
+
+/**
+ * Minnesota Working Family Credit + Child Tax Credit (Schedule M1CWFC), TY2025.
+ * WFC = 4% of first $9,480 earned income + per-older-child addition.
+ * CTC = $1,750 per qualifying child under 18.
+ * Combined credits phase out by 12% (9% when the family has qualifying older
+ * children but no qualifying children) of income over threshold, where income
+ * = the GREATER of AGI or earned income (Minn. Stat. 290.0671). Refundable.
+ */
+export const MN_WFC = {
+  earnedIncomeCap: 9480,
+  rate: 0.04,
+  olderChildAdd: [0, 1000, 2270, 2710] as const, // 0 / 1 / 2 / 3+ qualifying older children
+  ctcPerChild: 1750,
+  phaseStartMfj: 37910,
+  phaseStartOther: 31950,
+  phaseRate: 0.12,
+  phaseRateOlderOnly: 0.09,
+};
+
+/** §911 foreign earned income exclusion — Rev. Proc. 2024-40 §3.45 (max $130,000, prorated by qualifying days/365). */
+export const FEIE = { maxExclusion: 130000, daysInYear: 365 };
+
+/**
+ * Form 8839 adoption credit, TY2025 — Rev. Proc. 2024-40 §3.32 + OBBBA
+ * (which made up to $5,000 of the credit refundable per child for 2025+).
+ */
+export const ADOPTION = {
+  maxPerChild: 17280,
+  refundableCapPerChild: 5000,
+  magiPhaseStart: 259190,
+  magiPhaseEnd: 299190,
+};
+
+/**
+ * Form 8962 premium tax credit, TY2025. Uses the 2024 HHS federal poverty
+ * guidelines (the FPL published on the first day of open enrollment for 2025).
+ * For TY2025 the enhanced-subsidy applicable-figure table applies (IRA):
+ * 0% below 150% FPL ramping linearly to 8.5% at/above 400%.
+ */
+export const FPL_2024 = {
+  contiguous: [15060, 20440, 25820, 31200, 36580, 41960, 47340, 52720] as const,
+  alaska: [18810, 25540, 32270, 39000, 45730, 52460, 59190, 65920] as const,
+  hawaii: [17310, 23500, 29690, 35880, 42070, 48260, 54450, 60640] as const,
+  perExtra: { contiguous: 5380, alaska: 6730, hawaii: 6190 } as const,
+};
+
+/** Applicable-figure bands: [FPL-fraction floor, figure at floor]. Linear inside each band. */
+export const APPLICABLE_FIGURE: Array<[number, number]> = [
+  [0, 0],
+  [1.5, 0],
+  [2.0, 0.02],
+  [2.5, 0.04],
+  [3.0, 0.06],
+  [4.0, 0.085],
+  [Infinity, 0.085],
+];
+
+/** Excess-APTC repayment limitation (i8962 Table 5): [single, other] by FPL band. */
+export const APTC_REPAY_LIMIT = {
+  bands: [200, 300, 400] as const, // percent-of-FPL ceilings
+  single: [375, 975, 1625] as const,
+  other: [750, 1950, 3250] as const,
+};
+
+/** Schedule AI annualization (Form 2210 Part IV): periods end 3/31, 5/31, 8/31, 11/30. */
+export const SCHEDULE_AI = {
+  annualizationFactors: [4, 2.4, 1.5, 12 / 11] as const,
+  applicablePct: [0.225, 0.45, 0.675, 0.9] as const,
+};
+
+/**
+ * California Form 540, TY2025 — FTB 2025 tax rate schedules + deductions.
+ * CA starts from federal AGI ± Schedule CA adjustments. Exemption credits:
+ * $153 personal (each taxpayer on joint), $475 per dependent.
+ */
+export const CA = {
+  brackets: {
+    // Schedule X — single / MFS
+    single: [[0, 0.01], [11079, 0.02], [26264, 0.04], [41452, 0.06], [57542, 0.08], [72724, 0.093], [371479, 0.103], [445771, 0.113], [742953, 0.123]],
+    mfs: [[0, 0.01], [11079, 0.02], [26264, 0.04], [41452, 0.06], [57542, 0.08], [72724, 0.093], [371479, 0.103], [445771, 0.113], [742953, 0.123]],
+    // Schedule Y — MFJ / QSS
+    mfj: [[0, 0.01], [22158, 0.02], [52528, 0.04], [82904, 0.06], [115084, 0.08], [145448, 0.093], [742958, 0.103], [891542, 0.113], [1485906, 0.123]],
+    qss: [[0, 0.01], [22158, 0.02], [52528, 0.04], [82904, 0.06], [115084, 0.08], [145448, 0.093], [742958, 0.103], [891542, 0.113], [1485906, 0.123]],
+    // Schedule Z — head of household
+    hoh: [[0, 0.01], [22173, 0.02], [52530, 0.04], [67716, 0.06], [83805, 0.08], [98990, 0.093], [505208, 0.103], [606251, 0.113], [1010417, 0.123]],
+  } as Record<FilingStatus, Array<[number, number]>>,
+  standardDeduction: { single: 5706, mfs: 5706, hoh: 11412, mfj: 11412, qss: 11412 } as Record<FilingStatus, number>,
+  personalExemptionCredit: { single: 153, mfs: 153, hoh: 153, mfj: 306, qss: 306 } as Record<FilingStatus, number>,
+  seniorExemptionCredit: 153,
+  dependentExemptionCredit: 475,
+  /** Mental Health Services Tax: +1% on taxable income over $1M (not indexed). */
+  mentalHealthThreshold: 1000000,
+  mentalHealthRate: 0.01,
+};
+
+/**
+ * New York Form IT-201, TY2025 — NYS tax rate schedule. Verified against the
+ * 2025 tax table (e.g. MFJ TI 38,275 -> 1,773). Above $107,650 NY AGI a
+ * supplemental tax recaptures the lower-bracket benefit — flagged, not computed.
+ */
+export const NY = {
+  brackets: {
+    single: [[0, 0.04], [8500, 0.045], [11700, 0.0525], [13900, 0.055], [80650, 0.06], [215400, 0.0685], [1077550, 0.0965], [5000000, 0.103], [25000000, 0.109]],
+    mfs: [[0, 0.04], [8500, 0.045], [11700, 0.0525], [13900, 0.055], [80650, 0.06], [215400, 0.0685], [1077550, 0.0965], [5000000, 0.103], [25000000, 0.109]],
+    mfj: [[0, 0.04], [17150, 0.045], [23600, 0.0525], [27900, 0.055], [161550, 0.06], [323200, 0.0685], [2155350, 0.0965], [5000000, 0.103], [25000000, 0.109]],
+    qss: [[0, 0.04], [17150, 0.045], [23600, 0.0525], [27900, 0.055], [161550, 0.06], [323200, 0.0685], [2155350, 0.0965], [5000000, 0.103], [25000000, 0.109]],
+    hoh: [[0, 0.04], [12800, 0.045], [17650, 0.0525], [20900, 0.055], [107650, 0.06], [269300, 0.0685], [1616450, 0.0965], [5000000, 0.103], [25000000, 0.109]],
+  } as Record<FilingStatus, Array<[number, number]>>,
+  standardDeduction: { single: 8000, mfs: 8000, hoh: 11200, mfj: 16050, qss: 16050 } as Record<FilingStatus, number>,
+  singleDependentStdDed: 3100,
+  dependentExemption: 1000,
+  /** Above this NY AGI the tax-table method is disallowed (benefit recapture). */
+  supplementalAgiThreshold: 107650,
+};

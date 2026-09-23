@@ -1,0 +1,23 @@
+{
+  "name": "Adoption credit with OBBBA refundable portion",
+  "description": "MFJ $90k wages, $17,280 qualified expenses -> $12,280 nonrefundable + $5,000 refundable.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "mfj",
+    "taxpayer": {},
+    "spouse": {},
+    "wages": 90000,
+    "federalWithholding": 8000,
+    "adoption": { "expensesPerChild": [17280] }
+  },
+  "expected": {
+    "lines": {
+      "f8839.16": 17280,
+      "sch3.6c": 12280,
+      "f8839.ref": 5000,
+      "1040.24": 0
+    },
+    "refund": 13000,
+    "owed": 0
+  }
+}

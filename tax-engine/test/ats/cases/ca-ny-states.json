@@ -1,0 +1,27 @@
+{
+  "name": "Single filer with CA and NY state returns",
+  "description": "$120k wages, one dependent; CA Schedule X + exemption credits, NY brackets + $1k exemption. NY supplemental recapture flagged over $107,650 AGI.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "single",
+    "taxpayer": {},
+    "wages": 120000,
+    "federalWithholding": 20000,
+    "dependents": [{}],
+    "ca": { "withholding": 5000 },
+    "ny": { "withholding": 4500 }
+  },
+  "expected": {
+    "lines": {
+      "f540.19": 114294,
+      "f540.32": 628,
+      "f540.35": 6440,
+      "f540.100": 1440,
+      "it201.37": 111000,
+      "it201.39": 6092,
+      "it201.80": 1592
+    },
+    "refund": 2633,
+    "owed": 0
+  }
+}

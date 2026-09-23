@@ -1,0 +1,30 @@
+{
+  "name": "Marketplace family with net premium tax credit",
+  "description": "MFJ family of 3, $45k wages (~174% FPL), $18k SLCSP benchmark, $15k premiums, $12k APTC -> $3k net PTC.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "mfj",
+    "taxpayer": {},
+    "spouse": {},
+    "wages": 45000,
+    "dependents": [{}],
+    "marketplace": {
+      "familySize": 3,
+      "slcspBenchmarkAnnual": 18000,
+      "premiumsPaidAnnual": 15000,
+      "aptcReceived": 12000
+    }
+  },
+  "expected": {
+    "lines": {
+      "f8962.5": 174,
+      "f8962.8a": 437,
+      "f8962.24": 15000,
+      "f8962.26": 3000,
+      "sch3.9": 3000,
+      "1040.24": 853
+    },
+    "refund": 2147,
+    "owed": 0
+  }
+}

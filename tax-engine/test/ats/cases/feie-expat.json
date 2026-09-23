@@ -1,0 +1,25 @@
+{
+  "name": "Expat with full-year foreign earned income exclusion",
+  "description": "$150k foreign wages, 365 qualifying days -> $130k exclusion, FEI stacking tax worksheet.",
+  "source": "engine KAT — replace expectations with IRS ATS answers when authorized",
+  "input": {
+    "filingStatus": "single",
+    "taxpayer": {},
+    "wages": 150000,
+    "federalWithholding": 25000,
+    "feie": { "foreignEarnedIncome": 150000, "qualifyingDays": 365 }
+  },
+  "expected": {
+    "lines": {
+      "f2555.42": 130000,
+      "sch1.8d": -130000,
+      "1040.9": 20000,
+      "1040.11": 20000,
+      "1040.15": 4250,
+      "1040.16": 1020,
+      "1040.24": 1020
+    },
+    "refund": 23980,
+    "owed": 0
+  }
+}

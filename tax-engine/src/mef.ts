@@ -22,10 +22,21 @@ export interface ReturnMeta {
   spouseSsn?: string;
   spouseFirstName?: string;
   spouseLastName?: string;
-  address?: { line1: string; city: string; state: string; zip: string };
+  address?: { line1: string; line2?: string; city: string; state: string; zip: string };
+  /** OriginatorGrp — required for transmission; EFIN/ETIN come from IRS e-Services. */
+  efin?: string;
+  etin?: string;
+  /** ERO / transmitter legal name + phone. */
+  transmitterName?: string;
+  phone?: string;
+  /** Originator type: ERO, OnlineFiler (direct API self-file), etc. */
+  originatorType?: "ERO" | "OnlineFiler" | "LargeTaxpayer" | "FinancialAgent" | "SoftwareDeveloper" | "ReportingAgent" | "Other";
   softwareId?: string;
   softwareVersion?: string;
   submissionId?: string;
+  /** Practitioner PIN / self-select PIN signature inputs. */
+  primarySignaturePin?: string;
+  spouseSignaturePin?: string;
   /** Override tax year (default 2025). */
   taxYear?: number;
 }
@@ -124,6 +135,24 @@ const MAP: Record<string, Record<string, string>> = {
   IRSScheduleR: {
     "schR.22": "CreditForElderlyOrDisabledAmt",
   },
+  IRS2555: {
+    "f2555.42": "ForeignEarnedIncomeExclusionAmt",
+    "sch1.8d": "ForeignEarnedIncomeExclusionAmt",
+  },
+  IRS8839: {
+    "f8839.16": "AdoptionCreditAmt",
+    "f8839.ref": "RefundableAdoptionCreditAmt",
+  },
+  IRS8962: {
+    "f8962.5": "FederalPovertyLevelPct",
+    "f8962.8a": "AnnualContributionAmt",
+    "f8962.24": "AnnualPremiumTaxCreditAllowedAmt",
+    "f8962.26": "NetPremiumTaxCreditAmt",
+    "f8962.29": "ExcessAdvancePaymentOfPtcAmt",
+  },
+  IRS4952: {
+    "f4952.5": "DeductibleInvestmentInterestAmt",
+  },
 };
 
 const FORM_DOC_NAME: Record<string, string> = {
@@ -139,13 +168,17 @@ const FORM_DOC_NAME: Record<string, string> = {
   IRS8615: "IRS8615",
   IRS2210: "IRS2210",
   IRSScheduleR: "IRSScheduleR",
+  IRS2555: "IRS2555",
+  IRS8839: "IRS8839",
+  IRS8962: "IRS8962",
+  IRS4952: "IRS4952",
 };
 
 /** Ordered so the 1040 is first and schedules follow in attachment order. */
 const FORM_ORDER = [
   "IRS1040", "IRS1040Schedule1", "IRS1040Schedule1A", "IRS1040Schedule2",
   "IRS1040Schedule3", "IRS1040ScheduleA", "IRS1040ScheduleB", "IRSScheduleR",
-  "IRS6251", "IRS8863", "IRS8615", "IRS2210",
+  "IRS6251", "IRS8863", "IRS8615", "IRS2210", "IRS2555", "IRS8839", "IRS8962", "IRS4952",
 ];
 
 export function toMefXml(input: TaxInput, result: TaxResult, meta: ReturnMeta = {}): string {
@@ -171,27 +204,76 @@ export function toMefXml(input: TaxInput, result: TaxResult, meta: ReturnMeta = 
     );
   }
 
+  const i4 = "        ";
+  const i6 = "      ";
+  const i5 = "    ";
+
+  // Filer: primary/spouse identity + USAddress (schema-required for ATS).
+  let filer = "";
+  if (meta.primarySsn || meta.address) {
+    filer = `${i5}<Filer>\n`;
+    if (meta.primarySsn) {
+      filer += `${i6}<PrimarySSN>${esc(meta.primarySsn)}</PrimarySSN>\n`;
+      if (meta.primaryFirstName) {
+        filer += `${i6}<PrimaryNameControlTxt>${esc((meta.primaryLastName ?? meta.primaryFirstName).slice(0, 4).toUpperCase())}</PrimaryNameControlTxt>\n`;
+        filer += `${i6}<Name>\n${i4}<PersonFirstNm>${esc(meta.primaryFirstName)}</PersonFirstNm>\n`;
+        if (meta.primaryLastName) filer += `${i4}<PersonLastNm>${esc(meta.primaryLastName)}</PersonLastNm>\n`;
+        filer += `${i6}</Name>\n`;
+      }
+    }
+    if (meta.spouseSsn) {
+      filer += `${i6}<SpouseSSN>${esc(meta.spouseSsn)}</SpouseSSN>\n`;
+      if (meta.spouseFirstName) {
+        filer += `${i6}<SpouseName>\n${i4}<PersonFirstNm>${esc(meta.spouseFirstName)}</PersonFirstNm>\n`;
+        if (meta.spouseLastName) filer += `${i4}<PersonLastNm>${esc(meta.spouseLastName)}</PersonLastNm>\n`;
+        filer += `${i6}</SpouseName>\n`;
+      }
+    }
+    if (meta.address) {
+      const a = meta.address;
+      filer += `${i6}<USAddress>\n` +
+        `${i4}<AddressLine1Txt>${esc(a.line1)}</AddressLine1Txt>\n` +
+        (a.line2 ? `${i4}<AddressLine2Txt>${esc(a.line2)}</AddressLine2Txt>\n` : "") +
+        `${i4}<CityNm>${esc(a.city)}</CityNm>\n` +
+        `${i4}<StateAbbreviationCd>${esc(a.state)}</StateAbbreviationCd>\n` +
+        `${i4}<ZIPCd>${esc(a.zip)}</ZIPCd>\n` +
+        `${i6}</USAddress>\n`;
+    }
+    filer += `${i5}</Filer>\n`;
+  }
+
+  // OriginatorGrp: EFIN + ETIN + originator type (required for transmission).
+  let originator = "";
+  if (meta.efin || meta.etin || meta.transmitterName) {
+    originator = `${i5}<OriginatorGrp>\n` +
+      (meta.efin ? `${i6}<EFIN>${esc(meta.efin)}</EFIN>\n` : "") +
+      (meta.etin ? `${i6}<ETIN>${esc(meta.etin)}</ETIN>\n` : "") +
+      `${i6}<OriginatorTypeCd>${meta.originatorType ?? "OnlineFiler"}</OriginatorTypeCd>\n` +
+      (meta.transmitterName
+        ? `${i6}<TransmitterName>\n${i4}<BusinessNameLine1Txt>${esc(meta.transmitterName)}</BusinessNameLine1Txt>\n${i6}</TransmitterName>\n`
+        : "") +
+      (meta.phone ? `${i6}<PhoneNum>${esc(meta.phone)}</PhoneNum>\n` : "") +
+      `${i5}</OriginatorGrp>\n`;
+  }
+
+  const pins =
+    (meta.primarySignaturePin || meta.spouseSignaturePin)
+      ? `${i5}<SignatureOptionCd>PIN</SignatureOptionCd>\n` +
+        (meta.primarySignaturePin ? `${i5}<PrimarySignaturePIN>${esc(meta.primarySignaturePin)}</PrimarySignaturePIN>\n` : "") +
+        (meta.spouseSignaturePin ? `${i5}<SpouseSignaturePIN>${esc(meta.spouseSignaturePin)}</SpouseSignaturePIN>\n` : "")
+      : "";
+
   const header =
     `  <ReturnHeader binaryAttachmentCnt="0">\n` +
-    el("ReturnTs", new Date().toISOString()).replace(/^    /, "    ") +
-    el("TaxYr", yr) +
-    el("TaxPeriodBeginDt", `${yr}-01-01`) +
-    el("TaxPeriodEndDt", `${yr}-12-31`) +
-    el("SoftwareId", meta.softwareId ?? "TAXENGINE-LOCAL") +
-    el("SoftwareVersionNum", meta.softwareVersion ?? "0.1.0") +
-    (meta.submissionId ? el("SubmissionId", meta.submissionId) : "") +
-    (meta.primarySsn
-      ? `    <Filer>\n` +
-        el("PrimarySSN", meta.primarySsn).replace(/^    /, "      ") +
-        (meta.primaryFirstName
-          ? `      <Name>\n` +
-            el("PersonFirstNm", meta.primaryFirstName).replace(/^    /, "        ") +
-            el("PersonLastNm", meta.primaryLastName ?? "").replace(/^    /, "        ") +
-            `      </Name>\n`
-          : "") +
-        `    </Filer>\n`
-      : "") +
-    el("FilingStatusCd", FILING_STATUS_CD[input.filingStatus]) +
+    `${i5}<ReturnTs>${new Date().toISOString()}</ReturnTs>\n` +
+    `${i5}<TaxYr>${yr}</TaxYr>\n` +
+    `${i5}<TaxPeriodBeginDt>${yr}-01-01</TaxPeriodBeginDt>\n` +
+    `${i5}<TaxPeriodEndDt>${yr}-12-31</TaxPeriodEndDt>\n` +
+    `${i5}<SoftwareId>${esc(meta.softwareId ?? "TAXENGINE-LOCAL")}</SoftwareId>\n` +
+    `${i5}<SoftwareVersionNum>${esc(meta.softwareVersion ?? "0.1.0")}</SoftwareVersionNum>\n` +
+    (meta.submissionId ? `${i5}<SubmissionId>${esc(meta.submissionId)}</SubmissionId>\n` : "") +
+    originator + filer + pins +
+    `${i5}<FilingStatusCd>${FILING_STATUS_CD[input.filingStatus]}</FilingStatusCd>\n` +
     `  </ReturnHeader>\n`;
 
   return (

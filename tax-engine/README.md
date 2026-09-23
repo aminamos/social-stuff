@@ -93,7 +93,13 @@ changes in R2 — the review queue that feeds the state engines.
   $100k, tax at cell midpoint) below $100k TI; bracket math above;
   Qualified Dividends & Capital Gain Tax Worksheet; full **Schedule D Tax
   Worksheet** (0/15/20 preferential, unrecaptured §1250 at 25%, 28% collectibles)
-  when those gains are present.
+  when those gains are present; **Foreign Earned Income Tax Worksheet**
+  (stacking) when the §911 exclusion applies.
+- **Form 2555 (FEIE)**: §911 exclusion, $130,000 max prorated by qualifying
+  days/365, entered as negative Schedule 1 income; MAGI add-backs wired
+  through §86/SLI/IRA/SALT/CTC/NIIT computations.
+- **Form 4952**: investment interest expense limited to net investment
+  income; excess carryforward diagnostic.
 - **Credits**: CTC/ODC/ACTC (Sch 8812, $2,200/$500/$1,700, 5%-per-$1k
   phaseout), EITC (Rev. Proc. 2024-40 params, EIC-table midpoint lookup on both
   earned income and AGI, $11,950 investment limit, age 25–64 no-child rule,
@@ -102,7 +108,11 @@ changes in R2 — the review queue that feeds the state engines.
   $80–90k/$160–180k phaseout), **Form 5695** energy (§25C $1,200/yr + per-item
   caps + $2,000 heat-pump cap; §25D 30% solar/wind/geothermal/battery),
   **Schedule R** elderly/disabled (15% of base after nontaxable benefits and
-  AGI excess, tax-liability limited).
+  AGI excess, tax-liability limited), **Form 8839** adoption credit
+  ($17,280/child, $259,190–$299,190 MAGI phaseout, up to $5,000/child
+  refundable under OBBBA), **Form 8962** premium tax credit (2024 FPL tables
+  for contiguous/AK/HI, IRA applicable-figure interpolation, APTC
+  reconciliation, Table 5 repayment caps, refundable net PTC).
 - **Other taxes (Sch 2)**: SE tax (with $176,100 SS wage base), additional
   Medicare 0.9%, NIIT 3.8%, **AMT (Form 6251)** — AMTI refigured without the
   senior deduction, SALT add-back (itemized) or standard-deduction add-back,
@@ -113,31 +123,52 @@ changes in R2 — the review queue that feeds the state engines.
   marginal rate; larger of tentative vs. child-rate tax replaces line 16.
 - **Estimated-tax penalty (Form 2210)**: 90%-of-current / 100%-or-110%-of-prior
   safe harbor, quarterly shortfalls at the 7% §6621 rate (all 2025 quarters),
-  withholding spread evenly unless per-quarter inputs are given.
-- **Minnesota M1 (v1)**: federal AGI + MN additions − subtractions, MN
-  standard/itemized (with the 3%-of-excess-AGI, 80%-cap limiter), $5,200
-  dependent exemptions, 5.35/6.8/7.85/9.85% brackets, withholding →
-  refund/owed. Lines keyed `m1.*`.
+  withholding spread evenly unless per-quarter inputs are given, plus
+  **Schedule AI** annualized-income installments (3/5/8/11-month periods,
+  22.5/45/67.5/90% applicable percentages, per-period min vs. regular).
+- **Minnesota M1**: federal AGI + MN additions − subtractions, **Schedule M1M
+  Social Security subtraction** (greater of alternative/simplified methods),
+  MN standard/itemized (with the 3%-of-excess-AGI, 80%-cap limiter), $5,200
+  dependent exemptions, 5.35/6.8/7.85/9.85% brackets, **Schedule M1NR**
+  nonresident/part-year proration, **Schedule M1CWFC** Working Family Credit
+  (4% of first $9,480 + older-child additions) + MN Child Tax Credit
+  ($1,750/child, joint phaseout on the greater of AGI or earned income).
+  Lines keyed `m1.*` / `m1m.*` / `m1nr.*` / `m1cwfc.*`.
+- **New York IT-201 (v1)**: federal AGI + additions − subtractions, NY
+  standard/itemized ($8,000/$16,050/$11,200), $1,000 dependent exemptions,
+  full NYS rate schedule (4%–10.9%); supplemental benefit-recapture above
+  $107,650 AGI flagged, not computed. Lines keyed `it201.*`.
+- **California Form 540 (v1)**: federal AGI ± Schedule CA adjustments, CA
+  standard/itemized ($5,706/$11,412), Schedule X/Y/Z rate schedules
+  (1%–12.3%) + 1% mental-health tax over $1M, $153/$306 personal + $475
+  dependent exemption credits. Lines keyed `f540.*`.
 - **Result**: payments, refund vs. amount-owed, plus `diagnostics[]` for
   known simplifications.
 
 ## Deliberate limitations (diagnostics flag most of them)
 
-- Foreign earned income exclusion computation, adoption credit, premium tax
-  credit / excess APTC repayment: pass-through input fields or not modeled.
-- Form 2210 uses the standard quarterly method; Schedule AI (annualized
-  income) may produce a smaller penalty — diagnostics note this.
+- Form 2555 housing exclusion/deduction (Part IX) is not modeled; FEIE is the
+  income exclusion only. FEIE + kiddie-tax interaction is simplified.
+- Form 8962 is annual-method only (no monthly lines 12–23, Part IV allocation,
+  or Part V alternative marriage-year calc). Enhanced subsidies are TY2025
+  law — the 2026 applicable-figure table differs materially.
+- Schedule AI uses bracket math for annualized tax (not the full Tax Table /
+  QDCGT worksheets per period) and relies on caller-supplied cumulative AGI.
 - Schedule B payer-level detail is intake data, not math; the engine emits
   totals + Part III diagnostics instead.
-- M1 v1 assumes full-year MN residency (no Schedule M1NR) and does not
-  compute the MN SS subtraction — pass it via `mn.subtractions`.
+- State returns are resident returns only: no IT-203/540NR nonresident
+  forms, no NYC/Yonkers tax, no NY supplemental recapture (AGI > $107,650
+  flagged), no CA exemption-credit phaseout, no state credits beyond MN
+  WFC/CTC.
 - IRA/SLI/SS benefit interdependence is resolved in two passes; inside a
   phaseout band the result can differ from iterated software by a few dollars.
 - MFS edge cases (spouse itemizing, community property) are the caller's job;
   `forceItemized` is provided.
 - Per-business §199A aggregation is simplified to a single QBI pool.
-- MeF XML is structure v1 (correct hierarchy + core monetary elements);
-  ATS-grade conformance needs the official XSD bundle for element validation.
+- MeF XML is structure v2: ReturnHeader now carries OriginatorGrp
+  (EFIN/ETIN/type), Filer with PrimaryNameControlTxt + USAddress, and
+  signature PIN elements. Element names still need validation against the
+  official IRS XSD bundle before ATS submission.
 
 ## Testing strategy
 
@@ -160,14 +191,16 @@ Pub. 1040 Tax Table are asserted verbatim). Extend it with:
    the merge is deterministic).
 3. ~~Interview UI~~ — done: `GET /` serves the questionnaire → `TaxInput` →
    `/compute` flow, with a MeF XML download button.
-4. ~~MeF XML~~ — done (v1): `POST /mef` emits ReturnHeader + ReturnData
-   keyed off `lines`. Next: validate elements against the official XSDs.
+4. ~~MeF XML~~ — done (v2): `POST /mef` emits ReturnHeader (OriginatorGrp
+   with EFIN/ETIN/transmitter, Filer with name control + USAddress, signature
+   PINs) + ReturnData keyed off `lines`. Remaining: XSD validation.
 5. **IRS ATS testing → Authorized e-file Provider (EFIN)** — the harness is
    ready (`npm run ats`, cases in `test/ats/cases/`); the e-Services
    application itself is a business process. See
    `../tax-software-irs-cost-local/irs-approval-checklist.md`.
-6. State returns — MN v1 done (`m1.*` lines); CA/NY reference docs are
-   staged in R2 for when they're added.
+6. ~~State returns~~ — done (v1): MN (incl. M1M SS subtraction, M1NR, M1CWFC),
+   NY IT-201, CA 540. Remaining: nonresident returns, local taxes, per-state
+   credits.
 
 ## Sources (all TY2025, verified at build time)
 

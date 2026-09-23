@@ -305,6 +305,53 @@ export interface TaxInput {
     estimatesByQuarter?: number[];
     /** Skip the penalty computation even when inputs are present. */
     waive?: boolean;
+    /**
+     * Schedule AI — annualized income installment method. Cumulative actual
+     * amounts through each period end (3/31, 5/31, 8/31, 11/30). The engine
+     * annualizes AGI and the deduction, computes annualized tax on the
+     * bracket schedule, and takes the smaller of each AI installment vs the
+     * regular required installment.
+     */
+    scheduleAI?: {
+      /** Cumulative AGI through 3/31, 5/31, 8/31, 11/30. */
+      agiByPeriod: number[];
+      /** Cumulative itemized deductions per period; omit to use the standard deduction. */
+      itemizedByPeriod?: number[];
+      /** Cumulative SE tax per period; default: computed from SE annualization of the yearly amount. */
+      seTaxByPeriod?: number[];
+    };
+  };
+
+  // ---- §911 foreign earned income exclusion (Form 2555) ----
+  feie?: {
+    /** Total foreign earned income (wages or SE earnings). */
+    foreignEarnedIncome: number;
+    /** Qualifying-period days in 2025 (bona fide residence or physical presence). Default 365. */
+    qualifyingDays?: number;
+  };
+
+  // ---- Form 8839 adoption credit ----
+  adoption?: {
+    /** Qualified adoption expenses per eligible child (carryforwards included). */
+    expensesPerChild: number[];
+    /** Employer-provided adoption benefits excluded from income (reduces expenses dollar-for-dollar). */
+    employerBenefitsPerChild?: number[];
+  };
+
+  // ---- Form 8962 premium tax credit (Marketplace / 1095-A) ----
+  marketplace?: {
+    /** Tax-family size (taxpayer + spouse + dependents claimed). */
+    familySize: number;
+    /** Annual second-lowest-cost Silver plan premium (1095-A col B sum). */
+    slcspBenchmarkAnnual: number;
+    /** Annual premiums actually paid for the qualified plan (1095-A col A sum). */
+    premiumsPaidAnnual: number;
+    /** Advance PTC paid to the insurer in 2025 (1095-A col C sum). */
+    aptcReceived?: number;
+    /** FPL table region (default contiguous 48 states + DC). */
+    fplRegion?: "contiguous" | "alaska" | "hawaii";
+    /** Months covered if < 12 — prorates benchmark/premiums evenly. Default 12. */
+    monthsCovered?: number;
   };
 
   // ---- Schedule B triggers ----
@@ -313,18 +360,56 @@ export interface TaxInput {
   /** Seller-financed mortgage interest, bond-premium amortization, nominee, etc. */
   scheduleBRequired?: boolean;
 
-  // ---- Minnesota M1 (v1) ----
+  // ---- Minnesota M1 ----
   mn?: {
-    /** Wages sourced to MN (defaults to wages — resident assumption). */
+    /** Full-year MN resident (default true). False computes M1NR proration. */
     resident?: boolean;
+    /** MN-source income for Schedule M1NR (nonresident/part-year). */
+    mnSourceIncome?: number;
     additions?: number;
-    /** MN subtractions (e.g. SS subtraction computed elsewhere, milit. pay). */
+    /** Extra MN subtractions (military pay etc.) — SS subtraction is computed. */
     subtractions?: number;
     /** MN itemized total (Schedule M1SA); defaults to federal itemized. */
     itemizedTotal?: number;
     /** MN income tax withheld. */
     withholding?: number;
     /** MN estimated payments. */
+    estimatedPayments?: number;
+    /** Qualifying children under 18 for the MN Child Tax Credit (default: dependents). */
+    ctcQualifyingChildren?: number;
+    /** Qualifying older children (EITC-qualifying, 18+) for the Working Family Credit. */
+    wfcOlderChildren?: number;
+    /** Earned income for the WFC (default: wages + SE earnings). */
+    wfcEarnedIncome?: number;
+  };
+
+  // ---- New York IT-201 (v1, full-year resident) ----
+  ny?: {
+    additions?: number;
+    subtractions?: number;
+    /** NY itemized total (Form IT-196); defaults to NY standard deduction. */
+    itemizedTotal?: number;
+    /** Dependent exemptions ($1,000 each; default: dependents count). */
+    dependents?: number;
+    withholding?: number;
+    estimatedPayments?: number;
+    /** NYC resident — NYC tax not computed, diagnostic only. */
+    nycResident?: boolean;
+  };
+
+  // ---- California Form 540 (v1, full-year resident) ----
+  ca?: {
+    /** Schedule CA additions (e.g. CA-nonconforming items). */
+    additions?: number;
+    /** Schedule CA subtractions (e.g. SS benefits — CA doesn't tax them). */
+    subtractions?: number;
+    /** CA itemized total (Schedule CA Part II); defaults to CA standard deduction. */
+    itemizedTotal?: number;
+    /** Dependent exemption credits ($475 each; default: dependents count). */
+    dependents?: number;
+    /** Additional senior exemption credits (count of 65+ persons). */
+    seniors65?: number;
+    withholding?: number;
     estimatedPayments?: number;
   };
 }

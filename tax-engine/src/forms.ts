@@ -276,6 +276,7 @@ export function form2210(
   totalTax: number,
   amountOwed: number,
   diagnostics: string[],
+  aiInstallments?: number[] | null,
 ): number {
   const u = input.underpayment;
   if (!u || u.waive) return 0;
@@ -300,32 +301,174 @@ export function form2210(
   let balance = 0; // positive = overpayment carried forward
   let penalty = 0;
   for (let q = 0; q < 4; q++) {
+    const required = aiInstallments ? Math.min(quarterly, aiInstallments[q]) : quarterly;
     const paid = nz(whQ[q]) + nz(estQ[q]) + Math.max(0, balance);
-    const under = Math.max(0, quarterly - paid);
-    balance = paid - quarterly;
+    const under = Math.max(0, required - paid);
+    balance = paid - required;
     penalty += (under * T.F2210.annualRate * T.F2210.accrualDays[q]) / 365;
   }
   const p = rd(penalty);
-  if (p > 0) diagnostics.push("Form 2210 penalty uses the standard quarterly method; Schedule AI (annualized income) may reduce it");
+  if (p > 0 && !aiInstallments) diagnostics.push("Form 2210 penalty uses the standard quarterly method; Schedule AI (annualized income) may reduce it");
   return p;
+}
+
+// --------------------------------------------------------------- Form 2555
+
+/**
+ * §911 foreign earned income exclusion: min(foreign earned income,
+ * $130,000 × qualifyingDays/365). Housing exclusion/deduction is not modeled.
+ */
+export function form2555(input: TaxInput): number {
+  const f = input.feie;
+  if (!f) return 0;
+  const days = Math.min(f.qualifyingDays ?? T.FEIE.daysInYear, T.FEIE.daysInYear);
+  const cap = (T.FEIE.maxExclusion * days) / T.FEIE.daysInYear;
+  return rd(clamp0(Math.min(nz(f.foreignEarnedIncome), cap)));
+}
+
+// --------------------------------------------------------------- Form 8839
+
+/**
+ * Adoption credit: per-child min(expenses − employer benefits, $17,280),
+ * MAGI phaseout $259,190–$299,190, refundable up to $5,000/child (OBBBA).
+ */
+export function form8839(input: TaxInput, magi: number): { credit: number; refundable: number } {
+  const a = input.adoption;
+  if (!a) return { credit: 0, refundable: 0 };
+  let credit = 0;
+  let refundableCap = 0;
+  for (let i = 0; i < a.expensesPerChild.length; i++) {
+    const net = clamp0(nz(a.expensesPerChild[i]) - nz(a.employerBenefitsPerChild?.[i]));
+    if (net <= 0) continue;
+    credit += Math.min(net, T.ADOPTION.maxPerChild);
+    refundableCap += T.ADOPTION.refundableCapPerChild;
+  }
+  const { magiPhaseStart: lo, magiPhaseEnd: hi } = T.ADOPTION;
+  if (magi >= hi) credit = 0;
+  else if (magi > lo) credit = rd(credit * (1 - (magi - lo) / (hi - lo)));
+  credit = rd(credit);
+  return { credit, refundable: Math.min(credit, refundableCap) };
+}
+
+// --------------------------------------------------------------- Form 8962
+
+export interface PtcResult {
+  householdIncome: number;
+  fplPct: number; // percent, e.g. 250 = 250%
+  applicableFigure: number;
+  contribution: number;
+  ptc: number;
+  /** PTC exceeding APTC — refundable (Sch 3 line 9). */
+  netPtc: number;
+  /** Excess APTC repayment after Table 5 cap (Sch 2 line 1a). */
+  excessAptcRepayment: number;
+}
+
+export function form8962(input: TaxInput, householdIncome: number, diagnostics: string[]): PtcResult {
+  const m = input.marketplace!;
+  const region = m.fplRegion ?? "contiguous";
+  const size = Math.max(1, Math.floor(m.familySize));
+  const table = T.FPL_2024[region];
+  const fpl = size <= table.length ? table[size - 1] : table[7] + (size - 8) * T.FPL_2024.perExtra[region];
+  const fplFrac = fpl > 0 ? householdIncome / fpl : Infinity;
+  const fplPct = fplFrac * 100;
+
+  // Applicable figure: linear interpolation inside each band.
+  let fig = 0;
+  const bands = T.APPLICABLE_FIGURE;
+  for (let i = 1; i < bands.length; i++) {
+    const [lo, loFig] = bands[i - 1];
+    const [hi, hiFig] = bands[i];
+    if (fplFrac <= hi || i === bands.length - 1) {
+      fig = loFig + (hiFig - loFig) * clamp0((Math.min(fplFrac, hi) - lo) / (hi - lo));
+      break;
+    }
+  }
+  const contribution = rd(fig * householdIncome);
+  const months = Math.min(m.monthsCovered ?? 12, 12);
+  const benchmark = nz(m.slcspBenchmarkAnnual) * (months / 12);
+  const premiums = nz(m.premiumsPaidAnnual) * (months / 12);
+  const ptc = rd(clamp0(Math.min(benchmark - contribution, premiums)));
+
+  const aptc = nz(m.aptcReceived);
+  let netPtc = 0;
+  let excessAptcRepayment = 0;
+  if (ptc >= aptc) {
+    netPtc = ptc - aptc;
+  } else {
+    const excess = aptc - ptc;
+    if (fplPct >= 400) {
+      excessAptcRepayment = excess;
+      diagnostics.push("excess APTC fully repayable: household income >= 400% FPL (no Table 5 cap)");
+    } else {
+      const idx = fplPct < 200 ? 0 : fplPct < 300 ? 1 : 2;
+      const caps = input.filingStatus === "single" ? T.APTC_REPAY_LIMIT.single : T.APTC_REPAY_LIMIT.other;
+      excessAptcRepayment = Math.min(excess, caps[idx]);
+    }
+  }
+  if (input.filingStatus === "mfs") diagnostics.push("MFS filers are generally not applicable taxpayers for PTC unless an exception applies");
+  return {
+    householdIncome: rd(householdIncome), fplPct: rd(fplPct), applicableFigure: fig,
+    contribution, ptc, netPtc, excessAptcRepayment: rd(excessAptcRepayment),
+  };
+}
+
+// --------------------------------------------------------------- Form 4952
+
+/** Investment interest expense deduction: limited to net investment income; excess carries forward. */
+export function form4952(input: TaxInput, netInvestmentIncome: number, diagnostics: string[]): number {
+  const expense = nz(input.itemized?.investmentInterest);
+  if (expense <= 0) return 0;
+  const allowed = Math.min(expense, Math.max(0, rd(netInvestmentIncome)));
+  if (expense > allowed) {
+    diagnostics.push(`Form 4952: investment interest limited to net investment income; ${expense - allowed} carries forward to 2026`);
+  }
+  return allowed;
+}
+
+// ------------------------------------------------------------- Schedule AI
+
+/**
+ * Form 2210 Schedule AI: per-period required installments from annualized
+ * income. Periods end 3/31, 5/31, 8/31, 11/30 with factors 4 / 2.4 / 1.5 /
+ * 1.0909 and cumulative applicable percentages 22.5 / 45 / 67.5 / 90%.
+ * Each installment = required_i − required_(i−1); returns the four installments.
+ */
+export function scheduleAI(
+  input: TaxInput,
+  stdDeduction: number,
+  seTaxTotal: number,
+  figureTax: (ti: number, s: FilingStatus) => number,
+  diagnostics: string[],
+): number[] | null {
+  const ai = input.underpayment?.scheduleAI;
+  if (!ai || ai.agiByPeriod.length !== 4) {
+    if (ai) diagnostics.push("Schedule AI needs cumulative AGI for all four periods (3/31, 5/31, 8/31, 11/30)");
+    return null;
+  }
+  const status = input.filingStatus;
+  const required: number[] = [];
+  for (let i = 0; i < 4; i++) {
+    const factor = T.SCHEDULE_AI.annualizationFactors[i];
+    const annualizedAgi = rd(nz(ai.agiByPeriod[i]) * factor);
+    const deduction = ai.itemizedByPeriod
+      ? Math.max(rd(nz(ai.itemizedByPeriod[i]) * factor), stdDeduction)
+      : stdDeduction;
+    const annualizedTi = clamp0(annualizedAgi - deduction);
+    const annualizedSeTax = ai.seTaxByPeriod ? rd(nz(ai.seTaxByPeriod[i]) * factor) : rd(seTaxTotal * factor * (i + 1) / 4);
+    const annualizedTax = rd(figureTax(annualizedTi, status)) + annualizedSeTax;
+    required.push(rd(annualizedTax * T.SCHEDULE_AI.applicablePct[i]));
+  }
+  // Installment_i = required_i − sum of prior required installments (line 25 col math).
+  const installments = required.map((r, i) => clamp0(r - required.slice(0, i).reduce((a, b) => a + b, 0)));
+  diagnostics.push("Form 2210 Schedule AI applied: annualized-income installments used where smaller than the regular method");
+  return installments;
 }
 
 // -------------------------------------------------------------- Minnesota
 
-export interface MnResult {
-  agi: number;
-  deduction: number;
-  exemptions: number;
-  taxableIncome: number;
-  tax: number;
-  withholding: number;
-  refund: number;
-  owed: number;
-}
-
-function mnBracketTax(ti: number, status: FilingStatus): number {
+function stateBracketTax(ti: number, bk: Array<[number, number]>): number {
   if (ti <= 0) return 0;
-  const bk = T.MN.brackets[status];
   let tax = 0;
   for (let i = 0; i < bk.length; i++) {
     const [floor, rate] = bk[i];
@@ -336,10 +479,46 @@ function mnBracketTax(ti: number, status: FilingStatus): number {
   return tax;
 }
 
+/** MN Social Security subtraction — greater of alternative vs simplified method. */
+export function mnSsSubtraction(input: TaxInput, agi: number, taxableSs: number): number {
+  if (taxableSs <= 0) return 0;
+  const status = input.filingStatus;
+  const S = T.MN_SS;
+  const divisor = S.stepDivisor(status);
+  const full = S.fullThreshold[status];
+  if (agi <= full) return taxableSs;
+  // Alternative method: taxable SS reduced 10% per step over the full threshold.
+  const altSteps = Math.min(10, Math.ceil(clamp0(agi - full) / divisor));
+  const alternative = clamp0(taxableSs - altSteps * 0.1 * taxableSs);
+  // Simplified method: statutory max reduced 10% per step over its own threshold.
+  const maxSub = Math.min(taxableSs, S.simplifiedMax[status]);
+  const simpSteps = Math.min(10, Math.ceil(clamp0(agi - S.simplifiedPhaseStart[status]) / divisor));
+  const simplified = clamp0(maxSub - simpSteps * 0.1 * S.simplifiedMax[status]);
+  return rd(Math.max(alternative, simplified));
+}
+
+export interface MnResult {
+  agi: number;
+  ssSubtraction: number;
+  deduction: number;
+  exemptions: number;
+  taxableIncome: number;
+  taxBeforeRatio: number;
+  nrRatio: number;
+  tax: number;
+  wfcCredit: number;
+  ctcCredit: number;
+  withholding: number;
+  refund: number;
+  owed: number;
+}
+
 export function mnReturn(
   input: TaxInput,
   federalAgi: number,
   federalItemized: number,
+  taxableSs: number,
+  wagesAndSeEarned: number,
   diagnostics: string[],
 ): MnResult {
   const mn = input.mn ?? {};
@@ -347,7 +526,9 @@ export function mnReturn(
   const P = T.MN.deductionPhaseout;
   const threshold = status === "mfs" ? P.thresholdMfs : P.threshold;
 
-  const mnAgi = federalAgi + nz(mn.additions) - nz(mn.subtractions);
+  // Schedule M1M line 12 — computed SS subtraction.
+  const ssSub = mnSsSubtraction(input, federalAgi, taxableSs);
+  const mnAgi = federalAgi + nz(mn.additions) - nz(mn.subtractions) - ssSub;
   const rawDed = Math.max(T.MN.standardDeduction[status], nz(mn.itemizedTotal) || federalItemized);
   const reduction = Math.min(
     P.maxReduction * rawDed,
@@ -356,12 +537,126 @@ export function mnReturn(
   const deduction = rd(rawDed - reduction);
   const exemptions = T.MN.dependentExemption * (input.dependents?.length ?? 0);
   const mnTi = clamp0(mnAgi - deduction - exemptions);
-  const tax = rd(mnBracketTax(mnTi, status));
-  const paid = nz(mn.withholding) + nz(mn.estimatedPayments);
-  const refund = clamp0(paid - tax);
-  const owed = clamp0(tax - paid);
+  const taxBeforeRatio = rd(stateBracketTax(mnTi, T.MN.brackets[status]));
 
-  if (mn.resident === false) diagnostics.push("M1 v1 assumes full-year MN residency; part-year/nonresident needs Schedule M1NR");
-  if (nz(input.socialSecurityBenefits) > 0) diagnostics.push("M1 v1: MN Social Security subtraction not computed — pass it via mn.subtractions");
-  return { agi: rd(mnAgi), deduction, exemptions, taxableIncome: rd(mnTi), tax, withholding: paid, refund: rd(refund), owed: rd(owed) };
+  // Schedule M1NR: nonresident/part-year tax = resident tax × MN-source ratio.
+  let nrRatio = 1;
+  let tax = taxBeforeRatio;
+  if (mn.resident === false) {
+    nrRatio = mnAgi > 0 ? clamp0(nz(mn.mnSourceIncome) / mnAgi) : 0;
+    tax = rd(taxBeforeRatio * nrRatio);
+    diagnostics.push(`Schedule M1NR applied: MN-source ratio ${(nrRatio * 100).toFixed(1)}%`);
+  }
+
+  // Schedule M1CWFC — Working Family Credit + MN Child Tax Credit (refundable).
+  const W = T.MN_WFC;
+  const earned = nz(mn.wfcEarnedIncome) || wagesAndSeEarned;
+  const olderKids = Math.min(3, nz(mn.wfcOlderChildren));
+  const youngKids = nz(mn.ctcQualifyingChildren) || (input.dependents?.filter((dd) => dd.qualifyingChildForCtc && dd.under17).length ?? 0);
+  const wfcBase = W.rate * Math.min(earned, W.earnedIncomeCap) + W.olderChildAdd[olderKids];
+  const ctcBase = youngKids * W.ctcPerChild;
+  const phaseStart = status === "mfj" || status === "qss" ? W.phaseStartMfj : W.phaseStartOther;
+  const phaseRate = youngKids === 0 && olderKids > 0 ? W.phaseRateOlderOnly : W.phaseRate;
+  const phaseIncome = Math.max(mnAgi, earned);
+  const phasedTotal = clamp0(wfcBase + ctcBase - phaseRate * clamp0(phaseIncome - phaseStart));
+  const totalCredits = rd(phasedTotal * nrRatio);
+  const wfcCredit = Math.min(totalCredits, rd(wfcBase));
+  const ctcCredit = clamp0(totalCredits - wfcCredit);
+  if ((wfcBase + ctcBase) > 0 && phasedTotal === 0) diagnostics.push("MN WFC/CTC fully phased out at this income");
+
+  const paid = nz(mn.withholding) + nz(mn.estimatedPayments);
+  const refund = clamp0(paid + totalCredits - tax);
+  const owed = clamp0(tax - paid - totalCredits);
+
+  if (status === "mfs") diagnostics.push("M1 v1: verify MFS-specific MN credit/eligibility rules");
+  return {
+    agi: rd(mnAgi), ssSubtraction: ssSub, deduction, exemptions, taxableIncome: rd(mnTi),
+    taxBeforeRatio, nrRatio, tax, wfcCredit, ctcCredit, withholding: paid,
+    refund: rd(refund), owed: rd(owed),
+  };
+}
+
+// -------------------------------------------------------------- California
+
+export interface StateResult {
+  agi: number;
+  deduction: number;
+  exemptionCredits: number;
+  taxableIncome: number;
+  tax: number;
+  withholding: number;
+  refund: number;
+  owed: number;
+}
+
+export function caReturn(
+  input: TaxInput,
+  federalAgi: number,
+  diagnostics: string[],
+): StateResult {
+  const ca = input.ca ?? {};
+  const status = input.filingStatus;
+
+  // CA does not tax Social Security benefits or conform to federal Sch 1-A
+  // deductions/QBI — modeled via ca.subtractions/additions on Schedule CA.
+  const caAgi = federalAgi + nz(ca.additions) - nz(ca.subtractions);
+  const deduction = Math.max(T.CA.standardDeduction[status], nz(ca.itemizedTotal));
+  const caTi = clamp0(caAgi - deduction);
+
+  let tax = stateBracketTax(caTi, T.CA.brackets[status]);
+  const mentalHealth = rd(T.CA.mentalHealthRate * clamp0(caTi - T.CA.mentalHealthThreshold));
+  tax = rd(tax) + mentalHealth;
+
+  const depCount = nz(ca.dependents) || (input.dependents?.length ?? 0);
+  const seniorCount = nz(ca.seniors65) ||
+    (input.taxpayer.senior65Plus ? 1 : 0) + (input.spouse?.senior65Plus ? 1 : 0);
+  const exemptionCredits =
+    T.CA.personalExemptionCredit[status] +
+    T.CA.seniorExemptionCredit * seniorCount +
+    T.CA.dependentExemptionCredit * depCount;
+  const taxAfter = clamp0(tax - exemptionCredits);
+
+  if (nz(input.socialSecurityBenefits) > 0 && !nz(ca.subtractions)) {
+    diagnostics.push("540 v1: pass CA subtractions for SS benefits (CA doesn't tax SS — subtract 1040.6b via ca.subtractions)");
+  }
+  diagnostics.push("540 v1: CA nonconformity (no Sch 1-A tips/overtime/senior deductions, no QBI, HSA taxable) handled via ca.additions/subtractions");
+  if (caAgi > 250000) diagnostics.push("540 v1: CA exemption-credit phaseout for high AGI not modeled");
+
+  const paid = nz(ca.withholding) + nz(ca.estimatedPayments);
+  return {
+    agi: rd(caAgi), deduction: rd(deduction), exemptionCredits: rd(exemptionCredits),
+    taxableIncome: rd(caTi), tax: rd(taxAfter), withholding: paid,
+    refund: rd(clamp0(paid - taxAfter)), owed: rd(clamp0(taxAfter - paid)),
+  };
+}
+
+// ---------------------------------------------------------------- New York
+
+export function nyReturn(
+  input: TaxInput,
+  federalAgi: number,
+  diagnostics: string[],
+): StateResult {
+  const ny = input.ny ?? {};
+  const status = input.filingStatus;
+
+  const nyAgi = federalAgi + nz(ny.additions) - nz(ny.subtractions);
+  let stdDed = T.NY.standardDeduction[status];
+  if (input.claimedAsDependent && status === "single") stdDed = T.NY.singleDependentStdDed;
+  const deduction = Math.max(stdDed, nz(ny.itemizedTotal));
+  const depExemptions = T.NY.dependentExemption * (nz(ny.dependents) || (input.dependents?.length ?? 0));
+  const nyTi = clamp0(nyAgi - deduction - depExemptions);
+  const tax = rd(stateBracketTax(nyTi, T.NY.brackets[status]));
+
+  if (nyAgi > T.NY.supplementalAgiThreshold) {
+    diagnostics.push("IT-201: NY AGI > $107,650 — supplemental benefit-recapture tax not modeled; computed tax may be understated");
+  }
+  if (ny.nycResident) diagnostics.push("IT-201 v1: NYC resident tax (IT-201 lines 47+) not computed");
+
+  const paid = nz(ny.withholding) + nz(ny.estimatedPayments);
+  return {
+    agi: rd(nyAgi), deduction: rd(deduction), exemptionCredits: depExemptions,
+    taxableIncome: rd(nyTi), tax, withholding: paid,
+    refund: rd(clamp0(paid - tax)), owed: rd(clamp0(tax - paid)),
+  };
 }

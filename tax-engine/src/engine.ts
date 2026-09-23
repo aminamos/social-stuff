@@ -281,11 +281,18 @@ export function compute(input: TaxInput): TaxResult {
   }
   L["1040.7"] = line7;
 
+  // ---- Form 2555 foreign earned income exclusion (negative Sch 1 line 8d) ----
+  const feieExclusion = F.form2555(input);
+  if (feieExclusion > 0) {
+    L["f2555.42"] = feieExclusion;
+    L["sch1.8d"] = -feieExclusion;
+  }
+
   // Schedule 1 part I
   const sch1Income =
     nz(input.taxableStateRefunds) + nz(input.alimonyReceived) + nz(input.businessIncome) +
     nz(input.otherGains) + nz(input.rentalRoyaltyPartnership) + nz(input.farmIncome) +
-    nz(input.unemploymentCompensation) + nz(input.otherIncome);
+    nz(input.unemploymentCompensation) + nz(input.otherIncome) - feieExclusion;
   L["sch1.10"] = sch1Income;
   L["1040.8"] = sch1Income;
 
@@ -319,7 +326,8 @@ export function compute(input: TaxInput): TaxResult {
   // The SS benefits worksheet subtracts all Sch 1 adjustments except the student
   // loan interest deduction. The IRA deduction does reduce provisional income,
   // so it is resolved in two passes (differences only inside phaseout bands).
-  const foreign = nz(input.excludedForeignIncome);
+  // MAGI add-back for §§911/931/933: computed FEIE + any pass-through exclusion.
+  const foreign = feieExclusion + nz(input.excludedForeignIncome);
   const ssTotal = nz(input.socialSecurityBenefits);
 
   // Provisional income (§86(b)(2)): AGI determined without regard to §§86, 135,
@@ -407,11 +415,16 @@ export function compute(input: TaxInput): TaxResult {
   const saltAllowed = Math.min(saltPaid, saltCap);
   const charityAllowed = Math.min(nz(it.charitableGifts), 0.6 * clamp0(agi)) + Math.min(nz(it.charitableGiftsLimited), 0.3 * clamp0(agi));
   const gamblingAllowed = Math.min(nz(it.gamblingLosses), input.gamblingWinnings ?? nz(it.gamblingLosses));
+  // Form 4952: investment interest deductible only up to net investment income.
+  const niiFor4952 = input.netInvestmentIncome ??
+    (nz(input.taxableInterest) + nz(input.ordinaryDividends) + Math.max(0, capTotal) + Math.max(0, nz(input.rentalRoyaltyPartnership)));
+  const investmentInterestAllowed = F.form4952(input, niiFor4952, d);
   const itemizedTotal = rd(
-    medicalAllowed + saltAllowed + nz(it.homeMortgageInterest) + nz(it.investmentInterest) +
+    medicalAllowed + saltAllowed + nz(it.homeMortgageInterest) + investmentInterestAllowed +
     charityAllowed + nz(it.casualtyLoss) + gamblingAllowed + nz(it.otherItemized),
   );
   L["schA.17"] = itemizedTotal;
+  if (it.investmentInterest) L["f4952.5"] = investmentInterestAllowed;
 
   const earnedIncomeForDep = wages + hhWages + seNet;
   const agedBlind = (p65?: boolean, blind?: boolean) => (p65 ? 1 : 0) + (blind ? 1 : 0);
@@ -445,12 +458,24 @@ export function compute(input: TaxInput): TaxResult {
   const qd = nz(input.qualifiedDividends);
   let tax = F.capitalGainTax(ti, qd, preferentialGain, nz(cap.unrecaptured1250Gain), nz(cap.collectiblesGain), status, figureTax);
 
+  // Foreign Earned Income Tax Worksheet: when §911 income was excluded, tax =
+  // tax on (TI + exclusion) minus tax on the exclusion — the exclusion stacks
+  // at the bottom so remaining income keeps its marginal position.
+  if (feieExclusion > 0) {
+    tax = rd(
+      F.capitalGainTax(ti + feieExclusion, qd, preferentialGain, nz(cap.unrecaptured1250Gain), nz(cap.collectiblesGain), status, figureTax) -
+      F.capitalGainTax(feieExclusion, qd, preferentialGain, nz(cap.unrecaptured1250Gain), nz(cap.collectiblesGain), status, figureTax),
+    );
+    d.push("Form 2555 foreign earned income exclusion applied; tax figured with the FEI stacking worksheet");
+  }
+
   // Form 8615 kiddie tax replaces the line-16 tax when it applies.
   const kiddie = F.form8615(input, ti, figureTax);
   if (kiddie) {
     L["f8615.5"] = kiddie.netUnearned;
     tax = kiddie.tax;
     d.push("Form 8615 kiddie tax applied: net unearned income taxed at parent's marginal rate");
+    if (feieExclusion > 0) d.push("kiddie tax + FEIE interaction is simplified (stacking applied to the child-rate path only)");
   }
   L["1040.16"] = tax;
 
@@ -527,11 +552,18 @@ export function compute(input: TaxInput): TaxResult {
   const schRCredit = F.scheduleR(input, agi, schRCapacity, d);
   if (input.scheduleR) L["schR.22"] = schRCredit;
 
+  // Form 8839 adoption credit — MAGI = AGI + §911 exclusions; refundable part
+  // (up to $5,000/child, OBBBA) goes to payments, remainder is nonrefundable.
+  const adopt = F.form8839(input, agi + foreign);
+  const adoptNonref = adopt.credit - adopt.refundable;
+  if (adopt.credit > 0) L["f8839.16"] = adopt.credit;
+
   const priorMinTaxCredit = nz(input.amt?.priorYearMinimumTaxCredit);
   const sch3 = nz(input.foreignTaxCredit) + careCredit + eduNonref + nz(input.educationCredits) +
-    saversCredit + energy.credit + schRCredit + priorMinTaxCredit + nz(input.otherNonrefundableCredits);
+    saversCredit + energy.credit + schRCredit + priorMinTaxCredit + adoptNonref + nz(input.otherNonrefundableCredits);
   L["sch3.3"] = eduNonref;
   L["sch3.5"] = energy.credit;
+  if (adoptNonref > 0) L["sch3.6c"] = adoptNonref;
   L["sch3.8"] = sch3;
   L["1040.20"] = sch3;
   const line22 = clamp0(line18 - ctcRes.nonrefundable - sch3);
@@ -543,8 +575,26 @@ export function compute(input: TaxInput): TaxResult {
   const nii = input.netInvestmentIncome ??
     (nz(input.taxableInterest) + nz(input.ordinaryDividends) + Math.max(0, capTotal) + Math.max(0, nz(input.rentalRoyaltyPartnership)));
   const niit = rd(Math.min(nii, clamp0(agi + foreign - T.NIIT_THRESHOLD[status])) * T.NIIT_RATE);
-  const sch2 = seTax + addlMedicare + niit + nz(input.householdEmploymentTax) +
+
+  // Form 8962 premium tax credit. Household income = AGI + tax-exempt interest
+  // + §911 exclusions + nontaxable Social Security benefits.
+  let ptcNet = 0;
+  let aptcRepayment = 0;
+  if (input.marketplace) {
+    const householdIncome = agi + nz(input.taxExemptInterest) + foreign + clamp0(ssTotal - taxableSS);
+    const ptc = F.form8962(input, householdIncome, d);
+    ptcNet = ptc.netPtc;
+    aptcRepayment = ptc.excessAptcRepayment;
+    L["f8962.5"] = ptc.fplPct;
+    L["f8962.8a"] = ptc.contribution;
+    L["f8962.24"] = ptc.ptc;
+    if (ptc.netPtc > 0) L["f8962.26"] = ptc.netPtc;
+    if (aptcRepayment > 0) L["f8962.29"] = aptcRepayment;
+  }
+
+  const sch2 = seTax + addlMedicare + niit + aptcRepayment + nz(input.householdEmploymentTax) +
     nz(input.earlyDistributionPenalty) + nz(input.additionalHsaTax) + nz(input.otherTaxes);
+  if (aptcRepayment > 0) L["sch2.1a"] = aptcRepayment;
   L["sch2.9"] = addlMedicare;
   L["sch2.12"] = niit;
   L["sch2.21"] = sch2;
@@ -579,10 +629,13 @@ export function compute(input: TaxInput): TaxResult {
 
   const payments =
     nz(input.federalWithholding) + nz(input.estimatedTaxPayments) + nz(input.extensionPayment) +
-    nz(input.excessSocialSecurity) + nz(input.otherRefundablePayments) + eitc + ctcRes.actc + edu.refundable;
+    nz(input.excessSocialSecurity) + nz(input.otherRefundablePayments) + eitc + ctcRes.actc + edu.refundable +
+    ptcNet + adopt.refundable;
   L["1040.25d"] = nz(input.federalWithholding);
   L["1040.26"] = nz(input.estimatedTaxPayments) + nz(input.extensionPayment);
   L["1040.29"] = edu.refundable;
+  if (ptcNet > 0) L["sch3.9"] = ptcNet;
+  if (adopt.refundable > 0) L["f8839.ref"] = adopt.refundable;
   L["1040.33"] = payments;
 
   const refund = clamp0(payments - totalTax);
@@ -591,7 +644,10 @@ export function compute(input: TaxInput): TaxResult {
   L["1040.37"] = amountOwed;
 
   // Form 2210 estimated-tax penalty adds to the amount owed (1040 line 38).
-  const penalty2210 = F.form2210(input, totalTax, amountOwed, d);
+  const aiInstallments = input.underpayment?.scheduleAI
+    ? F.scheduleAI(input, stdDed, seTax, figureTax, d)
+    : null;
+  const penalty2210 = F.form2210(input, totalTax, amountOwed, d, aiInstallments);
   if (penalty2210 > 0) {
     L["f2210.19"] = penalty2210;
     L["1040.38"] = penalty2210;
@@ -605,17 +661,50 @@ export function compute(input: TaxInput): TaxResult {
     L["schB.6"] = nz(input.ordinaryDividends);
   }
 
-  // ---- Minnesota M1 (v1) ----
+  // ---- Minnesota M1 ----
   if (input.mn) {
-    const mnRes = F.mnReturn(input, agi, itemizedTotal, d);
+    const mnRes = F.mnReturn(input, agi, itemizedTotal, taxableSS, eicEarned, d);
     L["m1.1"] = mnRes.agi;
+    if (mnRes.ssSubtraction > 0) L["m1m.12"] = mnRes.ssSubtraction;
     L["m1.4"] = mnRes.deduction;
     L["m1.5"] = mnRes.exemptions;
     L["m1.6"] = mnRes.taxableIncome;
+    if (mnRes.nrRatio < 1) {
+      L["m1.7a"] = mnRes.taxBeforeRatio;
+      L["m1nr.ratio"] = mnRes.nrRatio;
+    }
     L["m1.7"] = mnRes.tax;
+    if (mnRes.wfcCredit > 0) L["m1cwfc.wfc"] = mnRes.wfcCredit;
+    if (mnRes.ctcCredit > 0) L["m1cwfc.ctc"] = mnRes.ctcCredit;
     L["m1.19"] = mnRes.withholding;
     L["m1.36"] = mnRes.refund;
     L["m1.38"] = mnRes.owed;
+  }
+
+  // ---- New York IT-201 ----
+  if (input.ny) {
+    const nyRes = F.nyReturn(input, agi, d);
+    L["it201.33"] = nyRes.agi;
+    L["it201.34"] = nyRes.deduction;
+    L["it201.36"] = nyRes.exemptionCredits;
+    L["it201.37"] = nyRes.taxableIncome;
+    L["it201.39"] = nyRes.tax;
+    L["it201.72"] = nyRes.withholding;
+    L["it201.78"] = nyRes.refund;
+    L["it201.80"] = nyRes.owed;
+  }
+
+  // ---- California Form 540 ----
+  if (input.ca) {
+    const caRes = F.caReturn(input, agi, d);
+    L["f540.17"] = caRes.agi;
+    L["f540.18"] = caRes.deduction;
+    L["f540.19"] = caRes.taxableIncome;
+    L["f540.32"] = caRes.exemptionCredits;
+    L["f540.35"] = caRes.tax;
+    L["f540.40"] = caRes.withholding;
+    L["f540.99"] = caRes.refund;
+    L["f540.100"] = caRes.owed;
   }
 
   if (input.claimedAsDependent && eitcKids > 0) d.push("dependent filer cannot claim dependents");
