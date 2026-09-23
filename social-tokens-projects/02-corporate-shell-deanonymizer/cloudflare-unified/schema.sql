@@ -147,6 +147,20 @@ CREATE TABLE IF NOT EXISTS dual_matches (
 CREATE INDEX IF NOT EXISTS idx_dual_matches_case ON dual_matches(case_id);
 CREATE INDEX IF NOT EXISTS idx_dual_matches_city ON dual_matches(landlord_city);
 
+-- Staging for rebuildDualMatches: raw license-row hits per wage-theft case,
+-- aggregated (COUNT DISTINCT apn) into dual_matches when a pass completes.
+CREATE TABLE IF NOT EXISTS dual_match_hits (
+    case_id TEXT NOT NULL,
+    landlord_name TEXT NOT NULL,
+    landlord_city TEXT,
+    landlord_county TEXT,
+    landlord_state TEXT,
+    apn TEXT,
+    units INTEGER DEFAULT 0,
+    tier3 INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_dual_match_hits_case ON dual_match_hits(case_id);
+
 -- Confidential whistleblower / worker incident intake.
 -- Written by POST /api/reports (unified) and the legacy POST /report.
 CREATE TABLE IF NOT EXISTS worker_reports (

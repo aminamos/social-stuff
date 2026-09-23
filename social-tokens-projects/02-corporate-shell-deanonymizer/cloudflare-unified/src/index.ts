@@ -89,7 +89,7 @@ export default {
         // too large for request-time queries. Chunks resume via sync_state if
         // the event dies before finishing.
         for (let guard = 0; guard < 60; guard++) {
-          const r = await rebuildDualMatches(env, 25);
+          const r = await rebuildDualMatches(env, 25000);
           if (r.done) break;
         }
         // Entity-resolution pass: chunked over rental_licenses, resumes via
@@ -797,7 +797,7 @@ export default {
     if (url.pathname === "/crossover/rebuild" && request.method === "POST") {
       if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
       try {
-        return json(await rebuildDualMatches(env, 25));
+        return json(await rebuildDualMatches(env, 25000));
       } catch (err: any) {
         return json({ error: err.message }, { status: 500 });
       }
@@ -1176,11 +1176,47 @@ async function runFullTick(
 
 const DUAL_MATCH_FEED = "dual_matches";
 
-// Rebuilds dual_matches one wage_theft_records chunk at a time (each row is a
-// full-scan instr() match against rental_licenses). Progress persists in
-// sync_state so cron and manual calls resume where the last run stopped.
-// Rows written carry matched_at; stale rows from the previous cycle are
-// deleted only once a full pass completes.
+// Rebuilds dual_matches by scanning rental_licenses once per pass and
+// matching every wage-theft name in JS — the old version ran a full-table
+// instr() scan per wage_theft row, which blew D1's CPU limit once NYC
+// owner names landed. Hits stage in dual_match_hits; on pass completion a
+// single GROUP BY (COUNT DISTINCT apn) materializes dual_matches and stale
+// rows are dropped. Progress persists in sync_state (offset counts
+// rental_licenses rows) so cron and manual calls resume where they stopped.
+// Word-boundary containment, mirroring the old SQL predicate exactly:
+// needle must equal the field or follow a space/comma/dash/paren — plain
+// substring matching would hit 'dominium' inside 'CONDOMINIUM'.
+function nameTokenMatch(field: string, needle: string): boolean {
+  if (!field || !needle) return false;
+  const f = field.toLowerCase();
+  const n = needle.toLowerCase();
+  return f === n
+    || f.includes(" " + n)
+    || f.includes(", " + n)
+    || f.includes("-" + n)
+    || f.includes("(" + n);
+}
+
+interface WageTheftNeedle {
+  case_id: string;
+  needles: string[];
+}
+
+// All wage-theft names, loaded once per invocation (~516 rows, tiny).
+async function wageTheftNeedles(env: Env): Promise<WageTheftNeedle[]> {
+  const res = await env.DB.prepare(
+    `SELECT case_id, respondent_legal_name, trade_name FROM wage_theft_records`,
+  ).all();
+  return (res.results as any[]).map((w) => ({
+    case_id: w.case_id,
+    needles: [...new Set(
+      [w.trade_name, w.respondent_legal_name]
+        .filter((n) => n && String(n).trim())
+        .map((n) => String(n).trim().toLowerCase()),
+    )],
+  })).filter((w) => w.needles.length);
+}
+
 async function rebuildDualMatches(
   env: Env,
   maxRows: number,
@@ -1193,67 +1229,58 @@ async function rebuildDualMatches(
   const cycleStart: string = state?.started_at ?? now;
 
   const totalRes = await env.DB.prepare(
-    `SELECT COUNT(*) as n FROM wage_theft_records`,
+    `SELECT COUNT(*) as n FROM rental_licenses`,
   ).first<any>();
   const total: number = totalRes?.n ?? 0;
 
+  // Fresh pass: clear staging.
+  if (offset === 0) {
+    await env.DB.prepare(`DELETE FROM dual_match_hits`).run();
+  }
+
+  const needles = await wageTheftNeedles(env);
+
   const chunk = await env.DB.prepare(
-    `SELECT case_id, source_agency, respondent_legal_name, trade_name, violation_type,
-            back_wages_recovered, workers_affected, provenance_type, source_docket_url
-     FROM wage_theft_records ORDER BY case_id LIMIT ? OFFSET ?`,
+    `SELECT owner_name, applicant_name, city, county, state, apn, units,
+            severity_class
+     FROM rental_licenses ORDER BY parcel_id LIMIT ? OFFSET ?`,
   ).bind(maxRows, offset).all();
 
   const rows = chunk.results as any[];
-  // Scans are independent I/O; run the chunk concurrently (~2s each, not ~35s
-  // sequential). Per-query D1 CPU stays bounded because each scan is its own
-  // statement.
-  await Promise.all(rows.map(async (w) => {
-    const names = [w.trade_name, w.respondent_legal_name].filter(
-      (n) => n && String(n).trim(),
-    );
-    if (names.length) {
-      // Word-boundary containment: needle must start the field or follow a
-      // space/comma/dash/paren — plain instr() matches 'dominium' inside
-      // 'CONDOMINIUM'.
-      const cond = names
-        .map(
-          () =>
-            `((lower(r.owner_name) = lower(?) OR instr(lower(r.owner_name), ' ' || lower(?)) > 0 OR instr(lower(r.owner_name), ', ' || lower(?)) > 0 OR instr(lower(r.owner_name), '-' || lower(?)) > 0 OR instr(lower(r.owner_name), '(' || lower(?)) > 0)
-             OR (lower(r.applicant_name) = lower(?) OR instr(lower(r.applicant_name), ' ' || lower(?)) > 0 OR instr(lower(r.applicant_name), ', ' || lower(?)) > 0 OR instr(lower(r.applicant_name), '-' || lower(?)) > 0 OR instr(lower(r.applicant_name), '(' || lower(?)) > 0))`,
-        )
-        .join(" OR ");
-      const matches = await env.DB.prepare(
-        `SELECT r.owner_name as landlord_name, r.city as landlord_city,
-                r.county as landlord_county, r.state as landlord_state,
-                COUNT(DISTINCT r.apn) as properties_count,
-                SUM(r.units) as total_units,
-                SUM(CASE WHEN r.severity_class = 'C' THEN 1 ELSE 0 END) as tier3_properties
-         FROM rental_licenses r WHERE ${cond} GROUP BY r.owner_name LIMIT 200`,
-      )
-        .bind(...names.flatMap((n) => [n, n, n, n, n, n, n, n, n, n]))
-        .all();
-      for (const m of matches.results as any[]) {
-        await env.DB.prepare(
-          `INSERT OR REPLACE INTO dual_matches
-           (landlord_name, landlord_city, landlord_county, landlord_state,
-            properties_count, total_units, tier3_properties, case_id,
-            source_agency, respondent_legal_name, trade_name, violation_type,
-            back_wages_recovered, workers_affected, provenance_type,
-            source_docket_url, matched_at)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-        )
-          .bind(
-            m.landlord_name, m.landlord_city, m.landlord_county, m.landlord_state,
-            m.properties_count ?? 0, m.total_units ?? 0, m.tier3_properties ?? 0,
-            w.case_id, w.source_agency, w.respondent_legal_name, w.trade_name,
-            w.violation_type, w.back_wages_recovered ?? 0, w.workers_affected ?? 0,
-            w.provenance_type ?? "PROTOTYPE_SEED_PENDING_FOIA",
-            w.source_docket_url ?? "", now,
-          )
-          .run();
+  const hits: D1PreparedStatement[] = [];
+  for (const r of rows) {
+    const owner = String(r.owner_name ?? "");
+    const applicant = String(r.applicant_name ?? "");
+    if (!owner && !applicant) continue;
+    const ownerL = owner.toLowerCase();
+    const applicantL = applicant.toLowerCase();
+    for (const w of needles) {
+      let hit = false;
+      for (const n of w.needles) {
+        if (nameTokenMatch(ownerL, n) || nameTokenMatch(applicantL, n)) {
+          hit = true;
+          break;
+        }
+      }
+      if (hit) {
+        hits.push(
+          env.DB.prepare(
+            `INSERT INTO dual_match_hits
+             (case_id, landlord_name, landlord_city, landlord_county,
+              landlord_state, apn, units, tier3)
+             VALUES (?,?,?,?,?,?,?,?)`,
+          ).bind(
+            w.case_id, owner, r.city ?? null, r.county ?? null,
+            r.state ?? null, r.apn ?? null, r.units ?? 0,
+            r.severity_class === "C" ? 1 : 0,
+          ),
+        );
       }
     }
-  }));
+  }
+  for (let i = 0; i < hits.length; i += 100) {
+    await env.DB.batch(hits.slice(i, i + 100));
+  }
 
   const processed = offset + rows.length;
   const done = processed >= total;
@@ -1269,9 +1296,30 @@ async function rebuildDualMatches(
   ).bind(DUAL_MATCH_FEED, done ? 0 : processed, total, offset === 0 ? now : cycleStart, now, done ? now : null).run();
 
   if (done) {
+    // Materialize: one grouped insert over the staged hits. Semantics match
+    // the old per-case GROUP BY r.owner_name output (any city per group →
+    // MIN, properties = DISTINCT apn, tier3 = severity_class='C' row count).
+    await env.DB.prepare(
+      `INSERT OR REPLACE INTO dual_matches
+       (landlord_name, landlord_city, landlord_county, landlord_state,
+        properties_count, total_units, tier3_properties, case_id,
+        source_agency, respondent_legal_name, trade_name, violation_type,
+        back_wages_recovered, workers_affected, provenance_type,
+        source_docket_url, matched_at)
+       SELECT h.landlord_name, MIN(h.landlord_city), MIN(h.landlord_county),
+              MIN(h.landlord_state), COUNT(DISTINCT h.apn), SUM(h.units),
+              SUM(h.tier3), h.case_id, w.source_agency,
+              w.respondent_legal_name, w.trade_name, w.violation_type,
+              w.back_wages_recovered, w.workers_affected, w.provenance_type,
+              w.source_docket_url, ?1
+       FROM dual_match_hits h
+       JOIN wage_theft_records w ON w.case_id = h.case_id
+       GROUP BY h.landlord_name, h.case_id`,
+    ).bind(now).run();
     await env.DB.prepare(
       `DELETE FROM dual_matches WHERE matched_at < ?`,
     ).bind(cycleStart).run();
+    await env.DB.prepare(`DELETE FROM dual_match_hits`).run();
     await env.DB.prepare(
       `INSERT INTO sync_logs (source, cases_synced, status, details) VALUES ('crossover-dual-matches', ?, 'SUCCESS', ?)`,
     ).bind(total, `rebuilt dual_matches in chunks`).run();
