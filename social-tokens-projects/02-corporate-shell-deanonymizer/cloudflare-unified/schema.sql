@@ -49,6 +49,9 @@ CREATE INDEX IF NOT EXISTS idx_rl_link_key ON rental_licenses(link_key);
 
 -- Per-feed crawl cursor. A single invocation must never exceed the platform's
 -- D1 queries-per-invocation limit, so large feeds resume here.
+-- started_at is used by chunked rebuild jobs (dual_matches, entity_resolution)
+-- to mark cycle boundaries; older databases need
+--   ALTER TABLE sync_state ADD COLUMN started_at TEXT;
 CREATE TABLE IF NOT EXISTS sync_state (
     feed_id TEXT PRIMARY KEY,
     offset INTEGER NOT NULL DEFAULT 0,
@@ -81,31 +84,6 @@ CREATE TABLE IF NOT EXISTS violations (
 CREATE INDEX IF NOT EXISTS idx_v_join_key ON violations(join_key);
 CREATE INDEX IF NOT EXISTS idx_v_feed ON violations(feed_id);
 CREATE INDEX IF NOT EXISTS idx_v_feed_open_class ON violations(feed_id, is_open, violation_class);
-
--- Multi-city property parcels across Hennepin and Ramsey counties
-CREATE TABLE IF NOT EXISTS county_parcels (
-    pid TEXT PRIMARY KEY,
-    county TEXT NOT NULL,
-    city TEXT NOT NULL,
-    address TEXT,
-    owner_name TEXT,
-    owner_address TEXT,
-    taxpayer_name TEXT,
-    taxpayer_address TEXT,
-    units INTEGER DEFAULT 1,
-    market_value REAL,
-    property_type TEXT,
-    homestead_status TEXT,
-    delinquent_tax_year TEXT,
-    year_built INTEGER,
-    synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX IF NOT EXISTS idx_d1_parcel_owner ON county_parcels(owner_name);
-CREATE INDEX IF NOT EXISTS idx_d1_parcel_taxpayer ON county_parcels(taxpayer_name);
-CREATE INDEX IF NOT EXISTS idx_d1_parcel_city ON county_parcels(city);
-CREATE INDEX IF NOT EXISTS idx_d1_parcel_county ON county_parcels(county);
-CREATE INDEX IF NOT EXISTS idx_d1_parcel_address ON county_parcels(address);
 
 -- Wage theft enforcement actions, settlements, and civil citations.
 -- provenance_type / source_docket_url are written by the labor sync/seed
@@ -140,6 +118,35 @@ CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_trade ON wage_theft_records(trade_n
 CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_city ON wage_theft_records(city);
 CREATE INDEX IF NOT EXISTS idx_d1_wage_theft_agency ON wage_theft_records(source_agency);
 
+-- Materialized landlord × wage-theft join. The instr() substring join over
+-- rental_licenses × wage_theft_records exceeds D1's per-query CPU limit at
+-- request time, so the 06:00 cron (or POST /crossover/rebuild) rebuilds this
+-- table one wage_theft_records row at a time; /api/crossover reads it.
+-- Rebuild progress resumes via sync_state.feed_id = 'dual_matches'.
+CREATE TABLE IF NOT EXISTS dual_matches (
+    landlord_name TEXT NOT NULL,
+    landlord_city TEXT,
+    landlord_county TEXT,
+    landlord_state TEXT,
+    properties_count INTEGER DEFAULT 0,
+    total_units INTEGER DEFAULT 0,
+    tier3_properties INTEGER DEFAULT 0,
+    case_id TEXT NOT NULL,
+    source_agency TEXT,
+    respondent_legal_name TEXT,
+    trade_name TEXT,
+    violation_type TEXT,
+    back_wages_recovered REAL DEFAULT 0.0,
+    workers_affected INTEGER DEFAULT 0,
+    provenance_type TEXT,
+    source_docket_url TEXT DEFAULT '',
+    matched_at TEXT,
+    PRIMARY KEY (landlord_name, case_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_dual_matches_case ON dual_matches(case_id);
+CREATE INDEX IF NOT EXISTS idx_dual_matches_city ON dual_matches(landlord_city);
+
 -- Confidential whistleblower / worker incident intake.
 -- Written by POST /api/reports (unified) and the legacy POST /report.
 CREATE TABLE IF NOT EXISTS worker_reports (
@@ -173,3 +180,56 @@ CREATE TABLE IF NOT EXISTS sync_logs (
 );
 
 CREATE INDEX IF NOT EXISTS idx_sync_logs_source ON sync_logs(source);
+
+-- ---------------------------------------------------------------------------
+-- Entity resolution: canonical owner entities with per-link provenance.
+--
+-- Every rental_licenses row emits linking signals (applicant/owner email,
+-- shared email domain, jurisdiction-scoped normalized name). Each signal
+-- is its own entity (entity_id = the signal key) and every signal links the
+-- parcel to that entity with a match_type + confidence, so a row carrying
+-- both an email and a name links into both clusters. Candidate merges that
+-- need human judgment land in owner_entity_review (cross-jurisdiction
+-- name/domain matches, oversized auto groups); approving re-points the
+-- links. This DDL mirrors the deployed production tables — keep in sync.
+--
+-- Rows are written by the chunked rebuild in src/housing/entities.ts
+-- (sync_state feed_id = 'entity_resolution'), mirroring dual_matches.
+CREATE TABLE IF NOT EXISTS owner_entities (
+    entity_id TEXT PRIMARY KEY,      -- 'email:<email>' | 'domain:<domain>' | 'name:<jurisdiction>:<name>'
+    display_name TEXT NOT NULL,
+    normalized_name TEXT,
+    entity_kind TEXT DEFAULT 'unknown',   -- company | person | unknown
+    email_domain TEXT,
+    parcel_count INTEGER DEFAULT 0,
+    jurisdiction_count INTEGER DEFAULT 0,
+    provenance TEXT DEFAULT '{}',         -- JSON: {signals:[], sources:[], merged_from:[]}
+    status TEXT DEFAULT 'auto',           -- auto | review | confirmed | merged
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+    updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS owner_entity_links (
+    parcel_id TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    match_type TEXT NOT NULL,             -- email_exact | email_domain | name | manual
+    confidence REAL DEFAULT 1.0,
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+    PRIMARY KEY (parcel_id, entity_id)
+);
+
+CREATE TABLE IF NOT EXISTS owner_entity_review (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entity_id_a TEXT NOT NULL,
+    entity_id_b TEXT,                     -- NULL for single-entity flags
+    reason TEXT NOT NULL,                 -- cross_jurisdiction_name_domain | multi_jurisdiction_name | large_auto_group
+    evidence TEXT DEFAULT '{}',           -- JSON describing the candidate
+    status TEXT DEFAULT 'pending',        -- pending | approved | rejected
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+    reviewed_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_oel_entity ON owner_entity_links(entity_id);
+CREATE INDEX IF NOT EXISTS idx_oe_domain ON owner_entities(email_domain);
+CREATE INDEX IF NOT EXISTS idx_oe_status ON owner_entities(status);
+CREATE INDEX IF NOT EXISTS idx_oer_status ON owner_entity_review(status);

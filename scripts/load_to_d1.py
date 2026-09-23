@@ -24,6 +24,9 @@ ROOT = Path(__file__).resolve().parent.parent
 SOURCES = ROOT / "data" / "county_sources.json"
 SEED_SQL = ROOT / "data" / "seed_counties.sql"
 DB = "rural-planning-bot"
+# Route wrangler through scripts/wr: it refuses data-plane commands without
+# an explicit --local/--remote (wrangler defaults to the simulator).
+WR = str(ROOT / "scripts" / "wr")
 
 
 def sql_str(value: object) -> str:
@@ -67,7 +70,7 @@ def main() -> int:
     SEED_SQL.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"wrote {len(records)} statements -> {SEED_SQL.relative_to(ROOT)}")
 
-    cmd = ["wrangler", "d1", "execute", DB, "--remote", "--file", str(SEED_SQL)]
+    cmd = [WR, "d1", "execute", DB, "--remote", "--file", str(SEED_SQL)]
     if args.push:
         subprocess.run(cmd, check=True, cwd=ROOT)
     else:

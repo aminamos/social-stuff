@@ -1221,7 +1221,6 @@ export function renderWageTheftUI(): string {
         '',
         '> **Data Provenance Notice**:',
         '> - 🟢 **VERIFIED PUBLIC ENFORCEMENT ACTION**: Confirmed civil court consent decree or official state AG/DLI enforcement filing.',
-        '> - 🟡 **PROTOTYPE SEED / PENDING FOIA SYNC**: Demonstration case fixture modeled on documented industry practices under Minn. Stat. § 177.24, pending automated bulk FOIA sync.',
         '',
         '---',
         ''

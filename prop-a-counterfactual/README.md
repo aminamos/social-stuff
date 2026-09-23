@@ -34,7 +34,7 @@ effect (−1.6–3.3% via supply/carrying-cost, not direct capitalization).
 npm install
 npm test          # engine tests (tsx, no CF needed)
 npm run check     # tsc --noEmit
-npm run dev       # wrangler dev (local D1 via migrations)
+npm run dev       # wrangler dev --remote (code runs locally, D1/R2 hit production)
 ```
 
 ### Data layer

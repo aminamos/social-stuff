@@ -14,7 +14,7 @@ pure library (`compute(input)`) and a CLI.
 npm install
 npm test          # known-answer tests (tsx, no framework)
 npm run check     # tsc --noEmit
-npx wrangler dev  # worker on :8787
+npm run dev       # wrangler dev --remote: worker on :8787, D1/R2 hit production
 echo '{"filingStatus":"single","taxpayer":{"ageAtEndOfYear":35},"wages":60000,"federalWithholding":7000}' \
   | curl -s -X POST localhost:8787/compute -H 'content-type: application/json' -d @-
 npx tsx src/cli.ts some-return.json   # CLI, prints form lines
@@ -32,7 +32,9 @@ npx tsx src/cli.ts some-return.json   # CLI, prints form lines
 `wrangler.jsonc` ships a `DB` (D1) and `RETURNS_BUCKET` (R2) binding. Deploy:
 create the resources (`wrangler d1 create tax-engine`, `wrangler r2 bucket
 create tax-engine-artifacts`), paste the real `database_id` into
-`wrangler.jsonc`, run `wrangler d1 migrations apply DB`, `wrangler deploy`.
+`wrangler.jsonc`, run `wrangler d1 migrations apply DB --remote`, `wrangler deploy`.
+(`migrations apply` and `r2 object` default to the local simulator — `--remote`
+is required for the real database; see repo `AGENTS.md`.)
 Compute routes work even with the bindings absent (501 on persistence routes).
 
 ## What it computes (TY2025)

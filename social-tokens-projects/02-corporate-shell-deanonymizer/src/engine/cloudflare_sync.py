@@ -50,7 +50,8 @@ def export_metro_parcels_r2_snapshot(store: LocalRentalStore, output_path: Path)
 def generate_d1_seed_sql(store: LocalRentalStore, output_path: Path) -> Path:
     """Generates a batch SQL seed file formatted for Cloudflare D1 execution
 
-    via `npx wrangler d1 execute social-housing-db --file=seed.sql`.
+    via `npx wrangler d1 execute social-housing-db --remote --file=seed.sql`
+    (`--remote` required: without it wrangler writes to the local simulator).
     """
     conn = store._get_connection()
     try:

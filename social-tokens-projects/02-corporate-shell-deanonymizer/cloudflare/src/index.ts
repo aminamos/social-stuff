@@ -228,7 +228,6 @@ export default {
         );
       }
 
-      const isDeRomaQuery = /deroma|de\s*roma|jager|j[aä]ger|club\s*j|teutohellene|hansaware/i.test(q);
       const pattern = `%${q}%`;
       const tokenPattern = `%${q.replace(/\s+/g, "%")}%`;
       const noSpacePattern = `%${q.replace(/\s+/g, "")}%`;
@@ -262,19 +261,6 @@ export default {
                  instr(lower(r.owner_name), lower(w.respondent_legal_name)) > 0
                  OR instr(lower(r.applicant_name), lower(w.respondent_legal_name)) > 0
              ))
-             OR (lower(w.trade_name) LIKE '%fitterer%' AND (
-                 instr(lower(r.owner_name), 'fitterer') > 0
-                 OR instr(lower(r.applicant_name), 'fitterer') > 0
-                 OR instr(lower(r.applicant_email), 'ipgliving') > 0
-             ))
-             OR ((lower(w.trade_name) LIKE '%jager%' OR lower(w.respondent_legal_name) LIKE '%deroma%') AND (
-                 instr(lower(r.owner_name), 'deroma') > 0
-                 OR instr(lower(r.owner_name), 'de roma') > 0
-                 OR instr(lower(r.applicant_name), 'deroma') > 0
-                 OR instr(lower(r.applicant_name), 'de roma') > 0
-                 OR instr(lower(r.owner_address), '4133 dupont') > 0
-                 OR r.apn = '2202924210384'
-             ))
              LIMIT 1) as wage_theft_match
           FROM rental_licenses r
           WHERE (
@@ -291,21 +277,11 @@ export default {
               OR r.applicant_name LIKE ?2
               OR r.owner_name LIKE ?3
               OR r.applicant_name LIKE ?3
-              OR (?4 = 1 AND (
-                  lower(r.owner_name) LIKE '%deroma%'
-                  OR lower(r.owner_name) LIKE '%de roma%'
-                  OR lower(r.applicant_name) LIKE '%deroma%'
-                  OR lower(r.applicant_name) LIKE '%de roma%'
-                  OR lower(r.owner_address) LIKE '%4133 dupont%'
-                  OR r.applicant_email IN ('teutohellene@gmail.com', 'hansaware@gmail.com')
-                  OR r.apn = '2202924210384'
-                  OR r.address LIKE '%923 WASHINGTON%'
-              ))
           )
-          AND (?5 = '' OR r.jurisdiction_id = ?5)
-          AND (?6 = '' OR r.severity_class = ?6)
-          AND (?7 = '' OR r.state = ?7)
-          AND (?8 = 0 OR r.severity_class = 'C'
+          AND (?4 = '' OR r.jurisdiction_id = ?4)
+          AND (?5 = '' OR r.severity_class = ?5)
+          AND (?6 = '' OR r.state = ?6)
+          AND (?7 = 0 OR r.severity_class = 'C'
               OR EXISTS (SELECT 1 FROM violations v
                          WHERE v.join_key = r.apn AND v.is_open = 1
                            AND v.violation_class = 'C'))
@@ -315,7 +291,6 @@ export default {
           pattern,
           tokenPattern,
           noSpacePattern,
-          isDeRomaQuery ? 1 : 0,
           jurisdiction,
           severity,
           state,
@@ -336,7 +311,6 @@ export default {
       if (!q) {
         return json({ error: "Missing query param ?q=" }, { status: 400 });
       }
-      const isDeRomaQuery = /deroma|de\s*roma|jager|j[aä]ger|club\s*j/i.test(q);
       const pattern = `%${q}%`;
       const tokenPattern = `%${q.replace(/\s+/g, "%")}%`;
       const wageRes = await env.DB.prepare(`
@@ -348,16 +322,9 @@ export default {
            OR address LIKE ?1
            OR respondent_legal_name LIKE ?2
            OR trade_name LIKE ?2
-           OR (?3 = 1 AND (
-               lower(respondent_legal_name) LIKE '%deroma%'
-               OR lower(respondent_legal_name) LIKE '%de roma%'
-               OR lower(trade_name) LIKE '%jager%'
-               OR lower(trade_name) LIKE '%jäger%'
-               OR lower(address) LIKE '%923 washington%'
-           ))
         ORDER BY (back_wages_recovered + settlement_amount) DESC
         LIMIT 50
-      `).bind(pattern, tokenPattern, isDeRomaQuery ? 1 : 0).all();
+      `).bind(pattern, tokenPattern).all();
 
       return json({ query: q, results: wageRes.results });
     }

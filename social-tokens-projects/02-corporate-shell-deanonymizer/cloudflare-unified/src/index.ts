@@ -17,12 +17,16 @@ import {
   runSyncTick,
   syncOne,
   loadStates,
+  beginNewCycle,
+  SyncResult,
 } from "./housing/sync";
 import {
   VIOLATION_ADAPTERS,
   getViolationAdapter,
   syncViolationAdapter,
+  runViolationsTick,
 } from "./housing/violations";
+import { rebuildEntities, applyEntityReview } from "./housing/entities";
 import { WAGE_THEFT_SEED_DATA } from "./labor/data";
 import { runLiveEnforcementSync } from "./labor/live_sync";
 import { renderWageTheftUI } from "./labor/labor-ui";
@@ -37,6 +41,13 @@ export interface Env {
   SOCRATA_APP_TOKEN?: string;
   DOL_API_KEY?: string;
 }
+
+// Multi-hundred-page source reports mirrored in R2 under docs/; cards and
+// exports link the single-page case doc first, full report as context.
+const FULL_REPORT_MIRROR: Record<string, string> = {
+  "https://www.ag.state.mn.us/Office/Reports/LaborReport_2024.pdf": "ag-labor-report-2024.pdf",
+  "https://www.ag.state.mn.us/Office/Reports/LaborReport_2025.pdf": "ag-labor-report-2025.pdf",
+};
 
 function json(body: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(body, null, 2), {
@@ -59,10 +70,6 @@ function authorized(request: Request, env: Env): boolean {
   return request.headers.get("Authorization") === `Bearer ${env.AUTH_SECRET}`;
 }
 
-function isDeRomaQuery(q: string): boolean {
-  return /deroma|de\s*roma|jager|j[aä]ger|club\s*j|teutohellene|hansaware/i.test(q);
-}
-
 export default {
   /**
    * Merged cron dispatch (see wrangler.toml):
@@ -75,10 +82,25 @@ export default {
     if (event.cron === "0 5 * * *") {
       ctx.waitUntil(runLiveEnforcementSync(env));
     } else if (event.cron === "0 6 * * *") {
-      ctx.waitUntil(backupMatrixSnapshot(env));
+      ctx.waitUntil((async () => {
+        await backupMatrixSnapshot(env);
+        // Rebuild the materialized dual-match table; the live instr() join is
+        // too large for request-time queries. Chunks resume via sync_state if
+        // the event dies before finishing.
+        for (let guard = 0; guard < 60; guard++) {
+          const r = await rebuildDualMatches(env, 25);
+          if (r.done) break;
+        }
+        // Entity-resolution pass: chunked over rental_licenses, resumes via
+        // sync_state feed 'entity_resolution'. Same budget discipline.
+        for (let guard = 0; guard < 10; guard++) {
+          const r = await rebuildEntities(env, 800);
+          if (r.done) break;
+        }
+      })());
     } else {
       const isDaily = event.cron === "0 4 * * *";
-      ctx.waitUntil(runSyncTick(env, { reset: isDaily }));
+      ctx.waitUntil(runFullTick(env, { reset: isDaily }));
     }
   },
 
@@ -124,7 +146,7 @@ export default {
       if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
       const reset = url.searchParams.get("reset") === "1";
       const budget = parseInt(url.searchParams.get("budget") || String(D1_QUERY_BUDGET), 10);
-      const results = await runSyncTick(env, { reset, budget });
+      const results = await runFullTick(env, { reset, budget });
       return json({ status: "sync tick complete", budget, results });
     }
 
@@ -303,7 +325,6 @@ export default {
           { status: 400 },
         );
       }
-      const deRoma = isDeRomaQuery(q);
       const pattern = `%${q}%`;
       const tokenPattern = `%${q.replace(/\s+/g, "%")}%`;
       const noSpacePattern = `%${q.replace(/\s+/g, "")}%`;
@@ -325,31 +346,9 @@ export default {
              WHERE r.link_key IS NOT NULL AND r2.link_key = r.link_key) as sister_properties_count,
             (SELECT SUM(r3.units) FROM rental_licenses r3
              WHERE r.link_key IS NOT NULL AND r3.link_key = r.link_key) as total_syndicate_units,
-            (SELECT case_id || '::' || violation_type || '::' || back_wages_recovered || '::' || workers_affected || '::' || COALESCE(provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA')
-             FROM wage_theft_records w
-             WHERE (w.trade_name != '' AND (
-                 instr(lower(r.owner_name), lower(w.trade_name)) > 0
-                 OR instr(lower(r.applicant_name), lower(w.trade_name)) > 0
-                 OR instr(lower(r.applicant_email), lower(w.trade_name)) > 0
-             ))
-             OR (w.respondent_legal_name != '' AND (
-                 instr(lower(r.owner_name), lower(w.respondent_legal_name)) > 0
-                 OR instr(lower(r.applicant_name), lower(w.respondent_legal_name)) > 0
-             ))
-             OR (lower(w.trade_name) LIKE '%fitterer%' AND (
-                 instr(lower(r.owner_name), 'fitterer') > 0
-                 OR instr(lower(r.applicant_name), 'fitterer') > 0
-                 OR instr(lower(r.applicant_email), 'ipgliving') > 0
-             ))
-             OR ((lower(w.trade_name) LIKE '%jager%' OR lower(w.respondent_legal_name) LIKE '%deroma%') AND (
-                 instr(lower(r.owner_name), 'deroma') > 0
-                 OR instr(lower(r.owner_name), 'de roma') > 0
-                 OR instr(lower(r.applicant_name), 'deroma') > 0
-                 OR instr(lower(r.applicant_name), 'de roma') > 0
-                 OR instr(lower(r.owner_address), '4133 dupont') > 0
-                 OR r.apn = '2202924210384'
-             ))
-             LIMIT 1) as wage_theft_match
+            (SELECT dm.case_id || '::' || dm.violation_type || '::' || dm.back_wages_recovered || '::' || dm.workers_affected || '::' || COALESCE(dm.provenance_type, 'VERIFIED_PUBLIC_ACTION')
+             FROM dual_matches dm
+             WHERE dm.landlord_name = r.owner_name LIMIT 1) as wage_theft_match
           FROM rental_licenses r
           WHERE (
               r.owner_name LIKE ?1
@@ -365,29 +364,19 @@ export default {
               OR r.applicant_name LIKE ?2
               OR r.owner_name LIKE ?3
               OR r.applicant_name LIKE ?3
-              OR (?4 = 1 AND (
-                  lower(r.owner_name) LIKE '%deroma%'
-                  OR lower(r.owner_name) LIKE '%de roma%'
-                  OR lower(r.applicant_name) LIKE '%deroma%'
-                  OR lower(r.applicant_name) LIKE '%de roma%'
-                  OR lower(r.owner_address) LIKE '%4133 dupont%'
-                  OR r.applicant_email IN ('teutohellene@gmail.com', 'hansaware@gmail.com')
-                  OR r.apn = '2202924210384'
-                  OR r.address LIKE '%923 WASHINGTON%'
-              ))
           )
-          AND (?5 = '' OR r.jurisdiction_id = ?5)
-          AND (?6 = '' OR r.city = ?6)
-          AND (?7 = '' OR r.severity_class = ?7)
-          AND (?8 = '' OR r.state = ?8)
-          AND (?9 = 0 OR r.severity_class = 'C'
+          AND (?4 = '' OR r.jurisdiction_id = ?4)
+          AND (?5 = '' OR r.city = ?5)
+          AND (?6 = '' OR r.severity_class = ?6)
+          AND (?7 = '' OR r.state = ?7)
+          AND (?8 = 0 OR r.severity_class = 'C'
               OR EXISTS (SELECT 1 FROM violations v
                          WHERE v.join_key = r.apn AND v.is_open = 1
                            AND v.violation_class = 'C'))
           ORDER BY r.units DESC
           LIMIT 50
         `).bind(
-          pattern, tokenPattern, noSpacePattern, deRoma ? 1 : 0,
+          pattern, tokenPattern, noSpacePattern,
           jurisdiction, city, severity, state, atRisk ? 1 : 0,
         ).all();
         return json({ query: q, jurisdiction, city, severity, state, at_risk: atRisk, results: searchRes.results });
@@ -399,7 +388,6 @@ export default {
     if (url.pathname === "/wage-theft") {
       const q = (url.searchParams.get("q") || "").trim();
       if (!q) return json({ error: "Missing query param ?q=" }, { status: 400 });
-      const deRoma = isDeRomaQuery(q);
       const pattern = `%${q}%`;
       const tokenPattern = `%${q.replace(/\s+/g, "%")}%`;
       const wageRes = await env.DB.prepare(`
@@ -411,16 +399,9 @@ export default {
            OR address LIKE ?1
            OR respondent_legal_name LIKE ?2
            OR trade_name LIKE ?2
-           OR (?3 = 1 AND (
-               lower(respondent_legal_name) LIKE '%deroma%'
-               OR lower(respondent_legal_name) LIKE '%de roma%'
-               OR lower(trade_name) LIKE '%jager%'
-               OR lower(trade_name) LIKE '%jäger%'
-               OR lower(address) LIKE '%923 washington%'
-           ))
         ORDER BY (back_wages_recovered + settlement_amount) DESC
         LIMIT 50
-      `).bind(pattern, tokenPattern, deRoma ? 1 : 0).all();
+      `).bind(pattern, tokenPattern).all();
       return json({ query: q, results: wageRes.results });
     }
 
@@ -456,13 +437,10 @@ export default {
       let queryStr = `SELECT * FROM wage_theft_records WHERE 1=1`;
       const binds: any[] = [];
       if (q) {
-        const deRoma = isDeRomaQuery(q);
         binds.push(`%${q}%`);
         const idx1 = binds.length;
         binds.push(`%${q.replace(/\s+/g, "%")}%`);
         const idx2 = binds.length;
-        binds.push(deRoma ? 1 : 0);
-        const idx3 = binds.length;
         queryStr += ` AND (
           respondent_legal_name LIKE ?${idx1}
           OR trade_name LIKE ?${idx1}
@@ -473,13 +451,6 @@ export default {
           OR city LIKE ?${idx1}
           OR respondent_legal_name LIKE ?${idx2}
           OR trade_name LIKE ?${idx2}
-          OR (?${idx3} = 1 AND (
-              lower(respondent_legal_name) LIKE '%deroma%'
-              OR lower(respondent_legal_name) LIKE '%de roma%'
-              OR lower(trade_name) LIKE '%jager%'
-              OR lower(trade_name) LIKE '%jäger%'
-              OR lower(address) LIKE '%923 washington%'
-          ))
         )`;
       }
       if (agency) {
@@ -637,7 +608,9 @@ export default {
           md.push(`- **Total Financial Restitution & Penalties**: $${total}`);
           md.push(`- **Affected Workforce**: ${row.workers_affected || 0} workers`);
           md.push(`- **Official Findings Summary**: ${row.description || "Confirmed civil/administrative wage theft findings."}`);
-          if (row.source_docket_url) md.push(`- **Primary Source Docket**: ${row.source_docket_url}`);
+          if (row.case_id) md.push(`- **Evidence Document (mirrored PDF)**: ${url.origin}/docs/${encodeURIComponent(row.case_id)}.pdf`);
+          const fullFile = FULL_REPORT_MIRROR[row.source_docket_url];
+          if (fullFile) md.push(`- **Full Source Report (mirrored PDF)**: ${url.origin}/docs/${fullFile}`);
           md.push("");
         }
         return new Response(md.join("\n"), {
@@ -771,7 +744,9 @@ export default {
         md.push(`  - Workers Impacted: ${s.workers_affected}`);
         md.push(`  - Labor Profile: ${s.labor_narrative}`);
         md.push(`- **Joint Organizing Playbook**: ${s.organizing_playbook}`);
-        if (s.source_docket_url) md.push(`- **Primary Source Docket**: ${s.source_docket_url}`);
+        if (s.source_excerpt_file || s.case_id) md.push(`- **Evidence Excerpt (mirrored PDF)**: ${url.origin}/docs/${encodeURIComponent(s.source_excerpt_file || s.case_id + ".pdf")}${s.source_pages ? ` (${s.source_pages}${s.source_doc_title ? ", " + s.source_doc_title : ""})` : ""}`);
+        if (s.housing_source_excerpt_file && s.housing_source_excerpt_file !== s.source_excerpt_file) md.push(`- **Housing Evidence Excerpt (mirrored PDF)**: ${url.origin}/docs/${encodeURIComponent(s.housing_source_excerpt_file)}${s.housing_source_pages ? ` (${s.housing_source_pages}${s.housing_source_doc_title ? ", " + s.housing_source_doc_title : ""})` : ""}`);
+        if (s.source_full_file && s.source_full_file !== s.source_excerpt_file) md.push(`- **Full Source Report (mirrored PDF)**: ${url.origin}/docs/${encodeURIComponent(s.source_full_file)}`);
         md.push("");
       }
       return new Response(md.join("\n"), {
@@ -792,31 +767,16 @@ export default {
         const pattern = `%${q}%`;
         const live = await env.DB.prepare(`
           SELECT
-            r.owner_name as landlord_name,
-            r.city as landlord_city,
-            r.county as landlord_county,
-            r.state as landlord_state,
-            COUNT(DISTINCT r.apn) as properties_count,
-            SUM(r.units) as total_units,
-            SUM(CASE WHEN r.severity_class = 'C' THEN 1 ELSE 0 END) as tier3_properties,
-            w.case_id, w.source_agency, w.respondent_legal_name, w.trade_name,
-            w.violation_type, w.back_wages_recovered, w.workers_affected,
-            COALESCE(w.provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA') as provenance_type
-          FROM rental_licenses r
-          JOIN wage_theft_records w ON (
-            (w.trade_name != '' AND (
-              instr(lower(r.owner_name), lower(w.trade_name)) > 0
-              OR instr(lower(r.applicant_name), lower(w.trade_name)) > 0
-            ))
-            OR (w.respondent_legal_name != '' AND (
-              instr(lower(r.owner_name), lower(w.respondent_legal_name)) > 0
-              OR instr(lower(r.applicant_name), lower(w.respondent_legal_name)) > 0
-            ))
-          )
-          WHERE (?1 = '%%' OR r.owner_name LIKE ?1 OR r.applicant_name LIKE ?1 OR w.trade_name LIKE ?1 OR w.respondent_legal_name LIKE ?1)
-            AND (?2 = '' OR r.city = ?2)
-          GROUP BY r.owner_name, w.case_id
-          ORDER BY w.back_wages_recovered DESC
+            landlord_name, landlord_city, landlord_county, landlord_state,
+            properties_count, total_units, tier3_properties,
+            case_id, source_agency, respondent_legal_name, trade_name,
+            violation_type, back_wages_recovered, workers_affected,
+            COALESCE(provenance_type, 'PROTOTYPE_SEED_PENDING_FOIA') as provenance_type,
+            COALESCE(source_docket_url, '') as source_docket_url
+          FROM dual_matches
+          WHERE (?1 = '%%' OR landlord_name LIKE ?1 OR trade_name LIKE ?1 OR respondent_legal_name LIKE ?1)
+            AND (?2 = '' OR landlord_city = ?2)
+          ORDER BY back_wages_recovered DESC
           LIMIT 50
         `).bind(pattern, cityFilter).all();
         const ql = q.toLowerCase();
@@ -830,6 +790,158 @@ export default {
         return json({ error: err.message }, { status: 500 });
       }
     }
+    // Manual dual-match rebuild, one chunk per call. Repeat until done:true —
+    // progress resumes via sync_state.feed_id = 'dual_matches'.
+    if (url.pathname === "/crossover/rebuild" && request.method === "POST") {
+      if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
+      try {
+        return json(await rebuildDualMatches(env, 25));
+      } catch (err: any) {
+        return json({ error: err.message }, { status: 500 });
+      }
+    }
+    // -------------------------------------------------- entity resolution
+    // Canonical owner entities with per-link provenance. Table is built by
+    // the chunked 'entity_resolution' rebuild (06:00 cron or POST
+    // /api/entities/rebuild); reads here are pure lookups.
+    if (url.pathname === "/api/entities/rebuild" && request.method === "POST") {
+      if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
+      try {
+        const chunks = Math.min(parseInt(url.searchParams.get("chunks") || "10", 10), 40);
+        const out = [];
+        for (let i = 0; i < chunks; i++) {
+          const r = await rebuildEntities(env, 800);
+          out.push(r);
+          if (r.done) break;
+        }
+        return json({ results: out, last: out[out.length - 1] });
+      } catch (err: any) {
+        return json({ error: err.message }, { status: 500 });
+      }
+    }
+
+    // Review queue: proposed merges/flags awaiting a human.
+    if (url.pathname === "/api/entity-review") {
+      if (request.method === "GET") {
+        try {
+          const status = url.searchParams.get("status") || "pending";
+          const rows = await env.DB.prepare(`
+            SELECT r.id, r.entity_id_a, r.entity_id_b, r.reason, r.evidence,
+                   r.status, r.created_at, r.reviewed_at,
+                   ea.display_name AS a_name, ea.entity_kind AS a_kind,
+                   ea.parcel_count AS a_parcels, ea.jurisdiction_count AS a_jurs,
+                   eb.display_name AS b_name, eb.entity_kind AS b_kind,
+                   eb.parcel_count AS b_parcels, eb.jurisdiction_count AS b_jurs
+            FROM owner_entity_review r
+            LEFT JOIN owner_entities ea ON ea.entity_id = r.entity_id_a
+            LEFT JOIN owner_entities eb ON eb.entity_id = r.entity_id_b
+            WHERE r.status = ?
+            ORDER BY r.created_at DESC LIMIT 200
+          `).bind(status).all();
+          return json({ status, count: rows.results.length, review: rows.results });
+        } catch (err: any) {
+          return json({ error: err.message }, { status: 500 });
+        }
+      }
+      if (request.method === "POST") {
+        if (!authorized(request, env)) return new Response("Unauthorized", { status: 401 });
+        try {
+          const body: any = await request.json();
+          const action = body.action === "approve" ? "approve" : body.action === "reject" ? "reject" : null;
+          const id = Number(body.id);
+          if (!id || !action) {
+            return json({ error: "Missing id or action (approve|reject)" }, { status: 400 });
+          }
+          const r = await applyEntityReview(env, id, action);
+          if (!r.ok) return json({ error: r.error }, { status: 404 });
+          return json({ ok: true, id, status: action === "approve" ? "approved" : "rejected" });
+        } catch (err: any) {
+          return json({ error: err.message }, { status: 500 });
+        }
+      }
+    }
+
+    if (url.pathname === "/api/entities") {
+      try {
+        const q = (url.searchParams.get("q") || "").trim();
+        const jur = (url.searchParams.get("jurisdiction") || "").trim();
+        const minParcels = parseInt(url.searchParams.get("min_parcels") || "1", 10);
+        const limit = Math.min(parseInt(url.searchParams.get("limit") || "50", 10), 200);
+        const res = await env.DB.prepare(`
+          SELECT entity_id, display_name, normalized_name, entity_kind,
+                 parcel_count, jurisdiction_count, status
+          FROM owner_entities
+          WHERE (?1 = '' OR display_name LIKE '%' || ?1 || '%'
+                 OR normalized_name LIKE '%' || ?1 || '%'
+                 OR entity_id LIKE '%' || ?1 || '%')
+            AND (?2 = '' OR EXISTS (
+                  SELECT 1 FROM owner_entity_links l
+                  JOIN rental_licenses r ON r.parcel_id = l.parcel_id
+                  WHERE l.entity_id = owner_entities.entity_id
+                    AND r.jurisdiction_id = ?2))
+            AND parcel_count >= ?3
+            AND status != 'merged'
+          ORDER BY parcel_count DESC
+          LIMIT ?4
+        `).bind(q, jur, minParcels, limit).all();
+        return json({ count: res.results.length, entities: res.results });
+      } catch (err: any) {
+        return json({ error: err.message }, { status: 500 });
+      }
+    }
+
+    if (url.pathname.startsWith("/api/entities/")) {
+      try {
+        const entityId = decodeURIComponent(
+          url.pathname.slice("/api/entities/".length),
+        );
+        const entity = await env.DB.prepare(
+          `SELECT * FROM owner_entities WHERE entity_id = ?`,
+        ).bind(entityId).first();
+        if (!entity) return json({ error: "not found" }, { status: 404 });
+
+        // Linked parcels + the co-linked entities sharing them (the network
+        // this entity belongs to, e.g. email + domain + name clusters).
+        const parcels = await env.DB.prepare(
+          `SELECT l.parcel_id, l.match_type, l.confidence,
+                  r.address, r.city, r.state, r.jurisdiction_id, r.units, r.severity_class
+           FROM owner_entity_links l
+           LEFT JOIN rental_licenses r ON r.parcel_id = l.parcel_id
+           WHERE l.entity_id = ?
+           ORDER BY r.jurisdiction_id, r.address
+           LIMIT 500`,
+        ).bind(entityId).all();
+        const coEntities = await env.DB.prepare(
+          `SELECT l2.entity_id, e.display_name, e.entity_kind, e.parcel_count,
+                  e.jurisdiction_count, e.status,
+                  COUNT(DISTINCT l2.parcel_id) AS shared_parcels
+           FROM owner_entity_links l2
+           LEFT JOIN owner_entities e ON e.entity_id = l2.entity_id
+           WHERE l2.entity_id != ?
+             AND l2.parcel_id IN (
+               SELECT parcel_id FROM owner_entity_links WHERE entity_id = ?
+             )
+           GROUP BY l2.entity_id
+           ORDER BY shared_parcels DESC
+           LIMIT 100`,
+        ).bind(entityId, entityId).all();
+        const review = await env.DB.prepare(
+          `SELECT id, entity_id_a, entity_id_b, reason, evidence, status, created_at
+           FROM owner_entity_review
+           WHERE entity_id_a = ? OR entity_id_b = ?
+           ORDER BY created_at DESC LIMIT 50`,
+        ).bind(entityId, entityId).all();
+        return json({
+          entity,
+          parcels: parcels.results,
+          co_entities: coEntities.results,
+          review_items: review.results,
+        });
+      } catch (err: any) {
+        return json({ error: err.message }, { status: 500 });
+      }
+    }
+
     // -------------------------------------------------- unified browsing
     // Every city/area with data, across housing + labor, in one call.
     if (url.pathname === "/api/cities") {
@@ -1008,6 +1120,162 @@ export default {
     );
   },
 };
+
+/**
+ * One full tick: registries plus a reserved violations slice.
+ *
+ * Violations run first inside a bounded slice (V_TICK_SLICE queries,
+ * ~2 pages/tick) so a multi-day registry refill cannot starve them; the
+ * rest of the budget goes to the registry feeds exactly as before. On
+ * reset ticks, completed violation feeds are reset explicitly — the
+ * shared beginNewCycle skips all violation cursors so multi-day fills
+ * (NYC open: ~2.9M rows) converge instead of rescanning a prefix daily.
+ */
+const V_TICK_SLICE = 10;
+
+async function runFullTick(
+  env: Env,
+  opts: { reset?: boolean; budget?: number } = {},
+): Promise<SyncResult[]> {
+  const budget = opts.budget ?? D1_QUERY_BUDGET;
+  const results: SyncResult[] = [];
+
+  if (opts.reset) {
+    await beginNewCycle(env);
+    // Fresh daily pass for violation feeds that completed; in-progress
+    // fills keep their cursor.
+    await env.DB.prepare(
+      `UPDATE sync_state SET offset=0, completed_at=NULL, last_error=NULL, updated_at=?
+       WHERE completed_at IS NOT NULL
+         AND feed_id IN (SELECT DISTINCT feed_id FROM violations)`,
+    )
+      .bind(new Date().toISOString())
+      .run();
+  }
+
+  const states = await loadStates(env);
+
+  const violationsPending = VIOLATION_ADAPTERS.some(
+    (a) => a.enabled && !states.get(a.feed.id)?.completed_at,
+  );
+  let queriesUsed = 0;
+  if (violationsPending) {
+    const slice = Math.min(V_TICK_SLICE, Math.max(0, budget - 6));
+    const vr = await runViolationsTick(env, { budget: slice, states });
+    queriesUsed += vr.reduce((a, r) => a + r.queriesUsed, 0);
+    results.push(...vr);
+  }
+
+  results.push(
+    ...(await runSyncTick(env, { budget: Math.max(0, budget - queriesUsed) })),
+  );
+  return results;
+}
+
+const DUAL_MATCH_FEED = "dual_matches";
+
+// Rebuilds dual_matches one wage_theft_records chunk at a time (each row is a
+// full-scan instr() match against rental_licenses). Progress persists in
+// sync_state so cron and manual calls resume where the last run stopped.
+// Rows written carry matched_at; stale rows from the previous cycle are
+// deleted only once a full pass completes.
+async function rebuildDualMatches(
+  env: Env,
+  maxRows: number,
+): Promise<{ done: boolean; processed: number; total: number }> {
+  const now = new Date().toISOString();
+  const state = await env.DB.prepare(
+    `SELECT * FROM sync_state WHERE feed_id = ?`,
+  ).bind(DUAL_MATCH_FEED).first<any>();
+  const offset: number = state?.offset ?? 0;
+  const cycleStart: string = state?.started_at ?? now;
+
+  const totalRes = await env.DB.prepare(
+    `SELECT COUNT(*) as n FROM wage_theft_records`,
+  ).first<any>();
+  const total: number = totalRes?.n ?? 0;
+
+  const chunk = await env.DB.prepare(
+    `SELECT case_id, source_agency, respondent_legal_name, trade_name, violation_type,
+            back_wages_recovered, workers_affected, provenance_type, source_docket_url
+     FROM wage_theft_records ORDER BY case_id LIMIT ? OFFSET ?`,
+  ).bind(maxRows, offset).all();
+
+  const rows = chunk.results as any[];
+  // Scans are independent I/O; run the chunk concurrently (~2s each, not ~35s
+  // sequential). Per-query D1 CPU stays bounded because each scan is its own
+  // statement.
+  await Promise.all(rows.map(async (w) => {
+    const names = [w.trade_name, w.respondent_legal_name].filter(
+      (n) => n && String(n).trim(),
+    );
+    if (names.length) {
+      // Word-boundary containment: needle must start the field or follow a
+      // space/comma/dash/paren — plain instr() matches 'dominium' inside
+      // 'CONDOMINIUM'.
+      const cond = names
+        .map(
+          () =>
+            `((lower(r.owner_name) = lower(?) OR instr(lower(r.owner_name), ' ' || lower(?)) > 0 OR instr(lower(r.owner_name), ', ' || lower(?)) > 0 OR instr(lower(r.owner_name), '-' || lower(?)) > 0 OR instr(lower(r.owner_name), '(' || lower(?)) > 0)
+             OR (lower(r.applicant_name) = lower(?) OR instr(lower(r.applicant_name), ' ' || lower(?)) > 0 OR instr(lower(r.applicant_name), ', ' || lower(?)) > 0 OR instr(lower(r.applicant_name), '-' || lower(?)) > 0 OR instr(lower(r.applicant_name), '(' || lower(?)) > 0))`,
+        )
+        .join(" OR ");
+      const matches = await env.DB.prepare(
+        `SELECT r.owner_name as landlord_name, r.city as landlord_city,
+                r.county as landlord_county, r.state as landlord_state,
+                COUNT(DISTINCT r.apn) as properties_count,
+                SUM(r.units) as total_units,
+                SUM(CASE WHEN r.severity_class = 'C' THEN 1 ELSE 0 END) as tier3_properties
+         FROM rental_licenses r WHERE ${cond} GROUP BY r.owner_name LIMIT 200`,
+      )
+        .bind(...names.flatMap((n) => [n, n, n, n, n, n, n, n, n, n]))
+        .all();
+      for (const m of matches.results as any[]) {
+        await env.DB.prepare(
+          `INSERT OR REPLACE INTO dual_matches
+           (landlord_name, landlord_city, landlord_county, landlord_state,
+            properties_count, total_units, tier3_properties, case_id,
+            source_agency, respondent_legal_name, trade_name, violation_type,
+            back_wages_recovered, workers_affected, provenance_type,
+            source_docket_url, matched_at)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        )
+          .bind(
+            m.landlord_name, m.landlord_city, m.landlord_county, m.landlord_state,
+            m.properties_count ?? 0, m.total_units ?? 0, m.tier3_properties ?? 0,
+            w.case_id, w.source_agency, w.respondent_legal_name, w.trade_name,
+            w.violation_type, w.back_wages_recovered ?? 0, w.workers_affected ?? 0,
+            w.provenance_type ?? "PROTOTYPE_SEED_PENDING_FOIA",
+            w.source_docket_url ?? "", now,
+          )
+          .run();
+      }
+    }
+  }));
+
+  const processed = offset + rows.length;
+  const done = processed >= total;
+  await env.DB.prepare(
+    `INSERT INTO sync_state (feed_id, offset, rows_total, started_at, updated_at, completed_at, last_error)
+     VALUES (?, ?, ?, ?, ?, ?, NULL)
+     ON CONFLICT(feed_id) DO UPDATE SET
+       offset = excluded.offset,
+       rows_total = excluded.rows_total,
+       started_at = CASE WHEN excluded.offset = 0 THEN excluded.started_at ELSE sync_state.started_at END,
+       updated_at = excluded.updated_at,
+       completed_at = excluded.completed_at`,
+  ).bind(DUAL_MATCH_FEED, done ? 0 : processed, total, offset === 0 ? now : cycleStart, now, done ? now : null).run();
+
+  if (done) {
+    await env.DB.prepare(
+      `DELETE FROM dual_matches WHERE matched_at < ?`,
+    ).bind(cycleStart).run();
+    await env.DB.prepare(
+      `INSERT INTO sync_logs (source, cases_synced, status, details) VALUES ('crossover-dual-matches', ?, 'SUCCESS', ?)`,
+    ).bind(total, `rebuilt dual_matches in chunks`).run();
+  }
+  return { done, processed, total };
+}
 
 async function backupMatrixSnapshot(env: Env): Promise<void> {
   try {

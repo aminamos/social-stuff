@@ -56,6 +56,7 @@ export function renderUnifiedUI(): string {
     <div class="controls">
       <input id="q" placeholder="Search name, street, email, LLC, or case…">
       <input id="city" placeholder="City / area filter (e.g. Minneapolis)" style="flex:1;min-width:160px">
+      <select id="jur" style="min-width:170px"><option value="">All jurisdictions</option></select>
       <button id="go" class="tabs active" style="border:none;background:var(--accent);color:#06121f;border-radius:8px;padding:10px 18px;font-weight:800;cursor:pointer">Search</button>
     </div>
     <div id="results"><div class="loading">Pick a tab and search — or browse cities/areas.</div></div>
@@ -86,14 +87,28 @@ export function renderUnifiedUI(): string {
       return '<div class="stat"><b>' + n + '</b><span>' + label + '</span></div>';
     }
 
+    async function loadJurisdictions() {
+      try {
+        const r = await fetch('/api/cities'); const d = await r.json();
+        const sel = $('jur');
+        (d.housing_cities || []).forEach(c => {
+          if (!c.jurisdiction_id) return;
+          const o = document.createElement('option');
+          o.value = c.jurisdiction_id;
+          o.textContent = c.city + ', ' + c.state + ' (' + Number(c.license_count || 0).toLocaleString() + ')';
+          sel.appendChild(o);
+        });
+      } catch (e) { /* selector stays as "All jurisdictions" */ }
+    }
+
     async function run() {
-      const q = $('q').value.trim(), city = $('city').value.trim();
+      const q = $('q').value.trim(), city = $('city').value.trim(), jur = $('jur').value;
       const box = $('results'); box.innerHTML = '<div class="loading">Loading…</div>';
       try {
         if (tab === 'cities') return renderCities(box);
         if (tab === 'landlords') {
-          if (!q && !city) { box.innerHTML = '<div class="loading">Enter a name, street, or city — or open the Cities tab.</div>'; return; }
-          const r = await fetch('/api/landlords?q=' + encodeURIComponent(q) + '&city=' + encodeURIComponent(city));
+          if (!q && !city && !jur) { box.innerHTML = '<div class="loading">Enter a name, street, or city — or open the Cities tab.</div>'; return; }
+          const r = await fetch('/api/landlords?q=' + encodeURIComponent(q) + '&city=' + encodeURIComponent(city) + '&jurisdiction=' + encodeURIComponent(jur));
           const d = await r.json();
           box.innerHTML = '<div class="meta">Found <b>' + (d.results || []).length + '</b> properties' +
             ((d.results || []).some(x => x.wage_theft_match) ? ' — <span class="badge b-red">has wage-theft match</span> flags a dual offender' : '') + '</div><br>' +
@@ -136,7 +151,7 @@ export function renderUnifiedUI(): string {
       box.innerHTML = '<h3>🏘️ Housing coverage (' + (d.housing_cities || []).length + ' areas)</h3>' + byState(d.housing_cities) +
         '<h3>⚖️ Labor coverage (' + (d.labor_cities || []).length + ' areas)</h3>' + byState(d.labor_cities);
     }
-    function jump(city, wage) { $('city').value = city; tab = wage ? 'wage' : 'landlords';
+    function jump(city, wage) { $('city').value = city; $('jur').value = ''; tab = wage ? 'wage' : 'landlords';
       document.querySelectorAll('.tabs button[data-tab]').forEach(x => x.classList.toggle('active', x.dataset.tab === tab)); run(); }
 
     function cardLandlord(x) {
@@ -154,22 +169,42 @@ export function renderUnifiedUI(): string {
         '<div>' + (c.provenance_type === 'VERIFIED_PUBLIC_ACTION' ? '<span class="badge b-green">VERIFIED</span>' : '<span class="badge b-amber">SEED / PENDING FOIA</span>') +
         (c.repeat_violator ? '<span class="badge b-red">REPEAT OFFENDER</span>' : '') + '</div>' +
         '<div class="meta">' + esc(c.case_id || '') + ' · ' + esc(c.source_agency || '') + ' · ' + esc(c.city || '') + ', ' + esc(c.state || '') +
-        ' · $' + total + ' · ' + (c.workers_affected || 0) + ' workers</div></div>';
+        ' · $' + total + ' · ' + (c.workers_affected || 0) + ' workers' +
+        (c.case_id ? ' · <a href="/docs/' + encodeURIComponent(c.case_id) + '.pdf" target="_blank">case doc ↗</a>' : '') + '</div></div>';
     }
     function cardDualLive(x) {
       return '<div class="card"><h3>' + esc(x.landlord_name) + ' <span class="meta">' + esc(x.landlord_city || '') + '</span></h3>' +
         '<div><span class="badge b-red">LIVE DUAL MATCH</span><span class="badge b-amber">' + (x.properties_count || 0) + ' properties · ' + (x.total_units || 0) + ' units</span></div>' +
         '<div class="meta">Case ' + esc(x.case_id || '') + ' (' + esc(x.source_agency || '') + ') · ' + esc(x.violation_type || '') +
-        ' · $' + Number(x.back_wages_recovered || 0).toLocaleString() + ' · ' + (x.workers_affected || 0) + ' workers</div></div>';
+        ' · $' + Number(x.back_wages_recovered || 0).toLocaleString() + ' · ' + (x.workers_affected || 0) + ' workers' +
+        (x.case_id ? ' · <a href="/docs/' + encodeURIComponent(x.case_id) + '.pdf" target="_blank">case doc ↗</a>' : '') + '</div></div>';
+    }
+    function evLink(excerptFile, pages, docTitle, label) {
+      const txt = esc(label || docTitle || 'source doc') + (pages ? ' ' + esc(pages) : '') + ' ↗';
+      if (excerptFile) return '<a href="/docs/' + encodeURIComponent(excerptFile) + '" target="_blank">' + txt + '</a>';
+      return '';
     }
     function cardDualCurated(s) {
+      const labor = evLink(s.source_excerpt_file || (s.case_id ? s.case_id + '.pdf' : ''), s.source_pages, s.source_doc_title);
+      const housing = s.housing_source_excerpt_file && s.housing_source_excerpt_file !== s.source_excerpt_file
+        ? evLink(s.housing_source_excerpt_file, s.housing_source_pages, s.housing_source_doc_title, 'housing source')
+        : '';
+      const full = s.source_full_file && s.source_full_file !== s.source_excerpt_file
+        ? evLink(s.source_full_file, '', 'full source report')
+        : '';
+      const ev = [labor, housing, full].filter(Boolean).length
+        ? '📄 ' + [labor, housing, full].filter(Boolean).join(' · 📄 ')
+        : '';
       return '<div class="card"><h3>' + esc(s.entity_name) + '</h3>' +
         '<div><span class="badge b-red">' + esc(s.risk_tier) + '</span><span class="badge b-amber">score ' + s.composite_score + '/100</span></div>' +
         '<div class="meta">' + esc(s.city) + ' · ' + s.properties_count + ' properties · ' + s.total_units + ' units · $' +
-        Number(s.total_wage_theft_recovered || 0).toLocaleString() + ' recovered · ' + s.workers_affected + ' workers</div></div>';
+        Number(s.total_wage_theft_recovered || 0).toLocaleString() + ' recovered · ' + s.workers_affected + ' workers' +
+        (ev ? '<br>' + ev : '') + '</div></div>';
     }
     function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    $('jur').onchange = () => { if (tab === 'landlords') run(); };
     loadStats();
+    loadJurisdictions();
   </script>
 </body>
 </html>`;

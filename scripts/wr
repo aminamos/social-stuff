@@ -1,0 +1,144 @@
+#!/bin/bash
+# ./scripts/wr — fail-closed front door for wrangler data-plane commands.
+#
+# Background: wrangler 4 `r2 object`, `kv`, and `d1 execute` / `d1 migrations
+# apply` / `d1 export` silently target the LOCAL simulator unless --remote is
+# passed. An upload without --remote "succeeds" into .wrangler/state while the
+# real bucket stays empty. This wrapper refuses to run those commands without
+# an explicit --local or --remote, so the mistake fails loudly instead.
+#
+# Usage: ./scripts/wr <same args as wrangler>
+#   ./scripts/wr r2 object put my-bucket/key --file ./x.pdf --remote
+#   ./scripts/wr d1 execute my-db --local --command "SELECT 1"
+# Non-data commands (dev, deploy, tail, ...) pass straight through.
+# Run ./scripts/wr --self-test to exercise the guard without touching anything.
+# Machine-wide twin (this Mac): ~/.local/bin/wr-guard + ~/.local/bin/wrangler
+# shim + npx() in ~/.zshenv/~/.bashrc enforce the same rule outside this repo.
+set -euo pipefail
+
+# Subcommand shapes that have a local/remote duality in wrangler 4.
+# (kv key delete intentionally omitted: unverified flag support; the repo
+# scanner still flags bare usage.)
+is_guarded() {
+  # Prefix match: subcommand_of caps at 3 tokens, so "d1 execute mydb" must
+  # still match the "d1 execute" guard.
+  case "$1" in
+    "r2 object put"*|"r2 object get"*|"r2 object delete"*|\
+    "kv key put"*|"kv key get"*|"kv key list"*|\
+    "kv bulk put"*|"kv bulk delete"*|\
+    "d1 execute"*|"d1 export"*|"d1 migrations apply"*) return 0 ;;
+  esac
+  return 1
+}
+
+has_scope_flag() {
+  for t in "$@"; do
+    case "$t" in --local|--remote|--local=*|--remote=*) return 0 ;; esac
+  done
+  return 1
+}
+
+# First three non-flag tokens form the subcommand (wrangler has no global
+# flags before the subcommand in practice; values of `--key value` flags are
+# skipped so a value like "remote" can't fake scope).
+subcommand_of() {
+  local out=() skip_next=0 t
+  for t in "$@"; do
+    if [ "$skip_next" = 1 ]; then skip_next=0; continue; fi
+    case "$t" in
+      --config|--cwd|--persist-to|--file|--command|--output) skip_next=1; continue ;;
+      -*) continue ;;
+    esac
+    out+=("$t")
+    [ "${#out[@]}" -eq 3 ] && break
+  done
+  echo "${out[*]:-}"
+}
+
+is_help() {
+  for t in "$@"; do
+    case "$t" in -h|--help|--version) return 0 ;; esac
+  done
+  return 1
+}
+
+check_scope() {
+  if is_help "$@"; then return 0; fi
+  local sub
+  sub="$(subcommand_of "$@")"
+  # No local dev loop: bare `wrangler dev` would bind the simulator, so it
+  # needs --remote like everything else. Deliberate simulator sessions opt
+  # out explicitly via WR_ALLOW_LOCAL_DEV=1.
+  case "$sub" in
+    dev|dev\ *)
+      if [ "${WR_ALLOW_LOCAL_DEV:-}" != "1" ] && ! has_scope_flag "$@"; then
+        echo "scripts/wr: REFUSED bare 'wrangler dev' (simulator bindings)." >&2
+        echo "  There is no dev/prod split in this repo: use --remote so dev" >&2
+        echo "  binds production, or set WR_ALLOW_LOCAL_DEV=1 to opt out explicitly." >&2
+        return 2
+      fi
+      return 0 ;;
+  esac
+  if is_guarded "$sub" && ! has_scope_flag "$@"; then
+    echo "scripts/wr: REFUSED 'wrangler $sub' with no --local or --remote." >&2
+    echo "  These commands default to the LOCAL simulator; without --remote" >&2
+    echo "  your data lands in .wrangler/state, not the real bucket/database." >&2
+    echo "  Re-run with --remote (real) or --local (simulator), e.g.:" >&2
+    echo "    ./scripts/wr $* --remote" >&2
+    return 2
+  fi
+  return 0
+}
+
+if [ "${1:-}" = "--self-test" ]; then
+  fail=0
+  # Each case: expected exit | argv...
+  t() { local want="$1"; shift; if check_scope "$@" >/dev/null 2>&1; then got=0; else got=$?; fi
+        if [ "$got" = "$want" ]; then echo "ok   [$want] wrangler $*";
+        else echo "FAIL [$want, got $got] wrangler $*"; fail=1; fi; }
+  t 2 r2 object put b/k --file f            # the original incident
+  t 0 r2 object put b/k --file f --remote
+  t 0 r2 object put b/k --file f --local
+  t 2 r2 object get b/k --file f
+  t 0 r2 object get b/k --file f --remote
+  t 2 r2 object delete b/k
+  t 0 r2 object delete b/k --remote
+  t 2 d1 execute mydb --command "SELECT 1"
+  t 0 d1 execute mydb --remote --command "SELECT 1"
+  t 2 d1 migrations apply mydb
+  t 0 d1 migrations apply mydb --local
+  t 2 d1 export mydb --output o.sql
+  t 0 d1 export mydb --remote --output o.sql
+  t 2 kv key put k v
+  t 0 kv key put k v --remote
+  t 2 kv bulk put f.json
+  t 0 kv bulk put f.json --local
+  t 0 dev --help                            # help always passes
+  t 0 deploy                                # always remote by nature
+  t 0 r2 bucket create b                    # account-level, no scope flags exist
+  t 0 d1 create db                          # account-level
+  t 2 r2 object put b/k --file remote       # value "remote" must NOT count as scope
+  t 0 r2 object put b/k --file f --remote=true
+  t 0 r2 object put b/k --file f --help     # help always passes
+  t 0 --version
+  t 2 dev                                     # no local dev loop
+  t 0 dev --remote
+  if WR_ALLOW_LOCAL_DEV=1 check_scope dev >/dev/null 2>&1; then echo "ok   [0] WR_ALLOW_LOCAL_DEV=1 wrangler dev";
+  else echo "FAIL [0] WR_ALLOW_LOCAL_DEV=1 wrangler dev"; fail=1; fi
+  exit $fail
+fi
+
+check_scope "$@"
+
+# Resolve the real wrangler: explicit env > nearest project install > PATH > npx.
+if [ -n "${WRANGLER_BIN:-}" ]; then BIN="$WRANGLER_BIN";
+else
+  dir="$PWD"; BIN=""
+  while [ "$dir" != "/" ]; do
+    if [ -x "$dir/node_modules/.bin/wrangler" ]; then BIN="$dir/node_modules/.bin/wrangler"; break; fi
+    dir="$(dirname "$dir")"
+  done
+  if [ -z "$BIN" ]; then BIN="$(command -v wrangler || true)"; fi
+  if [ -z "$BIN" ]; then exec npx -y wrangler "$@"; fi
+fi
+exec "$BIN" "$@"

@@ -82,31 +82,6 @@ CREATE INDEX IF NOT EXISTS idx_v_join_key ON violations(join_key);
 CREATE INDEX IF NOT EXISTS idx_v_feed ON violations(feed_id);
 CREATE INDEX IF NOT EXISTS idx_v_feed_open_class ON violations(feed_id, is_open, violation_class);
 
--- Multi-city property parcels across Hennepin and Ramsey counties
-CREATE TABLE IF NOT EXISTS county_parcels (
-    pid TEXT PRIMARY KEY,
-    county TEXT NOT NULL,
-    city TEXT NOT NULL,
-    address TEXT,
-    owner_name TEXT,
-    owner_address TEXT,
-    taxpayer_name TEXT,
-    taxpayer_address TEXT,
-    units INTEGER DEFAULT 1,
-    market_value REAL,
-    property_type TEXT,
-    homestead_status TEXT,
-    delinquent_tax_year TEXT,
-    year_built INTEGER,
-    synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX IF NOT EXISTS idx_d1_parcel_owner ON county_parcels(owner_name);
-CREATE INDEX IF NOT EXISTS idx_d1_parcel_taxpayer ON county_parcels(taxpayer_name);
-CREATE INDEX IF NOT EXISTS idx_d1_parcel_city ON county_parcels(city);
-CREATE INDEX IF NOT EXISTS idx_d1_parcel_county ON county_parcels(county);
-CREATE INDEX IF NOT EXISTS idx_d1_parcel_address ON county_parcels(address);
-
 -- Wage theft enforcement actions, settlements, and civil citations
 CREATE TABLE IF NOT EXISTS wage_theft_records (
     case_id TEXT PRIMARY KEY,
