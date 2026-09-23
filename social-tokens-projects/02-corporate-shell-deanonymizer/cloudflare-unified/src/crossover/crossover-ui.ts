@@ -856,6 +856,9 @@ export function renderCrossoverUI(): string {
   <script>
     let currentMatrixResults = [];
 
+    // '#page=N' fragment parsed from citation strings like "p. 7"/"pp. 12-14".
+    function pg(p){ const m = String(p || '').match(/\d+/); return m ? '#page=' + m[0] : ''; }
+
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
@@ -895,7 +898,7 @@ export function renderCrossoverUI(): string {
         '- **Official Source Records & Legal Dockets**:',
         (s.source_excerpt_file || s.case_id) ? '  - Evidence Excerpt (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(s.source_excerpt_file || (s.case_id + '.pdf')) + (s.source_pages ? ' (' + s.source_pages + (s.source_doc_title ? ', ' + s.source_doc_title : '') + ')' : '') : '',
         (s.housing_source_excerpt_file && s.housing_source_excerpt_file !== s.source_excerpt_file) ? '  - Housing Evidence Excerpt (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(s.housing_source_excerpt_file) + (s.housing_source_pages ? ' (' + s.housing_source_pages + (s.housing_source_doc_title ? ', ' + s.housing_source_doc_title : '') + ')' : '') : '',
-        (s.source_full_file && s.source_full_file !== s.source_excerpt_file) ? '  - Full Source Report (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(s.source_full_file) : '',
+        (s.source_full_file && s.source_full_file !== s.source_excerpt_file) ? '  - Full Source Report (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(s.source_full_file) + pg(s.source_pages) : '',
         '  - County Property Tax / Parcel PDF: https://www.hennepin.us/residents/property/property-information-search',
         '  - Municipal Active Rental License Registry: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0',
         '  - US DOL Enforcement Database: https://enforcement.dol.gov',
@@ -968,7 +971,7 @@ export function renderCrossoverUI(): string {
           lines.push('  - Housing Evidence Excerpt (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(s.housing_source_excerpt_file) + (s.housing_source_pages ? ' (' + s.housing_source_pages + (s.housing_source_doc_title ? ', ' + s.housing_source_doc_title : '') + ')' : ''));
         }
         if (s.source_full_file && s.source_full_file !== s.source_excerpt_file) {
-          lines.push('  - Full Source Report (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(s.source_full_file));
+          lines.push('  - Full Source Report (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(s.source_full_file) + pg(s.source_pages));
         }
         lines.push('  - County Parcel PDF: https://www.hennepin.us/residents/property/property-information-search');
         lines.push('  - Rental License Feature Docket: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0');
@@ -1266,8 +1269,8 @@ export function renderCrossoverUI(): string {
                     <span style="color: var(--card-border);">•</span>
                   \` : ''}
                   \${s.source_full_file && s.source_full_file !== s.source_excerpt_file ? \`
-                    <a href="/docs/\${encodeURIComponent(s.source_full_file)}" target="_blank" style="color: #94a3b8; text-decoration: underline;">
-                      Full source report ↗
+                    <a href="/docs/\${encodeURIComponent(s.source_full_file)}\${pg(s.source_pages)}" target="_blank" style="color: #94a3b8; text-decoration: underline;">
+                      Full source report\${s.source_pages ? ' ' + s.source_pages : ''} ↗
                     </a>
                     <span style="color: var(--card-border);">•</span>
                   \` : ''}

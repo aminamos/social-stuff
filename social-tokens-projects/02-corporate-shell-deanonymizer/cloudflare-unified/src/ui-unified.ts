@@ -179,9 +179,10 @@ export function renderUnifiedUI(): string {
         ' · $' + Number(x.back_wages_recovered || 0).toLocaleString() + ' · ' + (x.workers_affected || 0) + ' workers' +
         (x.case_id ? ' · <a href="/docs/' + encodeURIComponent(x.case_id) + '.pdf" target="_blank">case doc ↗</a>' : '') + '</div></div>';
     }
-    function evLink(excerptFile, pages, docTitle, label) {
+    function pg(p){ const m = String(p || '').match(/\d+/); return m ? '#page=' + m[0] : ''; }
+    function evLink(excerptFile, pages, docTitle, label, frag) {
       const txt = esc(label || docTitle || 'source doc') + (pages ? ' ' + esc(pages) : '') + ' ↗';
-      if (excerptFile) return '<a href="/docs/' + encodeURIComponent(excerptFile) + '" target="_blank">' + txt + '</a>';
+      if (excerptFile) return '<a href="/docs/' + encodeURIComponent(excerptFile) + (frag || '') + '" target="_blank">' + txt + '</a>';
       return '';
     }
     function cardDualCurated(s) {
@@ -190,7 +191,7 @@ export function renderUnifiedUI(): string {
         ? evLink(s.housing_source_excerpt_file, s.housing_source_pages, s.housing_source_doc_title, 'housing source')
         : '';
       const full = s.source_full_file && s.source_full_file !== s.source_excerpt_file
-        ? evLink(s.source_full_file, '', 'full source report')
+        ? evLink(s.source_full_file, s.source_pages, 'full source report', '', pg(s.source_pages))
         : '';
       const ev = [labor, housing, full].filter(Boolean).length
         ? '📄 ' + [labor, housing, full].filter(Boolean).join(' · 📄 ')
