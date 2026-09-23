@@ -163,21 +163,24 @@ export function renderUnifiedUI(): string {
         (x.open_violations ? ' · ' + x.open_violations + ' open violations' : '') +
         (x.sister_properties_count > 1 ? ' · ' + x.sister_properties_count + ' sister properties' : '') + '</div></div>';
     }
+    function caseDocFile(url){ const m = String(url || '').match(/\\/docs\\/([^/?#]+\\.pdf)$/i); return m ? m[1] : ''; }
     function cardCase(c) {
       const total = (parseFloat(c.back_wages_recovered || 0) + parseFloat(c.civil_penalties_assessed || 0)).toLocaleString();
+      const df = caseDocFile(c.source_docket_url);
       return '<div class="card"><h3>' + esc(c.respondent_legal_name) + ' <span class="meta">d/b/a ' + esc(c.trade_name || '—') + '</span></h3>' +
         '<div>' + (c.provenance_type === 'VERIFIED_PUBLIC_ACTION' ? '<span class="badge b-green">VERIFIED</span>' : '<span class="badge b-amber">SEED / PENDING FOIA</span>') +
         (c.repeat_violator ? '<span class="badge b-red">REPEAT OFFENDER</span>' : '') + '</div>' +
         '<div class="meta">' + esc(c.case_id || '') + ' · ' + esc(c.source_agency || '') + ' · ' + esc(c.city || '') + ', ' + esc(c.state || '') +
         ' · $' + total + ' · ' + (c.workers_affected || 0) + ' workers' +
-        (c.case_id ? ' · <a href="/docs/' + encodeURIComponent(c.case_id) + '.pdf" target="_blank">case doc ↗</a>' : '') + '</div></div>';
+        (df ? ' · <a href="/docs/' + encodeURIComponent(df) + '" target="_blank">case doc ↗</a>' : '') + '</div></div>';
     }
     function cardDualLive(x) {
+      const df = caseDocFile(x.source_docket_url);
       return '<div class="card"><h3>' + esc(x.landlord_name) + ' <span class="meta">' + esc(x.landlord_city || '') + '</span></h3>' +
         '<div><span class="badge b-red">LIVE DUAL MATCH</span><span class="badge b-amber">' + (x.properties_count || 0) + ' properties · ' + (x.total_units || 0) + ' units</span></div>' +
         '<div class="meta">Case ' + esc(x.case_id || '') + ' (' + esc(x.source_agency || '') + ') · ' + esc(x.violation_type || '') +
         ' · $' + Number(x.back_wages_recovered || 0).toLocaleString() + ' · ' + (x.workers_affected || 0) + ' workers' +
-        (x.case_id ? ' · <a href="/docs/' + encodeURIComponent(x.case_id) + '.pdf" target="_blank">case doc ↗</a>' : '') + '</div></div>';
+        (df ? ' · <a href="/docs/' + encodeURIComponent(df) + '" target="_blank">case doc ↗</a>' : '') + '</div></div>';
     }
     function pg(p){ const m = String(p || '').match(/\d+/); return m ? '#page=' + m[0] : ''; }
     function evLink(excerptFile, pages, docTitle, label, frag) {
@@ -193,8 +196,10 @@ export function renderUnifiedUI(): string {
       const full = s.source_full_file && s.source_full_file !== s.source_excerpt_file
         ? evLink(s.source_full_file, s.source_pages, 'full source report', '', pg(s.source_pages))
         : '';
-      const ev = [labor, housing, full].filter(Boolean).length
-        ? '📄 ' + [labor, housing, full].filter(Boolean).join(' · 📄 ')
+      const docs = (s.doc_links || []).map(l =>
+        '<a href="' + esc(l.url) + '" target="_blank">' + esc(l.label) + ' ↗</a>');
+      const ev = [labor, housing, full].concat(docs).filter(Boolean).length
+        ? '📄 ' + [labor, housing, full].concat(docs).filter(Boolean).join(' · 📄 ')
         : '';
       return '<div class="card"><h3>' + esc(s.entity_name) + '</h3>' +
         '<div><span class="badge b-red">' + esc(s.risk_tier) + '</span><span class="badge b-amber">score ' + s.composite_score + '/100</span></div>' +

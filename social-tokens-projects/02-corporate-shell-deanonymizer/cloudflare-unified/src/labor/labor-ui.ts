@@ -1018,6 +1018,22 @@ export function renderWageTheftUI(): string {
       'https://www.ag.state.mn.us/Office/Reports/LaborReport_2025.pdf': 'ag-labor-report-2025.pdf'
     };
 
+    // '#page=N' fragment — excerpt filenames carry the report page ("...-p6.pdf").
+    function pg(u){ const m = String(u || '').match(/-p(\d+)\.pdf/i); return m ? '#page=' + m[1] : ''; }
+
+    // Per-agency source listing — the actual public record that names the
+    // employer, not a portal homepage.
+    const AGENCY_SOURCE = {
+      'NJ_DOL_WALL':   { url: 'https://www.nj.gov/labor/ea/osec/wall.shtml', label: 'NJ DOL WALL violator list (employer is named) ↗' },
+      'US_DOL_WHD':    { url: 'https://enforcement.dol.gov', label: 'DOL WHD enforcement dataset (search this employer) ↗' },
+      'MN_AG_OFFICE':  { url: 'https://www.ag.state.mn.us/Office/Reports/', label: 'MN AG labor enforcement reports ↗' },
+    };
+    const AGENCY_SOURCE_EXPORT = {
+      'NJ_DOL_WALL':  'NJ DOL Workplace Accountability in Labor List (WALL): https://www.nj.gov/labor/ea/osec/wall.shtml',
+      'US_DOL_WHD':   'US DOL WHD enforcement dataset: https://enforcement.dol.gov',
+      'MN_AG_OFFICE': 'MN AG labor enforcement reports: https://www.ag.state.mn.us/Office/Reports/',
+    };
+
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
@@ -1060,11 +1076,9 @@ export function renderWageTheftUI(): string {
         '- **Affected Workforce**: ' + (c.workers_affected || 0) + ' workers',
         '- **Investigative Findings / Narrative**: ' + (c.description || 'Confirmed civil/administrative wage theft findings.'),
         '- **Primary Legal Dockets & Source Documents**:',
-        c.case_id ? '  - Evidence Document (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(c.case_id) + '.pdf' : '',
-        FULL_REPORT_MIRROR[c.source_docket_url] ? '  - Full Source Report (mirrored PDF): ' + location.origin + '/docs/' + FULL_REPORT_MIRROR[c.source_docket_url] : '',
-        '  - US DOL Wage & Hour Division Public Enforcement Database: https://enforcement.dol.gov',
-        '  - Minnesota Judicial Branch Public Access (MCRO Case Search): https://publicaccess.courts.state.mn.us',
-        '  - Minneapolis Civil Rights Labor Standards Findings: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards',
+        (() => { const df = (String(c.source_docket_url || '').match(/\\/docs\\/([^/?#]+\\.pdf)$/i) || [])[1]; return df ? '  - Evidence Document (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(df) : ''; })(),
+        FULL_REPORT_MIRROR[c.source_docket_url] ? '  - Full Source Report (mirrored PDF): ' + location.origin + '/docs/' + FULL_REPORT_MIRROR[c.source_docket_url] + pg(c.source_docket_url) : '',
+        AGENCY_SOURCE_EXPORT[c.source_agency] ? '  - ' + AGENCY_SOURCE_EXPORT[c.source_agency] : '',
         '  - Cross-Reference Landlord Shell Entity: https://mpls-rental-sync-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(c.trade_name || c.respondent_legal_name || '')
       ].join('\\n');
 
@@ -1123,15 +1137,16 @@ export function renderWageTheftUI(): string {
         lines.push('- **Status**: ' + (c.status || 'Active') + (c.repeat_violator ? ' [REPEAT OFFENDER]' : ''));
         lines.push('- **Case Summary**: ' + (c.description || ''));
         lines.push('- **Source Records**:');
-        if (c.case_id) {
-          lines.push('  - Evidence Document (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(c.case_id) + '.pdf');
+        const df = (String(c.source_docket_url || '').match(/\\/docs\\/([^/?#]+\\.pdf)$/i) || [])[1];
+        if (df) {
+          lines.push('  - Evidence Document (mirrored PDF): ' + location.origin + '/docs/' + encodeURIComponent(df));
         }
         if (FULL_REPORT_MIRROR[c.source_docket_url]) {
-          lines.push('  - Full Source Report (mirrored PDF): ' + location.origin + '/docs/' + FULL_REPORT_MIRROR[c.source_docket_url]);
+          lines.push('  - Full Source Report (mirrored PDF): ' + location.origin + '/docs/' + FULL_REPORT_MIRROR[c.source_docket_url] + pg(c.source_docket_url));
         }
-        lines.push('  - US DOL WHD Enforcement Database: https://enforcement.dol.gov');
-        lines.push('  - Minnesota District Court MCRO: https://publicaccess.courts.state.mn.us');
-        lines.push('  - Minneapolis Labor Standards Enforcement: https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards');
+        if (AGENCY_SOURCE_EXPORT[c.source_agency]) {
+          lines.push('  - ' + AGENCY_SOURCE_EXPORT[c.source_agency]);
+        }
         lines.push('');
       });
 
@@ -1312,16 +1327,32 @@ export function renderWageTheftUI(): string {
             </div>
           \`;
 
-          const primaryDocLink = c.case_id ? \`
-            <a href="/docs/\${encodeURIComponent(c.case_id)}.pdf" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
-              Case docket PDF ↗
+          // Real mirrored filename comes from the docket URL — never guess
+          // /docs/<case_id>.pdf (dead link when no such file exists).
+          const docFile = (String(c.source_docket_url || '').match(/\\/docs\\/([^/?#]+\\.pdf)$/i) || [])[1];
+          const docPg  = docFile ? ((docFile.match(/-p(\\d+)\\.pdf/i) || [])[1]) : null;
+          const reportFile = docPg
+            ? 'ag-labor-report-20' + (docFile.includes('2025') ? '25' : '24') + '.pdf'
+            : FULL_REPORT_MIRROR[c.source_docket_url];
+          const reportFrag = reportFile ? (docPg ? '#page=' + docPg : pg(c.source_docket_url)) : '';
+
+          const primaryDocLink = docFile && docFile !== reportFile ? \`
+            <a href="/docs/\${encodeURIComponent(docFile)}" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: underline;">
+              \${docPg ? '📄 Evidence excerpt — MN AG report p. ' + docPg : '📄 Case docket PDF'} ↗
             </a>
             <span>•</span>
           \` : '';
 
-          const fullReportLink = FULL_REPORT_MIRROR[c.source_docket_url] ? \`
-            <a href="/docs/\${FULL_REPORT_MIRROR[c.source_docket_url]}" target="_blank" style="color: #38bdf8; text-decoration: underline;">
-              Full source report ↗
+          const fullReportLink = reportFile ? \`
+            <a href="/docs/\${reportFile}\${reportFrag}" target="_blank" style="color: #38bdf8; text-decoration: underline;">
+              Full source report\${docPg ? ' p. ' + docPg : ''} ↗
+            </a>
+            <span>•</span>
+          \` : '';
+
+          const agencyLink = AGENCY_SOURCE[c.source_agency] ? \`
+            <a href="\${AGENCY_SOURCE[c.source_agency].url}" target="_blank" style="color: #38bdf8; text-decoration: underline;">
+              \${AGENCY_SOURCE[c.source_agency].label}
             </a>
             <span>•</span>
           \` : '';
@@ -1370,17 +1401,7 @@ export function renderWageTheftUI(): string {
                   <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     \${primaryDocLink}
                     \${fullReportLink}
-                    <a href="https://enforcement.dol.gov" target="_blank" style="color: #38bdf8; text-decoration: underline;">
-                      US DOL WHD Docket ↗
-                    </a>
-                    <span>•</span>
-                    <a href="https://publicaccess.courts.state.mn.us" target="_blank" style="color: #38bdf8; text-decoration: underline;">
-                      District Court Filings (MCRO) ↗
-                    </a>
-                    <span>•</span>
-                    <a href="https://www2.minneapolismn.gov/government/departments/civil-rights/labor-standards" target="_blank" style="color: #38bdf8; text-decoration: underline;">
-                      Mpls Civil Rights Findings PDF ↗
-                    </a>
+                    \${agencyLink}
                   </div>
                 </div>
               </div>

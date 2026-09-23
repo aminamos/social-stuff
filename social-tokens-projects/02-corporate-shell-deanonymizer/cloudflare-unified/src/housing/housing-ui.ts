@@ -885,6 +885,37 @@ export function renderUI(): string {
   </footer>
 
   <script>
+    // Per-record source link: the actual public record for THIS parcel in
+    // the jurisdiction's own dataset — not a portal homepage.
+    function recordLink(item){
+      const apn = String(item.apn || '').trim();
+      const ju  = item.jurisdiction_id || '';
+      if (!apn || !ju) return null;
+      const e = encodeURIComponent;
+      const arc = (base, field) => base + '?where=' + e(field + "='" + apn + "'") + '&outFields=*&f=html';
+      const soc = (dom, ds, field) => 'https://' + dom + '/resource/' + ds + '.json?' + e(field) + '=' + e(apn);
+      const M = {
+        'minneapolis-mn': () => ({ url: arc('https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0/query', 'apn'), label: 'Minneapolis license record for this parcel ↗' }),
+        'saint-paul-mn':  () => ({ url: arc('https://services1.arcgis.com/9meaaHE3uiba0zr8/arcgis/rest/services/Certificate_of_Occupancy_-_Residential/FeatureServer/0/query', 'PIN'), label: 'St. Paul certificate-of-occupancy record for this parcel ↗' }),
+        'detroit-mi':     () => ({ url: arc('https://services2.arcgis.com/qvkbeam7Wirps6zC/arcgis/rest/services/RentalStatuses/FeatureServer/0/query', 'parcel_id'), label: 'Detroit rental-status record for this parcel ↗' }),
+        'nashville-tn':   () => ({ url: arc('https://services2.arcgis.com/HdTo6HJqh92wn4D8/arcgis/rest/services/Residential_Short_Term_Rental_Permits_view/FeatureServer/0/query', 'Parcel'), label: 'Nashville STR permit record for this parcel ↗' }),
+        'new-york-ny': () => {
+          if (!/^\\d{10}$/.test(apn)) return null;
+          return { url: 'https://data.cityofnewyork.us/resource/tesw-yqqr.json?boroid=' + (+apn.slice(0,1)) + '&block=' + (+apn.slice(1,6)) + '&lot=' + (+apn.slice(6)), label: 'NYC HPD registration record (BBL ' + apn + ') ↗' };
+        },
+        'austin-tx':        () => ({ url: soc('datahub.austintexas.gov', 'ge82-ij4h', 'parcelid'),      label: 'Austin registration record (parcel ' + apn + ') ↗' }),
+        'buffalo-ny':       () => ({ url: soc('data.buffalony.gov', 'qcyy-feh8', 'prclid'),             label: 'Buffalo license record (parcel ' + apn + ') ↗' }),
+        'cincinnati-oh':    () => ({ url: soc('data.cincinnati-oh.gov', 'ivda-umw7', 'number_key'),     label: 'Cincinnati inspection record ' + apn + ' ↗' }),
+        'denver-co':        () => ({ url: soc('data.colorado.gov', 'f3vc-vat3', 'parcel_number'),       label: 'Denver STR license record (parcel ' + apn + ') ↗' }),
+        'san-francisco-ca': () => ({ url: soc('data.sf.gov', 'g8m3-pdis', 'uniqueid'),                  label: 'SF registry record ' + apn + ' ↗' }),
+        'seattle-wa':       () => ({ url: soc('data.seattle.gov', 'j2xh-c7vt', 'permitnum'),            label: 'Seattle RRIO record ' + apn + ' ↗' }),
+        'philadelphia-pa':  () => ({ url: 'https://phl.carto.com/api/v2/sql?q=' + e("SELECT * FROM business_licenses WHERE parcel_id_num = '" + apn + "'"), label: 'Philadelphia license record (OPA ' + apn + ') ↗' }),
+        'milwaukee-wi':     () => ({ url: 'https://data.milwaukee.gov/dataset/mprop',                   label: 'Milwaukee mprop property dataset ↗' }),
+        'pittsburgh-pa':    () => ({ url: 'https://data.wprdc.org/dataset/' + (item.source_dataset || ''), label: 'WPRDC source dataset ↗' }),
+      };
+      return M[ju] ? M[ju]() : null;
+    }
+
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       // Works from a click (window.event) and from code, where there is none.
@@ -1081,13 +1112,7 @@ export function renderUI(): string {
                 <div class="source-docs-box">
                   <div class="source-docs-title">📄 Source Documents & Public Records:</div>
                   <div class="source-docs-links">
-                    <a href="https://www.hennepin.us/residents/property/property-information-search" target="_blank" style="color:#38bdf8; text-decoration:underline;">
-                      County Property Tax / Parcel PDF ↗
-                    </a>
-                    <span>•</span>
-                    <a href="https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0" target="_blank" style="color:#38bdf8; text-decoration:underline;">
-                      Municipal Licensing Docket ↗
-                    </a>
+                    \${(() => { const rl = recordLink(item); return rl ? \`<a href="\${rl.url}" target="_blank" style="color:#38bdf8; text-decoration:underline;">\${rl.label}</a><span>•</span>\` : ''; })()}
                     \${item.wage_theft_match ? \`
                     <span>•</span>
                     <a href="https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=\${encodeURIComponent(item.owner_name)}" target="_blank" style="color:#f87171; font-weight:700; text-decoration:underline;">
@@ -1247,8 +1272,7 @@ export function renderUI(): string {
         '- **Sister Properties Unmasked**: ' + (item.sister_properties_count || 1) + ' properties sharing common management (' + (item.total_syndicate_units || 'N/A') + ' total units)',
         '- **Labor Standards & Wage Theft Record**: ' + wageTheftText,
         '- **Official Source Records & PDFs**:',
-        '  - County Parcel & Property Tax Assessment: https://www.hennepin.us/residents/property/property-information-search',
-        '  - Municipal Rental Licensing Feature Docket: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0',
+        (() => { const rl = recordLink(item); return rl ? '  - ' + rl.label.replace(' ↗','') + ': ' + rl.url : ''; })(),
         '  - Official Labor Standards Registry Docket: https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(item.owner_name || '')
       ].join('\\n');
 
@@ -1312,8 +1336,7 @@ export function renderUI(): string {
         lines.push('- **Sister Properties**: ' + (item.sister_properties_count || 1) + ' properties (' + (item.total_syndicate_units || 'N/A') + ' units)');
         lines.push('- **Wage Theft / Labor Citation**: ' + wageTheftText);
         lines.push('- **Primary Document Links**:');
-        lines.push('  - County Property Tax / Parcel PDF: https://www.hennepin.us/residents/property/property-information-search');
-        lines.push('  - Municipal Rental Licensing Registry: https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Active_Rental_Licenses/FeatureServer/0');
+        { const rl = recordLink(item); if (rl) lines.push('  - ' + rl.label.replace(' ↗','') + ': ' + rl.url); }
         lines.push('  - Labor Standards Registry: https://twin-cities-wage-theft-worker.a-8c6.workers.dev/?q=' + encodeURIComponent(item.owner_name || ''));
         lines.push('');
       });
