@@ -7,9 +7,12 @@ import { CityAdapter, toBBL } from "../../canonical";
  * The registration publishes no BBL column and no owner identity, so the
  * parcel key is derived: BBL = boroid digit + block (5-padded) + lot
  * (4-padded). boroid codes 1 MANHATTAN, 2 BRONX, 3 BROOKLYN, 4 QUEENS,
- * 5 STATEN ISLAND. Sister-property linkage waits on the separate contacts
- * dataset, so linker is registration_contacts (link_key null) and parcel
- * joins use apn equality (parcelJoin bbl) against violations.join_key.
+ * 5 STATEN ISLAND. Owner identity comes from the HPD Registration
+ * Contacts dataset (feu5-w2e2) joined on registrationid:
+ * scripts/nyc-owner-enrich.py backfills owner_* columns and link_key
+ * onto these rows (re-run after any full feed reset, since re-sync
+ * rewrites owner_name/link_key to null). Parcel joins use apn equality
+ * (parcelJoin bbl) against violations.join_key.
  */
 export const nyc: CityAdapter = {
   feed: {
@@ -42,5 +45,5 @@ export const nyc: CityAdapter = {
     const street = String(row["streetname"] ?? "").trim();
     return [house, street].filter(Boolean).join(" ");
   },
-  note: "Registration only: no owner identity published, no BBL column (derived from boroid/block/lot). Violations live in wvxf-dwi5 and join on BBL.",
+  note: "Registration only: no owner identity published (backfilled from feu5-w2e2 contacts via scripts/nyc-owner-enrich.py), no BBL column (derived from boroid/block/lot). Violations live in wvxf-dwi5 and join on BBL.",
 };
