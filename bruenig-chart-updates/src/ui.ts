@@ -42,6 +42,12 @@ figure.chart svg{width:100%;height:auto;display:block;border:1px solid #eee;bord
 .legend .key{display:inline-flex;align-items:center;gap:.4em}
 .legend i{display:inline-block;width:.8em;height:.8em;border-radius:2px}
 figcaption{font-size:.82em;color:#666;margin-top:.2em}
+.originals{margin:1.25em 0}
+.originals h2{font-size:1.05em;margin:.1em 0 .5em}
+figure.original{margin:.75em 0;border:1px solid #e5e5e5;border-radius:.4em;padding:.7em;background:#fff}
+figure.original img{max-width:100%;height:auto;display:block}
+.thumb{width:96px;height:auto;border:1px solid #eee;border-radius:.3em;flex:none}
+.chartcell{display:flex;gap:.7em;align-items:flex-start}
 .provenance{border:1px solid #d7d7d7;border-left:4px solid #1d4ed8;border-radius:.3em;background:#fafafa;padding:.8em 1.1em;margin-top:1.75em}
 .provenance h2{font-size:1.05em;margin:.1em 0 .5em}
 .provenance p{margin:.35em 0}
@@ -64,6 +70,33 @@ export interface SeriesData {
 }
 
 const PALETTE = ["#2563eb", "#dc2626", "#059669", "#d97706", "#7c3aed", "#0891b2", "#be185d", "#4d7c0f"];
+// Bruenig's scheme (black bars + dark-red accent) for x inside the original
+// article's data window; a blue family marks data added since.
+const ORIGINAL_FILLS = ["#000000", "#980000", "#3f3f3f", "#c05252"];
+const UPDATED_FILLS = ["#1d4ed8", "#60a5fa", "#1e40af", "#93c5fd"];
+const ACCENT = "#1d4ed8";
+
+/** Original article's data window from chart provenance; points with
+ *  x <= last_x render in the original palette, later x as an update. */
+export interface ChartWindow {
+  first_x?: string;
+  last_x?: string;
+}
+
+/** Chunked digit-aware sort so 'D2' < 'D10' and 'USA:2022' < 'USA:2023'. */
+function naturalCmp(a: string, b: string): number {
+  const ax = a.split(/(\d+)/);
+  const bx = b.split(/(\d+)/);
+  const n = Math.min(ax.length, bx.length);
+  for (let i = 0; i < n; i++) {
+    if (ax[i] === bx[i]) continue;
+    const na = Number(ax[i]);
+    const nb = Number(bx[i]);
+    if (ax[i] !== "" && bx[i] !== "" && !isNaN(na) && !isNaN(nb)) return na - nb;
+    return ax[i].localeCompare(bx[i]);
+  }
+  return ax.length - bx.length;
+}
 
 const SVG_W = 720;
 const SVG_H = 360;
@@ -121,7 +154,9 @@ function yAxis(lo: number, hi: number, unit: string): string {
   return out;
 }
 
-function lineChart(series: SeriesData[], lo: number, hi: number): string {
+function lineChart(series: SeriesData[], lo: number, hi: number, window?: ChartWindow | null): string {
+  const tFirst = window?.first_x != null ? xTime(window.first_x) : null;
+  const tLast = window?.last_x != null ? xTime(window.last_x) : null;
   const positions = series
     .flatMap((s) => s.points.map((p) => xTime(p.x)))
     .filter((v): v is number => v !== null)
@@ -155,16 +190,51 @@ function lineChart(series: SeriesData[], lo: number, hi: number): string {
     const d = pts.map((p) => `${X(p.t).toFixed(1)},${Y(p.y).toFixed(1)}`).join(" ");
     paths += `<polyline fill="none" stroke="${color}" stroke-width="2" points="${d}"><title>${esc(s.label)}</title></polyline>`;
     for (const p of pts) {
-      paths += `<circle cx="${X(p.t).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="2.6" fill="${color}"><title>${esc(s.label)} — ${esc(p.raw)}: ${fmt(p.y)}</title></circle>`;
+      const upd = tLast !== null && p.t > tLast;
+      paths += upd
+        ? `<circle cx="${X(p.t).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="3" fill="${color}" stroke="${ACCENT}" stroke-width="1.8"><title>${esc(s.label)} — ${esc(p.raw)}: ${fmt(p.y)} (added after the original article)</title></circle>`
+        : `<circle cx="${X(p.t).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="2.6" fill="${color}"><title>${esc(s.label)} — ${esc(p.raw)}: ${fmt(p.y)}</title></circle>`;
     }
   });
 
-  return `<svg viewBox="0 0 ${SVG_W} ${SVG_H}" role="img">${yAxis(lo, hi, series[0]?.unit ?? "")}${xTicks}${paths}</svg>`;
+  // Original-window shading + the 'updated' divider at last_x.
+  let overlay = "";
+  if (tLast !== null) {
+    if (tFirst !== null && tFirst < tLast) {
+      const sx = X(Math.max(tFirst, xMin));
+      const ex = X(Math.min(tLast, xMax));
+      if (ex > sx) overlay += `<rect x="${sx.toFixed(1)}" y="${MT}" width="${(ex - sx).toFixed(1)}" height="${PH}" fill="#980000" opacity="0.07"/>`;
+    }
+    const upT = positions.filter((t) => t > tLast);
+    if (upT.length) {
+      const inT = positions.filter((t) => t <= tLast);
+      const dx = inT.length ? (X(inT[inT.length - 1]) + X(upT[0])) / 2 : Math.min(ML + 8, ML + PW);
+      overlay += `<line x1="${dx.toFixed(1)}" y1="${MT}" x2="${dx.toFixed(1)}" y2="${MT + PH}" stroke="${ACCENT}" stroke-width="1.5" stroke-dasharray="5 3"/>`;
+      overlay += `<text x="${(dx + 4).toFixed(1)}" y="${(MT + 10).toFixed(1)}" font-size="10" fill="${ACCENT}">updated →</text>`;
+    }
+  }
+
+  return `<svg viewBox="0 0 ${SVG_W} ${SVG_H}" role="img">${yAxis(lo, hi, series[0]?.unit ?? "")}${overlay}${xTicks}${paths}</svg>`;
 }
 
-function barChart(series: SeriesData[], lo: number, hi: number): string {
+
+function barChart(series: SeriesData[], lo: number, hi: number, window?: ChartWindow | null): string {
   const groups: string[] = [];
   for (const s of series) for (const p of s.points) if (!groups.includes(p.x)) groups.push(p.x);
+  groups.sort(naturalCmp);
+  const tLast = window?.last_x != null ? xTime(window.last_x) : null;
+  const isUpd = groups.map((g) => {
+    const t = xTime(g);
+    return tLast !== null && t !== null && t > tLast;
+  });
+  // {first_x:null,last_x:null} = no window (extension charts, not his palette)
+  const wOn = window != null && (window.first_x != null || window.last_x != null);
+  const fillFor = (gi: number, si: number) =>
+    !wOn
+      ? PALETTE[si % PALETTE.length]
+      : isUpd[gi]
+        ? UPDATED_FILLS[si % UPDATED_FILLS.length]
+        : ORIGINAL_FILLS[si % ORIGINAL_FILLS.length];
   const Y = (v: number) => MT + ((hi - v) / (hi - lo)) * PH;
   const slot = PW / Math.max(1, groups.length);
   const barW = Math.min(30, (slot * 0.72) / Math.max(1, series.length));
@@ -172,6 +242,12 @@ function barChart(series: SeriesData[], lo: number, hi: number): string {
   const rotate = groups.length > 8;
 
   let bars = "";
+  const firstUpd = isUpd.indexOf(true);
+  if (tLast !== null && firstUpd > 0) {
+    const dx = ML + firstUpd * slot;
+    bars += `<line x1="${dx.toFixed(1)}" y1="${MT}" x2="${dx.toFixed(1)}" y2="${MT + PH}" stroke="${ACCENT}" stroke-width="1.5" stroke-dasharray="5 3"/>`;
+    bars += `<text x="${(dx + 4).toFixed(1)}" y="${(MT + 10).toFixed(1)}" font-size="10" fill="${ACCENT}">updated →</text>`;
+  }
   groups.forEach((g, gi) => {
     const base = ML + gi * slot + slot / 2 - (barW * series.length) / 2;
     series.forEach((s, si) => {
@@ -180,7 +256,7 @@ function barChart(series: SeriesData[], lo: number, hi: number): string {
       const top = Y(Math.max(0, p.y));
       const h = Math.abs(Y(p.y) - y0);
       const bx = base + si * barW;
-      bars += `<rect x="${bx.toFixed(1)}" y="${Math.min(top, y0).toFixed(1)}" width="${(barW - 1.5).toFixed(1)}" height="${h.toFixed(1)}" fill="${PALETTE[si % PALETTE.length]}"><title>${esc(s.label)} — ${esc(g)}: ${fmt(p.y)}</title></rect>`;
+      bars += `<rect x="${bx.toFixed(1)}" y="${Math.min(top, y0).toFixed(1)}" width="${(barW - 1.5).toFixed(1)}" height="${h.toFixed(1)}" fill="${fillFor(gi, si)}"><title>${esc(s.label)} — ${esc(g)}: ${fmt(p.y)}</title></rect>`;
     });
     const lx = ML + gi * slot + slot / 2;
     bars += rotate
@@ -191,17 +267,29 @@ function barChart(series: SeriesData[], lo: number, hi: number): string {
   return `<svg viewBox="0 0 ${SVG_W} ${SVG_H}" role="img">${yAxis(lo, hi, series[0]?.unit ?? "")}${bars}</svg>`;
 }
 
-/** Inline SVG figure: line chart on a time axis (years or 'YYYY:Qn'
- *  quarters), grouped bars for categorical x like 'USA:2023'. */
-export function chartFigure(series: SeriesData[]): string {
+/** Inline SVG figure. Time axis on fractional 'YYYY:Qn' quarters → line chart;
+ *  plain years or categorical x ('D5', 'USA:2023') → grouped bars. With a
+ *  window, x <= last_x keeps Bruenig's black/red and newer x turns blue with
+ *  an 'updated' divider; categorical x is always rendered in his scheme. */
+export function chartFigure(series: SeriesData[], window?: ChartWindow | null): string {
   const has = series.some((s) => s.points.length > 0);
   if (!has) return `<p class="empty">No data loaded for this chart yet — it populates on the next pipeline run.</p>`;
-  const numeric = series.every((s) => s.points.every((p) => xTime(p.x) !== null));
+  const times = series.flatMap((s) => s.points.map((p) => xTime(p.x)));
+  const numeric = times.every((t) => t !== null);
+  const yearly = numeric && times.every((t) => Number.isInteger(t));
+  const line = numeric && !yearly;
+  const tLast = window?.last_x != null ? xTime(window.last_x) : null;
   const [lo, hi] = yDomain(series.flatMap((s) => s.points.map((p) => p.y)));
-  const svg = numeric ? lineChart(series, lo, hi) : barChart(series, lo, hi);
+  const svg = line ? lineChart(series, lo, hi, window) : barChart(series, lo, hi, window);
   const unit = series[0]?.unit ?? "";
-  const legend = `<div class="legend">${series
-    .map((s, i) => `<span class="key"><i style="background:${PALETTE[i % PALETTE.length]}"></i>${esc(s.label)}</span>`)
-    .join("")}</div>`;
+  const wOn = window != null && (window.first_x != null || window.last_x != null);
+  const keys = series.map(
+    (s, i) =>
+      `<span class="key"><i style="background:${
+        line || !wOn ? PALETTE[i % PALETTE.length] : ORIGINAL_FILLS[i % ORIGINAL_FILLS.length]
+      }"></i>${esc(s.label)}</span>`
+  );
+  if (tLast !== null) keys.push(`<span class="key"><i style="background:${ACCENT}"></i>data added after the original article</span>`);
+  const legend = `<div class="legend">${keys.join("")}</div>`;
   return `<figure class="chart">${svg}${legend}${unit ? `<figcaption>Unit: ${esc(unit)}</figcaption>` : ""}</figure>`;
 }

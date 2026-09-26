@@ -48,9 +48,10 @@ DL = os.path.join(HERE, "downloads")
 OUT = os.path.join(HERE, "computed")
 BASE = "https://www2.census.gov/programs-surveys/cps/datasets"
 
-# ASEC release years supported (new-format CSV with SPM_* fields begins 2023).
-# Income (reference) year = ASEC year - 1.
-ASEC_YEARS = [2026, 2025, 2024, 2023]
+# ASEC release years supported (public person CSV with SPM_* fields; the
+# new-format "csv" zip covers 2022 onward — earlier releases are
+# fixed-width legacy files). Income (reference) year = ASEC year - 1.
+ASEC_YEARS = [2026, 2025, 2024, 2023, 2022]
 
 MARKET_COLS = [
     "WSAL_VAL", "SEMP_VAL", "FRSE_VAL",

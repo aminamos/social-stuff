@@ -7,15 +7,19 @@ Source: OECD Income Distribution Database via SDMX-ML REST API.
     OECD.WISE.INE,DSD_WISE_IDD@DF_IDD/<key>
   Key dims: REF_AREA.FREQ.MEASURE.STATISTICAL_OPERATION.UNIT_MEASURE.AGE
             .METHODOLOGY.DEFINITION.POVERTY_LINE
-  Used key: .A.PR_INC_DISP+PR_INC_MRKT._Z.PT_POP._T.METH2012.D_CUR.PL_50
+  Poverty key: .A.PR_INC_DISP+PR_INC_MRKT._Z.PT_POP._T.METH2012.D_CUR.PL_50
   (all areas, annual, poverty rate, % of population, total age,
    post-2012 income definition, current definition, 50%-of-median line)
+  Gini key:    .A.INC_MRKT_GINI._Z.0_TO_1.Y18T65+Y_GT65+_T.METH2012.D_CUR._Z
+  (market-income Gini by age group — reproduces Bruenig's OECD age-group
+   chart from "Crunching the Numbers on Predistribution")
 
 Measures: PR_INC_DISP (disposable income poverty), PR_INC_MRKT (market
-income poverty) — the same before/after-welfare comparison Bruenig charts.
+income poverty), INC_MRKT_GINI (market-income Gini).
 
-Outputs: downloads/oecd_idd_pov.csv, computed/intl.csv
-         (columns: ref_area, measure, year, value)
+Outputs: downloads/oecd_idd_pov.csv, downloads/oecd_idd_gini_age.csv,
+         computed/intl.csv      (columns: ref_area, measure, year, value)
+         computed/intl_gini.csv (columns: ref_area, age, year, value)
 """
 
 import os
@@ -29,6 +33,7 @@ OUT = os.path.join(HERE, "computed")
 BASE = "https://sdmx.oecd.org/public/rest/v1/data"
 FLOW = "OECD.WISE.INE,DSD_WISE_IDD@DF_IDD"
 KEY = ".A.PR_INC_DISP+PR_INC_MRKT._Z.PT_POP._T.METH2012.D_CUR.PL_50"
+GINI_KEY = ".A.INC_MRKT_GINI._Z.0_TO_1.Y18T65+Y_GT65+_T.METH2012.D_CUR._Z"
 UA = {"User-Agent": "bruenig-chart-updates pipeline (research)"}
 
 # OECD members + key partners we keep for the chart (drop aggregates).
@@ -75,6 +80,25 @@ def main():
                                            values="value")
     print("USA:", usa.tail(3).to_string())
     print(f"wrote {out_path}")
+
+    # --- market-income Gini by age group (Bruenig's OECD chart) ---
+    gpath = download(f"{BASE}/{FLOW}/{GINI_KEY}",
+                     os.path.join(DL, "oecd_idd_gini_age.csv"))
+    g = pd.read_csv(gpath)
+    g = g[~g["REF_AREA"].isin(AGGREGATES)]
+    g = g[["REF_AREA", "AGE", "TIME_PERIOD", "OBS_VALUE"]].rename(
+        columns={"REF_AREA": "ref_area", "AGE": "age",
+                 "TIME_PERIOD": "year", "OBS_VALUE": "value"})
+    g["year"] = g["year"].astype(int)
+    g["value"] = g["value"].astype(float).round(6)
+    gout = os.path.join(OUT, "intl_gini.csv")
+    g.to_csv(gout, index=False)
+    print(f"areas: {g['ref_area'].nunique()}, ages: "
+          f"{sorted(g['age'].unique())}, years {g.year.min()}-{g.year.max()}")
+    print("USA gini:",
+          g[g.ref_area == 'USA'].pivot(index='year', columns='age',
+                                       values='value').tail(3).to_string())
+    print(f"wrote {gout}")
 
 
 if __name__ == "__main__":

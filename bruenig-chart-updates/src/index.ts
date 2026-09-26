@@ -5,7 +5,7 @@
  * dataset's index page for a newer vintage and flags charts stale.
  */
 
-import { esc, mdLite, page, chartFigure, type SeriesData } from "./ui";
+import { esc, mdLite, page, chartFigure, type SeriesData, type ChartWindow } from "./ui";
 import { GENERIC_YEAR_HINT, RELEASE_SOURCES } from "./release-sources";
 
 interface Env {
@@ -22,12 +22,24 @@ interface ChartRow {
   updated_at: string;
 }
 
+interface OriginalChart {
+  title?: string;
+  source_url?: string;
+  r2_key?: string;
+}
+
 interface Provenance {
   bruenig_post_url?: string;
   bruenig_post_title?: string;
   source_name?: string;
   source_url?: string;
   recipe_md?: string;
+  /** Free text for charts we extend beyond (or without) a published original. */
+  extension_note?: string;
+  /** Archived copies of the chart(s) Bruenig actually published, in R2. */
+  original_charts?: OriginalChart[];
+  /** x-range the original article covered; <= last_x keeps his palette. */
+  original_window?: ChartWindow;
 }
 
 interface ReleaseRow {
@@ -41,7 +53,7 @@ interface ReleaseRow {
 
 const UA = { "User-Agent": "bruenig-chart-updates/1.0 (dataset vintage check; +https://bruenig-chart-updates.a-8c6.workers.dev)" };
 const HTML = { "content-type": "text/html;charset=utf-8" };
-const DOC_KEY = /^(asec|scf|oecd|lis)\/[A-Za-z0-9._\-\/]+$/;
+const DOC_KEY = /^(asec|scf|oecd|lis|originals)\/[A-Za-z0-9._\-\/]+$/;
 const FAMILY_ORDER = ["poverty", "wealth", "intl"];
 
 function provenanceOf(row: ChartRow): Provenance {
@@ -88,6 +100,36 @@ const chartJson = ({ chart, provenance, series }: LoadedChart) => ({
   series: series.map(({ id, label, unit, points }) => ({ id, label, unit, points })),
 });
 
+/** 'As published' date parsed out of a PPP post URL (…/YYYY/MM/DD/…). */
+function postDate(url: string | undefined): string | null {
+  const m = url && /\/(\d{4})\/(\d{2})\/(\d{2})\//.exec(url);
+  return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
+}
+
+/** The chart(s) as Bruenig published them: archived SVGs with links back. */
+function originalsBlock(p: Provenance): string {
+  const charts = (p.original_charts ?? []).filter((o) => o && typeof o.r2_key === "string" && o.r2_key);
+  if (!charts.length) return "";
+  const postUrl = p.bruenig_post_url;
+  const date = postDate(postUrl ?? charts.find((o) => o.source_url)?.source_url);
+  const figures = charts
+    .map((o) => {
+      const src = `/docs/${o.r2_key!.split("/").map(encodeURIComponent).join("/")}`;
+      const link = o.source_url || postUrl;
+      const title = o.title || p.bruenig_post_title || "Original chart";
+      const bits = [
+        `<strong>${esc(title)}</strong>`,
+        link ? `from <a href="${esc(link)}" rel="noopener">${esc(p.bruenig_post_title || link)}</a>` : "",
+        date ? `as published ${esc(date)}` : "",
+      ]
+        .filter(Boolean)
+        .join(" — ");
+      return `<figure class="original"><img src="${src}" alt="${esc(title)}" loading="lazy"/><figcaption>${bits}</figcaption></figure>`;
+    })
+    .join("\n");
+  return `<section class="originals"><h2>Original</h2>${figures}</section>`;
+}
+
 function provenanceBlock(p: Provenance, updatedAt: string): string {
   const bruenig = p.bruenig_post_url
     ? `<a href="${esc(p.bruenig_post_url)}" rel="noopener">${esc(p.bruenig_post_title || p.bruenig_post_url)}</a>`
@@ -99,6 +141,7 @@ function provenanceBlock(p: Provenance, updatedAt: string): string {
 <p><strong>Updates:</strong> ${bruenig}</p>
 <p><strong>Source data:</strong> ${source}</p>
 <p><strong>Last recomputed:</strong> ${esc(updatedAt)}</p>
+${p.extension_note ? `<p><strong>Note:</strong> ${esc(p.extension_note)}</p>` : ""}
 ${p.recipe_md ? `<div class="recipe"><strong>Method / recipe</strong>\n\n${mdLite(p.recipe_md)}</div>` : ""}
 </section>`;
 }
@@ -109,22 +152,37 @@ async function renderIndex(env: Env): Promise<Response> {
     env.DB.prepare("SELECT dataset, label, source_index_url, latest_vintage, checked_at, stale FROM releases").all<ReleaseRow>(),
   ]);
   const staleDatasets = new Set(releases.filter((r) => r.stale).map((r) => r.dataset));
-  const byFamily = new Map<string, ChartRow[]>();
+  // Group by the source Bruenig post — the site reads as 'his articles, updated'.
+  const byPost = new Map<string, { title: string; url: string | null; rows: ChartRow[]; famIdx: number }>();
   for (const c of charts) {
-    const list = byFamily.get(c.family) ?? [];
-    list.push(c);
-    byFamily.set(c.family, list);
+    const p = provenanceOf(c);
+    const key = p.bruenig_post_url ?? `none:${c.family}`;
+    let g = byPost.get(key);
+    if (!g) {
+      g = { title: p.bruenig_post_title || c.title, url: p.bruenig_post_url ?? null, rows: [], famIdx: FAMILY_ORDER.indexOf(c.family) };
+      byPost.set(key, g);
+    }
+    g.rows.push(c);
+    const fi = FAMILY_ORDER.indexOf(c.family);
+    if (fi !== -1 && (g.famIdx === -1 || fi < g.famIdx)) g.famIdx = fi;
   }
-  const families = [...FAMILY_ORDER.filter((f) => byFamily.has(f)), ...[...byFamily.keys()].filter((f) => !FAMILY_ORDER.includes(f))];
-  const sections = families
-    .map((fam) => {
-      const rows = (byFamily.get(fam) ?? [])
+  const groups = [...byPost.values()].sort(
+    (a, b) =>
+      (a.famIdx === -1 ? 99 : a.famIdx) - (b.famIdx === -1 ? 99 : b.famIdx) || a.title.localeCompare(b.title)
+  );
+  const sections = groups
+    .map((g) => {
+      const heading = g.url ? `<a href="${esc(g.url)}" rel="noopener">${esc(g.title)}</a>` : esc(g.title);
+      const date = postDate(g.url ?? undefined);
+      const rows = g.rows
         .map((c) => {
           const p = provenanceOf(c);
-          return `<tr><td><a href="/chart/${encodeURIComponent(c.slug)}">${esc(c.title)}</a>${c.subtitle ? `<div class="empty" style="font-size:.85em">${esc(c.subtitle)}</div>` : ""}</td><td>${esc(p.source_name ?? "—")}</td><td>${esc(c.updated_at.slice(0, 10))}</td></tr>`;
+          const thumb = p.original_charts?.find((o) => o?.r2_key)?.r2_key;
+          const thumbHtml = thumb ? `<img class="thumb" src="/docs/${thumb.split("/").map(encodeURIComponent).join("/")}" alt="" loading="lazy"/>` : "";
+          return `<tr><td><div class="chartcell">${thumbHtml}<div><a href="/chart/${encodeURIComponent(c.slug)}">${esc(c.title)}</a>${c.subtitle ? `<div class="empty" style="font-size:.85em">${esc(c.subtitle)}</div>` : ""}</div></div></td><td>${esc(p.source_name ?? "—")}</td><td>${esc(c.updated_at.slice(0, 10))}</td></tr>`;
         })
         .join("");
-      return `<h2>${esc(fam)}</h2><table><tr><th>Chart</th><th>Source</th><th>Updated</th></tr>${rows}</table>`;
+      return `<h2>${heading}${date ? ` <span class="empty" style="font-weight:normal;font-size:.7em">(${esc(date)})</span>` : ""}</h2><table><tr><th>Chart</th><th>Source</th><th>Updated</th></tr>${rows}</table>`;
     })
     .join("\n");
   const banner = staleDatasets.size
@@ -146,13 +204,21 @@ async function renderChartPage(env: Env, slug: string): Promise<Response> {
   const loaded = await loadChart(env, slug);
   if (!loaded) return new Response("Not found", { status: 404 });
   const { chart, provenance, series } = loaded;
+  const hasData = series.some((s) => s.points.length > 0);
+  const originals = originalsBlock(provenance);
+  const updated = hasData
+    ? `<section class="updated"><h2>Updated</h2>${chartFigure(series, provenance.original_window)}</section>`
+    : originals
+      ? `<p class="empty">Update pending — the original is shown above; this chart's source data has not been recomputed yet.</p>`
+      : chartFigure(series);
   return new Response(
     page(
       `${chart.title} — Bruenig Chart Updates`,
       `<div class="nav"><a href="/">← all charts</a><a href="/changes">dataset changes</a><a href="/api/chart/${encodeURIComponent(slug)}">JSON</a></div>
 <h1>${esc(chart.title)}</h1>
 ${chart.subtitle ? `<p class="subtitle">${esc(chart.subtitle)}</p>` : ""}
-${chartFigure(series)}
+${originals}
+${updated}
 ${provenanceBlock(provenance, chart.updated_at)}`
     ),
     { headers: HTML }
@@ -300,6 +366,8 @@ export default {
       if (!obj) return new Response("Not found", { status: 404 });
       const headers: Record<string, string> = {};
       if (key.endsWith(".pdf")) headers["content-type"] = "application/pdf";
+      else if (key.endsWith(".svg")) headers["content-type"] = "image/svg+xml";
+      else if (key.endsWith(".png")) headers["content-type"] = "image/png";
       else if (key.endsWith(".csv")) headers["content-type"] = "text/csv;charset=utf-8";
       else if (key.endsWith(".zip")) headers["content-type"] = "application/zip";
       else headers["content-type"] = "application/octet-stream";
