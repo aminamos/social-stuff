@@ -371,7 +371,8 @@ def main():
             "recipe_md": WEALTH_RECIPE,
             # our extension — no corresponding original in the post
             "original_charts": [],
-            "original_window": {"first_x": None, "last_x": None},
+            # divider at the SCF-2022 vintage the post reports on
+            "original_window": {"first_x": "2022:Q4", "last_x": "2022:Q4"},
             "extension_note": (
                 "Quarterly extension of Bruenig's 2022 SCF snapshot using "
                 "the Fed DFA; no single original chart in the post shows "

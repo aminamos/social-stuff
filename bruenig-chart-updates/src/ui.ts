@@ -77,10 +77,11 @@ const UPDATED_FILLS = ["#1d4ed8", "#60a5fa", "#1e40af", "#93c5fd"];
 const ACCENT = "#1d4ed8";
 
 /** Original article's data window from chart provenance; points with
- *  x <= last_x render in the original palette, later x as an update. */
+ *  x <= last_x render in the original palette, later x as an update.
+ *  Bounds may be JSON null — that means 'no window'. */
 export interface ChartWindow {
-  first_x?: string;
-  last_x?: string;
+  first_x?: string | null;
+  last_x?: string | null;
 }
 
 /** Chunked digit-aware sort so 'D2' < 'D10' and 'USA:2022' < 'USA:2023'. */

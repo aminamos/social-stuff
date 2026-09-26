@@ -405,6 +405,26 @@ describe("chartFigure", () => {
     expect(d1).toBeLessThan(d2);
     expect(d2).toBeLessThan(d10);
   });
+
+  it("treats original_window with null bounds as no window (extensions keep the default palette)", () => {
+    const html = chartFigure(
+      [
+        {
+          id: "intl:gini",
+          label: "Gini",
+          unit: "gini",
+          points: [
+            { x: "USA:2023", y: 0.5 },
+            { x: "NOR:2023", y: 0.4 },
+          ],
+        },
+      ],
+      { first_x: null, last_x: null }
+    );
+    expect(html).toContain('fill="#2563eb"');
+    expect(html).not.toContain('fill="#000000"');
+    expect(html).not.toContain("data added after the original article");
+  });
 });
 
 describe("scheduled vintage check", () => {
