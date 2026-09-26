@@ -1,3 +1,4 @@
+data/reports/sql/
 node_modules/
 .wrangler/
 .dev.vars
