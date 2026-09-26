@@ -284,17 +284,37 @@ export function slugifyCity(city: string, state: string): string {
 }
 
 /**
- * Normalize an entity name for grouping. Registrations frequently repeat the
- * same contact ("X , X") and vary punctuation/case, so keep the first segment
- * and reduce to alphanumerics.
+ * Normalize an entity name for grouping. Source feeds write person names two
+ * ways: "FIRST LAST" and "LAST, FIRST [ET UX|ET VIR|ET AL]". A single-token
+ * first segment is "LAST, FIRST"-style, so keep the surname plus the given
+ * names that follow (dropping ET-uxor markers); a multi-token first segment is
+ * already "FIRST LAST" (or the repeated-contact "X , X" pattern), so later
+ * , ; | segments are noise. Runs of the same token collapse ("SMITH, SMITH"
+ * still groups as "smith"). Reduce to alphanumerics.
  */
+const ET_UXOR_MARKERS: Record<string, true> = {
+  ux: true, uxor: true, vir: true, al: true, conj: true, unum: true,
+};
+
 export function normalizeEntityName(name: string): string {
-  const first = (name || "").split(/[,;|]/)[0];
-  return first
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim()
-    .replace(/\s+/g, " ");
+  const toTokens = (s: string): string[] =>
+    s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
+  const segments = (name || "").split(/[,;|]/);
+  let tokens = toTokens(segments[0] || "");
+  if (tokens.length <= 1 && segments.length > 1) {
+    tokens = tokens.concat(toTokens(segments.slice(1).join(" ")));
+  }
+  // Trailing "ET UX"/"ET VIR"/"ET AL" spouse markers carry no identity.
+  while (
+    tokens.length >= 3 &&
+    tokens[tokens.length - 2] === "et" &&
+    ET_UXOR_MARKERS[tokens[tokens.length - 1]]
+  ) {
+    tokens.length -= 2;
+  }
+  // "X , X" repeats collapse consecutive duplicates.
+  tokens = tokens.filter((t, i) => i === 0 || t !== tokens[i - 1]);
+  return tokens.join(" ");
 }
 
 /**
@@ -371,9 +391,18 @@ const GENERIC_TOKENS = new Set([
   "information",
 ]);
 
+/**
+ * "Unknown <city> landlord/owner" placeholders: registries drop the real name
+ * and write a fill value ("Unknown St. Paul Landlord"). Requiring the
+ * landlord/owner word keeps real names like "Five Unknown Holdings LLC" or
+ * "The Unknowns" linking normally.
+ */
+const UNKNOWN_LANDLORD_RE = /\bunknown\b.*\b(landlords?|owners?)\b|\b(landlords?|owners?)\b.*\bunknown\b/;
+
 export function isNonEntityName(normalized: string): boolean {
   if (!normalized) return true;
   if (NON_ENTITIES.has(normalized)) return true;
+  if (UNKNOWN_LANDLORD_RE.test(normalized)) return true;
   const tokens = normalized.split(" ").filter(Boolean);
   if (tokens.length === 0) return true;
   return tokens.every((t) => GENERIC_TOKENS.has(t));
@@ -396,8 +425,13 @@ export function linkKey(
     applicantName?: string;
   },
 ): string | null {
-  const email = (parts.applicantEmail || "").trim().toLowerCase();
-  const addr = (parts.ownerAddress || "").trim().toLowerCase().replace(/\s+/g, " ");
+  // Source cells sometimes carry several values in one ("a@b.com; c@d.com");
+  // keep the first, mirroring normEmail() in entities.ts, so no fused
+  // ';'-joined link key can ever be emitted again.
+  const email = (parts.applicantEmail || "").trim().toLowerCase().split(/[;,\s]/)[0];
+  const addr = (parts.ownerAddress || "")
+    .split(";")[0]
+    .trim().toLowerCase().replace(/\s+/g, " ");
   const name = normalizeEntityName(parts.ownerName || parts.applicantName || "");
   const usableName = name && name.length >= 3 && !isNonEntityName(name) ? name : "";
 

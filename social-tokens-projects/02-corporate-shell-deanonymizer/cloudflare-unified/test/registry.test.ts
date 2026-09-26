@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { normalizeEntityName, isNonEntityName, linkKey } from "../src/housing/canonical";
 import {
   VIOLATION_ADAPTERS,
   getViolationAdapter,
@@ -137,9 +138,94 @@ describe("entityLinksFor", () => {
     }
   });
 
+  it("takes the first email of a ';'-joined cell (no fused entity)", () => {
+    const links = entityLinksFor({
+      jurisdiction_id: "minneapolis-mn",
+      applicant_email: "Minnesota@RentPure.com; mmohanlall@rentpure.com",
+    });
+    const ids = links.map((l) => l.entity_id);
+    expect(ids).toContain("email:minnesota@rentpure.com");
+    expect(ids.some((id) => id.includes(";"))).toBe(false);
+    expect(ids).not.toContain("email:mmohanlall@rentpure.com");
+  });
+
+  it("keeps LAST, FIRST instead of collapsing to a surname bucket", () => {
+    const links = entityLinksFor({
+      jurisdiction_id: "nashville-tn",
+      owner_name: "SMITH, GLENN C. ET UX",
+    });
+    const ids = links.map((l) => l.entity_id);
+    expect(ids).toContain("name:nashville-tn:smith glenn c");
+    expect(ids).not.toContain("name:nashville-tn:smith");
+  });
+
+  it("does not link 'unknown <city> landlord' placeholders", () => {
+    const links = entityLinksFor({
+      jurisdiction_id: "saint-paul-mn",
+      owner_name: "Unknown St. Paul Landlord",
+    });
+    expect(links.filter((l) => l.match_type === "name")).toHaveLength(0);
+  });
+
   it("produces no links for a row with no signals", () => {
     expect(
       entityLinksFor({ jurisdiction_id: "x", owner_name: "" }),
     ).toHaveLength(0);
+  });
+});
+
+describe("normalizeEntityName", () => {
+  it("expands LAST, FIRST names and drops ET UX/ET VIR/ET AL markers", () => {
+    expect(normalizeEntityName("SMITH, GLENN C. ET UX")).toBe("smith glenn c");
+    expect(normalizeEntityName("JONES, PAULA F. & JOHN T.")).toBe(
+      "jones paula f john t",
+    );
+    expect(normalizeEntityName("DOE, JOHN ET VIR")).toBe("doe john");
+    expect(normalizeEntityName("ROE, JANE ET AL")).toBe("roe jane");
+  });
+
+  it("still takes the first segment for multi-token and repeated names", () => {
+    expect(normalizeEntityName("ACME PROPERTIES LLC; ACME PROPERTIES LLC")).toBe(
+      "acme properties llc",
+    );
+    expect(normalizeEntityName("SMITH, SMITH")).toBe("smith");
+    expect(normalizeEntityName("JOHN SMITH")).toBe("john smith");
+  });
+});
+
+describe("isNonEntityName", () => {
+  it("flags 'unknown ... landlord/owner' placeholders", () => {
+    for (const n of [
+      "unknown st paul landlord",
+      "unknown landlord",
+      "unknown owner",
+      "landlord unknown",
+      "unknown minneapolis property owner",
+    ]) {
+      expect(isNonEntityName(n)).toBe(true);
+    }
+  });
+
+  it("keeps real names that merely contain 'unknown'", () => {
+    expect(isNonEntityName("five unknown holdings llc")).toBe(false);
+    expect(isNonEntityName("the unknowns")).toBe(false);
+  });
+});
+
+describe("linkKey", () => {
+  it("keeps only the first address of a ';'-joined email cell", () => {
+    expect(
+      linkKey("email_or_owner_address", "minneapolis-mn", {
+        applicantEmail: "minnesota@rentpure.com; mmohanlall@rentpure.com",
+      }),
+    ).toBe("email:minnesota@rentpure.com");
+  });
+
+  it("keeps only the first segment of a ';'-joined owner address", () => {
+    expect(
+      linkKey("email_or_owner_address", "philadelphia-pa", {
+        ownerAddress: "201 Old York Road Suite; 1-458 Jenkintown, PA 19046 USA",
+      }),
+    ).toBe("addr:philadelphia-pa:201 old york road suite");
   });
 });

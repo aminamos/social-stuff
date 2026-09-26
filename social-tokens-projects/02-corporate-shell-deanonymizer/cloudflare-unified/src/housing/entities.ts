@@ -429,7 +429,9 @@ async function finalizeEntities(
 
 /**
  * Apply a review decision. Approving a pair merges b into a: links re-point,
- * counts recombine, b is marked 'merged'. Single-entity flags just close.
+ * counts recombine, b is marked 'merged'. Approving a single-entity flag
+ * (entity_id_b IS NULL) marks the entity 'confirmed'; rejecting only closes
+ * the review row.
  */
 export async function applyEntityReview(
   env: SyncEnv,
@@ -479,6 +481,14 @@ export async function applyEntityReview(
         `UPDATE owner_entities SET status = 'merged', updated_at = ?
          WHERE entity_id = ?`,
       ).bind(now, review.entity_id_b),
+    );
+  } else if (action === "approve") {
+    // Single-entity flag approved by a human: the group is real.
+    stmts.push(
+      env.DB.prepare(
+        `UPDATE owner_entities SET status = 'confirmed', updated_at = ?
+         WHERE entity_id = ?`,
+      ).bind(now, review.entity_id_a),
     );
   }
 
