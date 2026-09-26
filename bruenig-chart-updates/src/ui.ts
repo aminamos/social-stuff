@@ -258,6 +258,15 @@ function barChart(series: SeriesData[], lo: number, hi: number, window?: ChartWi
       const h = Math.abs(Y(p.y) - y0);
       const bx = base + si * barW;
       bars += `<rect x="${bx.toFixed(1)}" y="${Math.min(top, y0).toFixed(1)}" width="${(barW - 1.5).toFixed(1)}" height="${h.toFixed(1)}" fill="${fillFor(gi, si)}"><title>${esc(s.label)} — ${esc(g)}: ${fmt(p.y)}</title></rect>`;
+      // Value labels atop updated bars: near-flat series (12.91 vs 13.10)
+      // render as identical bars, so print the number.
+      if (wOn && isUpd[gi]) {
+        const inside = top < MT + 13;
+        const lx = bx + (barW - 1.5) / 2;
+        const ly = inside ? top + 12 : top - 4;
+        const fill = inside ? "#fff" : "#333";
+        bars += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="9.5" fill="${fill}">${(Math.round(p.y * 10) / 10).toFixed(1)}</text>`;
+      }
     });
     const lx = ML + gi * slot + slot / 2;
     bars += rotate

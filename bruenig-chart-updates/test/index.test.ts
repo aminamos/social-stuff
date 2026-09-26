@@ -385,6 +385,26 @@ describe("chartFigure", () => {
     expect((html.match(/stroke="#1d4ed8"/g) ?? []).length).toBeGreaterThanOrEqual(2); // divider line + circle stroke
   });
 
+  it("prints value labels atop updated bars only", () => {
+    const html = chartFigure(
+      [
+        {
+          id: "pov:disp",
+          label: "Disposable",
+          unit: "percent",
+          points: [
+            { x: "2022", y: 12.3261 },
+            { x: "2023", y: 12.906 },
+            { x: "2024", y: 12.9098 },
+          ],
+        },
+      ],
+      { first_x: "2021", last_x: "2022" }
+    );
+    expect(html).toContain(">12.9</text>");
+    expect(html).not.toContain(">12.3</text>");
+  });
+
   it("renders categorical decile x in order D2 before D10", () => {
     const html = chartFigure([
       {
