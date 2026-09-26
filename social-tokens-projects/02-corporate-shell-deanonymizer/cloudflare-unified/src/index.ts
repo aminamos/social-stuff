@@ -77,14 +77,13 @@ export default {
    *   - 04:00 daily  -> fresh housing full-cycle reset
    *   - every 15 min -> resume unfinished housing jurisdictions
    *   - 05:00 daily  -> wage-theft live enforcement sync
-   *   - 06:00 daily  -> crossover matrix R2 snapshot
+   *   - 06:00 daily  -> dual_matches + entity-resolution rebuilds
    */
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
     if (event.cron === "0 5 * * *") {
       ctx.waitUntil(runLiveEnforcementSync(env));
     } else if (event.cron === "0 6 * * *") {
       ctx.waitUntil((async () => {
-        await backupMatrixSnapshot(env);
         // Rebuild the materialized dual-match table; the live instr() join is
         // too large for request-time queries. Chunks resume via sync_state if
         // the event dies before finishing.
@@ -1327,15 +1326,3 @@ async function rebuildDualMatches(
   return { done, processed, total };
 }
 
-async function backupMatrixSnapshot(env: Env): Promise<void> {
-  try {
-    const today = new Date().toISOString().split("T")[0];
-    const key = `snapshots/crossover_matrix_${today}.json`;
-    await env.R2_BUCKET.put(key, JSON.stringify(VERIFIED_CROSSOVER_SYNDICATES, null, 2), {
-      httpMetadata: { contentType: "application/json" },
-    });
-    console.log(`Backed up crossover matrix to R2: ${key}`);
-  } catch (err) {
-    console.error("R2 backup error:", err);
-  }
-}

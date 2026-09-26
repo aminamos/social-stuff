@@ -40,7 +40,6 @@ export interface SyncResult {
 
 export interface SyncEnv {
   DB: D1Database;
-  R2_BUCKET?: R2Bucket;
   /**
    * Optional Socrata app token. Not authentication — it only raises the
    * throttling ceiling. Either a bare token (applied to every Socrata feed) or
@@ -273,34 +272,8 @@ async function markComplete(
   )
     .bind(adapter.feed.id, rowsTotal, syncedAt, syncedAt)
     .run();
-  await snapshotToR2(env, adapter, syncedAt);
 }
 
-async function snapshotToR2(
-  env: SyncEnv,
-  adapter: CityAdapter,
-  syncedAt: string,
-): Promise<void> {
-  if (!env.R2_BUCKET) return;
-  try {
-    const res = await env.DB.prepare(
-      "SELECT * FROM rental_licenses WHERE feed_id = ?",
-    )
-      .bind(adapter.feed.id)
-      .all();
-    const today = syncedAt.split("T")[0];
-    const key = `snapshots/${adapter.feed.id}_${today}.json`;
-    await env.R2_BUCKET.put(key, JSON.stringify(res.results || []), {
-      httpMetadata: { contentType: "application/json" },
-      customMetadata: {
-        recordCount: String((res.results || []).length),
-        syncedAt,
-      },
-    });
-  } catch (err) {
-    console.error("R2 snapshot failed", adapter.feed.id, err);
-  }
-}
 
 /**
  * One scheduled tick. Drains every feed that is not yet complete for this

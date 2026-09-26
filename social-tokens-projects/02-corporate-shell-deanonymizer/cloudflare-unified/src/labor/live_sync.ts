@@ -2,7 +2,6 @@ import { WAGE_THEFT_SEED_DATA, WageTheftSeedRecord } from "./data";
 
 export interface SyncEnv {
   DB: D1Database;
-  R2_BUCKET: R2Bucket;
   DOL_API_KEY?: string;
 }
 
@@ -17,7 +16,6 @@ export interface LiveSyncResult {
     details?: string;
   }[];
   total_upserted: number;
-  r2_snapshot_key?: string;
   duration_ms: number;
 }
 
@@ -278,31 +276,8 @@ export async function runLiveEnforcementSync(env: SyncEnv): Promise<LiveSyncResu
     totalUpserted += chunk.length;
   }
 
-  // 4. Archive updated database state to Cloudflare R2
-  let r2SnapshotKey = "";
-  try {
-    const allRecords = await env.DB.prepare("SELECT * FROM wage_theft_records ORDER BY findings_date DESC").all();
-    const today = new Date().toISOString().split("T")[0];
-    r2SnapshotKey = `snapshots/wage_theft_records_${today}.json`;
 
-    const snapshotPayload = JSON.stringify({
-      generated_at: new Date().toISOString(),
-      cron_schedule: "0 5 * * * (Daily 05:00 UTC)",
-      total_records: allRecords.results.length,
-      records: allRecords.results
-    }, null, 2);
-
-    await env.R2_BUCKET.put(r2SnapshotKey, snapshotPayload, {
-      httpMetadata: { contentType: "application/json" }
-    });
-    await env.R2_BUCKET.put("latest/wage_theft_records.json", snapshotPayload, {
-      httpMetadata: { contentType: "application/json" }
-    });
-  } catch (r2Err: any) {
-    console.error("R2 live sync snapshot error:", r2Err.message);
-  }
-
-  // 5. Log telemetry to D1 sync_logs
+  // 4. Log telemetry to D1 sync_logs
   try {
     await env.DB.prepare(`
       INSERT INTO sync_logs (source, cases_synced, status, details)
@@ -323,7 +298,6 @@ export async function runLiveEnforcementSync(env: SyncEnv): Promise<LiveSyncResu
     timestamp: new Date().toISOString(),
     sources: sourcesLog,
     total_upserted: totalUpserted,
-    r2_snapshot_key: r2SnapshotKey,
     duration_ms: durationMs
   };
 }
