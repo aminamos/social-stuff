@@ -1,0 +1,20 @@
+{
+  "cps-asec": {
+    "label": "CPS ASEC public-use files (new-format CSV)",
+    "index_url": "https://www2.census.gov/programs-surveys/cps/datasets/",
+    "regex_hint": "href=\"(\\d{4})/\"",
+    "vintage_from": "max capture = newest ASEC release year (income year = capture - 1); fetch the <year>/march/ page for asecpub*csv.zip"
+  },
+  "scf": {
+    "label": "Survey of Consumer Finances",
+    "index_url": "https://www.federalreserve.gov/econres/scfindex.htm",
+    "regex_hint": "(20\\d{2})\\s*Survey of Consumer",
+    "vintage_from": "max capture = latest SCF survey year (triennial)"
+  },
+  "oecd-idd": {
+    "label": "OECD Income Distribution Database (DF_IDD)",
+    "index_url": "https://sdmx.oecd.org/public/rest/v1/data/OECD.WISE.INE,DSD_WISE_IDD@DF_IDD/USA.A.PR_INC_DISP._Z.PT_POP._T.METH2012.D_CUR.PL_50",
+    "regex_hint": ",(\\d{4}),\\d",
+    "vintage_from": "max capture = latest TIME_PERIOD year in the USA disposable-poverty CSV row set; requires Accept: text/csv request header"
+  }
+}

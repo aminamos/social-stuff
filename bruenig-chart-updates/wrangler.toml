@@ -1,0 +1,19 @@
+name = "bruenig-chart-updates"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "bruenig-chart-updates"
+database_id = "0ff3bd41-6e8a-4e5d-84fb-473966349281"
+
+[[r2_buckets]]
+binding = "R2_DATA"
+bucket_name = "bruenig-chart-updates-data"
+
+# Monthly dataset-vintage check (ASEC ~Sept, SCF triennial, OECD rolling).
+[triggers]
+crons = ["0 8 2 * *"]
+
+[observability]
+enabled = true
