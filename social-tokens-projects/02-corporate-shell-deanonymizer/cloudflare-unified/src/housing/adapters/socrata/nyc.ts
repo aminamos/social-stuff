@@ -7,12 +7,13 @@ import { CityAdapter, toBBL } from "../../canonical";
  * The registration publishes no BBL column and no owner identity, so the
  * parcel key is derived: BBL = boroid digit + block (5-padded) + lot
  * (4-padded). boroid codes 1 MANHATTAN, 2 BRONX, 3 BROOKLYN, 4 QUEENS,
- * 5 STATEN ISLAND. Owner identity comes from the HPD Registration
+ * STATEN ISLAND. Owner identity comes from the HPD Registration
  * Contacts dataset (feu5-w2e2) joined on registrationid:
  * scripts/nyc-owner-enrich.py backfills owner_* columns and link_key
- * onto these rows (re-run after any full feed reset, since re-sync
- * rewrites owner_name/link_key to null). Parcel joins use apn equality
- * (parcelJoin bbl) against violations.join_key.
+ * onto these rows. Upserts for registration_contacts feeds exclude
+ * the owner columns and link_key from ON CONFLICT updates (sync.ts
+ * upsertSql), so a resync cannot erase the backfill. Parcel joins
+ * use apn equality (parcelJoin bbl) against violations.join_key.
  */
 export const nyc: CityAdapter = {
   feed: {

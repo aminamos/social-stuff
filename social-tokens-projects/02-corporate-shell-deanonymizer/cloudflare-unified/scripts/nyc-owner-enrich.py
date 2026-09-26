@@ -10,7 +10,8 @@ second dataset (feu5-w2e2, Registration Contacts) keyed by registrationid.
 This script:
   1. pages tesw-yqqr   -> bbl -> registrationid
   2. pages feu5-w2e2   -> registrationid -> best owner contact
-     (CorporateOwner corporationname preferred; Agent then HeadOfficer next)
+     (owner-side types ranked before Agent/SiteManager; corporationname
+     preferred, falling back to the contact's personal name)
   3. emits chunked .sql files that create a staging table nyc_owner_map,
      load it, update rental_licenses.owner_* + link_key, and drop it
   4. applies them via ../scripts/wr d1 execute --remote
@@ -21,8 +22,10 @@ link_key replicates linkKey("name") from src/housing/canonical.ts:
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.request
 
@@ -31,8 +34,18 @@ CONTACT_ENDPOINT = "https://data.cityofnewyork.us/resource/feu5-w2e2.json"
 PAGE = 50000
 JURISDICTION = "new-york-ny"
 FEED_ID = "ny-hpd-registration"
-OUT_DIR = "/tmp/nyc-enrich"
-WR = os.path.join(os.path.dirname(__file__), "../../../../scripts/wr")
+# Windows has no /tmp; honor NYC_ENRICH_OUT, else the platform temp dir.
+OUT_DIR = os.environ.get("NYC_ENRICH_OUT") or os.path.join(tempfile.gettempdir(), "nyc-enrich")
+# scripts/wr is a bash script; invoke through bash so this also runs on
+# Windows (subprocess will not exec an extensionless script natively), with
+# a POSIX-style path so git-bash does not mangle the backslashes.
+# shutil.which resolves bash from PATH (git-bash); a bare "bash" would let
+# CreateProcess pick System32\bash.exe (WSL) which cannot see E:/ paths.
+
+WR_SCRIPT = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../../../../scripts/wr")
+).replace("\\", "/")
+WR = [shutil.which("bash") or "bash", WR_SCRIPT]
 DB = "social-housing-db"
 
 NON_ENTITIES = {
@@ -40,11 +53,15 @@ NON_ENTITIES = {
     "dwelling units", "apartment", "apartments", "building", "property",
     "properties", "management", "same as owner", "see above",
 }
+# Kept in parity with GENERIC_TOKENS in src/housing/canonical.ts — the Python
+# link_key must reproduce linkKey("name") exactly or the grouping splits.
 GENERIC_TOKENS = {
     "the", "and", "of", "on", "at", "community", "property", "properties",
     "site", "building", "resident", "apartment", "apartments", "manager",
     "management", "office", "agent", "admin", "administrator", "contact",
-    "leasing", "maintenance", "general", "dwelling",
+    "leasing", "maintenance", "general", "dwelling", "unit", "units",
+    "na", "n", "none", "unknown", "self", "owner", "owners", "same", "as",
+    "see", "above", "tbd", "null", "blank", "info", "information",
 }
 
 
@@ -225,7 +242,7 @@ def apply_files(files: list[str]) -> None:
             print(f"applying {os.path.basename(path)}"
                   + (f" (retry {attempt})" if attempt else "") + "...", flush=True)
             res = subprocess.run(
-                [WR, "d1", "execute", DB, "--remote", "--file", path, "--json"],
+                WR + ["d1", "execute", DB, "--remote", "--file", path, "--json"],
                 capture_output=True, text=True,
             )
             if res.returncode == 0:
@@ -237,7 +254,7 @@ def apply_files(files: list[str]) -> None:
 
     print("done. verify with:", flush=True)
     print(
-        f"  {WR} d1 execute {DB} --remote --command \"SELECT COUNT(*) FROM "
+        f"  {' '.join(WR)} d1 execute {DB} --remote --command \"SELECT COUNT(*) FROM "
         f"rental_licenses WHERE feed_id='{FEED_ID}' AND link_key IS NOT NULL\"",
         flush=True,
     )

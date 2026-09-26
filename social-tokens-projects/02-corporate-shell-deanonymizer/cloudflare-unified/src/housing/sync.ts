@@ -1,4 +1,9 @@
-import { CANONICAL_COLUMNS, CanonicalRecord, CityAdapter } from "./canonical";
+import {
+  CANONICAL_COLUMNS,
+  CanonicalColumn,
+  CanonicalRecord,
+  CityAdapter,
+} from "./canonical";
 import { ADAPTERS, getAdapter } from "./adapters";
 import { fetchPage } from "./platforms";
 import { toCanonicalRecord } from "./normalize";
@@ -59,10 +64,38 @@ function socrataTokenFor(env: SyncEnv, endpoint: string): string | undefined {
   }
 }
 
-const UPSERT_SQL = (() => {
+/**
+ * Columns a `registration_contacts` feed cannot source: owner identity lives
+ * in a separate contacts dataset (NYC feu5-w2e2) backfilled by
+ * scripts/nyc-owner-enrich.py, and link_key derives from that name. These
+ * stay in the INSERT (new rows write nulls until the enricher runs) but are
+ * excluded from ON CONFLICT updates so every resync does not erase the
+ * backfill. Applicant columns are left alone: they are written by source
+ * fieldMaps, not offline enrichment.
+ */
+const ENRICHED_COLUMNS: readonly CanonicalColumn[] = [
+  "owner_name",
+  "owner_address",
+  "owner_city",
+  "owner_state",
+  "owner_zip",
+  "owner_phone",
+  "owner_email",
+  "link_key",
+];
+
+/**
+ * Upsert SQL for one adapter. `registration_contacts` adapters exclude the
+ * enriched columns from the update list (see ENRICHED_COLUMNS); every other
+ * adapter overwrites all non-key columns.
+ */
+export function upsertSql(adapter: CityAdapter): string {
   const cols = CANONICAL_COLUMNS.join(", ");
   const placeholders = CANONICAL_COLUMNS.map(() => "?").join(", ");
-  const updates = CANONICAL_COLUMNS.filter((c) => c !== "parcel_id")
+  const preserve = adapter.linker === "registration_contacts";
+  const updates = CANONICAL_COLUMNS.filter(
+    (c) => c !== "parcel_id" && !(preserve && ENRICHED_COLUMNS.includes(c)),
+  )
     .map((c) => `${c}=excluded.${c}`)
     .join(", ");
   // Skip the write entirely when nothing changed. With ~10 indexes a no-op
@@ -72,9 +105,9 @@ const UPSERT_SQL = (() => {
   return `INSERT INTO rental_licenses (${cols}) VALUES (${placeholders})
           ON CONFLICT(parcel_id) DO UPDATE SET ${updates}
           WHERE rental_licenses.row_hash IS NOT excluded.row_hash`;
-})();
+}
 
-function bindingsFor(rec: CanonicalRecord): (string | number | null)[] {
+export function bindingsFor(rec: CanonicalRecord): (string | number | null)[] {
   return CANONICAL_COLUMNS.map(
     (c) => rec[c as keyof CanonicalRecord] as string | number | null,
   );
@@ -147,6 +180,7 @@ export async function syncAdapter(
 
   const queriesPerPage = Math.ceil(adapter.source.pageSize / STATEMENTS_PER_BATCH);
   const costPerPage = queriesPerPage + 1; // batch calls + state checkpoint
+  const upsert = upsertSql(adapter);
 
   try {
     while (queriesUsed + costPerPage <= budget) {
@@ -170,7 +204,7 @@ export async function syncAdapter(
       const byParcel = new Map<string, D1PreparedStatement>();
       for (const row of rows) {
         const rec = toCanonicalRecord(adapter, row, syncedAt);
-        if (rec) byParcel.set(rec.parcel_id, env.DB.prepare(UPSERT_SQL).bind(...bindingsFor(rec)));
+        if (rec) byParcel.set(rec.parcel_id, env.DB.prepare(upsert).bind(...bindingsFor(rec)));
       }
       const statements = Array.from(byParcel.values());
 
